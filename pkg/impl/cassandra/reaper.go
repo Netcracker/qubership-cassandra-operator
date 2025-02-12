@@ -3,6 +3,7 @@ package cassandra
 import (
 	"fmt"
 
+	"github.com/Netcracker/qubership-cql-driver"
 	"github.com/Netcracker/qubership-cassandra-operator/api/v1alpha1"
 	"github.com/Netcracker/qubership-cassandra-operator/pkg/impl/utils"
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/constants"
