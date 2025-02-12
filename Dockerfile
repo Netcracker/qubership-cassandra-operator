@@ -38,8 +38,8 @@ RUN  chmod +x /usr/local/bin/user_setup && /usr/local/bin/user_setup
 
 RUN mkdir -p deployments/charts/qubership-cassandra-operator
 
-RUN cp -R /charts/helm/cassandra-operator/* deployments/charts/qubership-cassandra-operator/
-RUN cp /charts/helm/cassandra-operator/deployment-configuration.json deployments/deployment-configuration.json
+COPY /charts/helm/cassandra-operator/ deployments/charts/qubership-cassandra-operator/
+COPY /charts/helm/cassandra-operator/deployment-configuration.json deployments/deployment-configuration.json
 
 ENTRYPOINT ["/usr/local/bin/entrypoint"]
 
