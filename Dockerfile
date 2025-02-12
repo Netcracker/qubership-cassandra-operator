@@ -29,7 +29,7 @@ RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.20/main/' > /etc/apk/reposito
     && apk update \
     && apk upgrade
 
-COPY bin/cassandra-operator ${OPERATOR}
+#COPY bin/qubership-cassandra-operator ${OPERATOR}
 COPY build/bin /usr/local/bin
 #COPY bin/gocql /usr/local/bin/
 
