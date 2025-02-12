@@ -20,9 +20,9 @@ FROM alpine:3.20.3
 
 ENV WORKDIR=/opt/operator/
 
-ENV OPERATOR=/usr/local/bin/cassandra-operator \
+ENV OPERATOR=/usr/local/bin/qubership-cassandra-operator \
     USER_UID=1001 \
-    USER_NAME=cassandra-operator
+    USER_NAME=qubership-cassandra-operator
 
 RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.20/main/' > /etc/apk/repositories \
     && apk add --no-cache openssl \
@@ -36,10 +36,10 @@ COPY build/bin /usr/local/bin
 RUN chmod +x /usr/local/bin/entrypoint
 RUN  chmod +x /usr/local/bin/user_setup && /usr/local/bin/user_setup
 
-RUN mkdir -p deployments/charts/cassandra-operator
+RUN mkdir -p deployments/charts/qubership-cassandra-operator
 
-RUN cp -R ./charts/helm/cassandra-operator/* deployments/charts/cassandra-operator/
-RUN cp ./charts/helm/cassandra-operator/deployment-configuration.json deployments/deployment-configuration.json
+RUN cp -R /charts/helm/cassandra-operator/* deployments/charts/qubership-cassandra-operator/
+RUN cp /charts/helm/cassandra-operator/deployment-configuration.json deployments/deployment-configuration.json
 
 ENTRYPOINT ["/usr/local/bin/entrypoint"]
 
