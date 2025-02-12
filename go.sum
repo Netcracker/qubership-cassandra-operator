@@ -5,8 +5,8 @@ git.qubership.org/PROD.Platform.Databases/base/cql v0.1.0 h1:wDdnPwDaRO/qP98ncuE
 git.qubership.org/PROD.Platform.Databases/base/cql v0.1.0/go.mod h1:NCQyo7urkhqqIe3LTedg+iS1m625E7hv5zw6pAwUWlE=
 git.qubership.org/PROD.Platform.Databases/nosqldb-operator-core v0.20.1 h1:K6Hq14VCuWezC1MVVt5RSZ6dtXMacZpgSm0zNJAoxMw=
 git.qubership.org/PROD.Platform.Databases/nosqldb-operator-core v0.20.1/go.mod h1:W19+L7PjqX6ZNBzCFvmstlTCkpPQJrWFrcnl0gSIcWE=
-git.qubership.org/prod.platform.databases/credential-manager v0.0.2-1 h1:lVJd+gg4ZoUF3X1IFy0jI4AbmhQvcG0JRKKd//0pUXo=
-git.qubership.org/prod.platform.databases/credential-manager v0.0.2-1/go.mod h1:Q39YbMX/ItW5VfmkBd+6n4gHQXIDYJDG+M0QKWb5zWg=
+github.com/Netcracker/qubership-credential-manager v0.0.2-1 h1:lVJd+gg4ZoUF3X1IFy0jI4AbmhQvcG0JRKKd//0pUXo=
+github.com/Netcracker/qubership-credential-manager v0.0.2-1/go.mod h1:Q39YbMX/ItW5VfmkBd+6n4gHQXIDYJDG+M0QKWb5zWg=
 github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=

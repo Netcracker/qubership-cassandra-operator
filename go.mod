@@ -35,7 +35,7 @@ require (
 // replace github.com/Netcracker/qubership-nosqldb-operator-core => ../nosqldb-operator-core
 
 // replace github.com/Netcracker/qubership-cql-driver => ./cql
-// replace git.qubership.org/prod.platform.databases/credential-manager => ../credential-manager
+// replace github.com/Netcracker/qubership-credential-manager => ../credential-manager
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect

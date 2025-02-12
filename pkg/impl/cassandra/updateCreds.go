@@ -3,9 +3,9 @@ package cassandra
 import (
 	"fmt"
 
-	"git.qubership.org/prod.platform.databases/credential-manager/pkg/manager"
 	"github.com/Netcracker/qubership-cassandra-operator/api/v1alpha1"
 	"github.com/Netcracker/qubership-cassandra-operator/pkg/impl/utils"
+	"github.com/Netcracker/qubership-credential-manager/pkg/manager"
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/constants"
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/core"
 	"go.uber.org/zap"
