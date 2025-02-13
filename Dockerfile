@@ -5,9 +5,9 @@ ENV GOSUMDB=off GOPRIVATE=github.com/Netcracker
 RUN apk add --no-cache git
 RUN --mount=type=secret,id=GH_ACCESS_TOKEN git config --global url."https://$(cat /run/secrets/GH_ACCESS_TOKEN)@github.com/".insteadOf "https://github.com/"
 
-COPY . /workspace
+COPY . /opt/operator
 
-WORKDIR /workspace
+WORKDIR /opt/operator
 
 RUN go mod tidy
 
@@ -16,9 +16,7 @@ ARG TARGETOS TARGETARCH
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o ./bin/cassandra-operator \
 -gcflags all=-trimpath=${GOPATH} -asmflags all=-trimpath=${GOPATH} ./main.go
 
-#FROM alpine:3.20.3
-
-ENV WORKDIR=/opt/operator/
+FROM alpine:3.20.3
 
 ENV OPERATOR=/usr/local/bin/cassandra-operator \
     USER_UID=1001 \
@@ -29,7 +27,7 @@ RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.20/main/' > /etc/apk/reposito
     && apk update \
     && apk upgrade
 
-COPY --from=builder /workspace/bin/cassandra-operator ${OPERATOR}
+COPY --from=builder /opt/operator/bin/cassandra-operator ${OPERATOR}
 COPY build/bin /usr/local/bin
 #COPY bin/gocql /usr/local/bin/
 
