@@ -30,6 +30,9 @@ jobs:
           - name: qubership-cassandra-operator
             file: Dockerfile
             context: ""
+          - name: qubership-cassandra-operator-transfer
+            file: docker-transfer/Dockerfile
+            context: ""
     runs-on: ubuntu-24.04
     steps:
       - name: Validate
