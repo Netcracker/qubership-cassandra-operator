@@ -348,7 +348,16 @@ IP addresses used to generate SSL certificate with "Subject Alternative Name" fi
 {{- end -}}
 
 {{- define "cassandra.certDnsNames" -}}
-  {{- $dnsNames := list "localhost" "cassandra" (printf "%s.%s" "cassandra" .Release.Namespace) (printf "%s.%s.svc" "cassandra" .Release.Namespace) -}}
+  {{- $dnsNames := list
+    "localhost"
+    "cassandra"
+    (printf "%s.%s" "cassandra" .Release.Namespace)
+    (printf "%s.%s.svc" "cassandra" .Release.Namespace)
+    (printf "%s.%s.svc.cluster.local" "*.cassandra" .Release.Namespace)
+    (printf "%s.%s.svc.cluster.local" "*.cassandra-dc-dc1" .Release.Namespace)
+    (printf "%s.%s.svc.cluster.local" "*.cassandra-lb" .Release.Namespace)
+    (printf "%s.%s.svc.cluster.local" "*.cassandra-metrics" .Release.Namespace)
+  -}}
   {{- $dnsNames = concat $dnsNames .Values.tls.generateCerts.subjectAlternativeName.additionalDnsNames -}}
   {{- $dnsNames | toYaml -}}
 {{- end -}}
