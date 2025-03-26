@@ -36,6 +36,7 @@ import (
 
 	netcrackercomv1alpha1 "github.com/Netcracker/qubership-cassandra-operator/api/v1alpha1"
 	"github.com/Netcracker/qubership-cassandra-operator/controllers"
+	"github.com/Netcracker/qubership-credential-manager/pkg/hook"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -121,6 +122,8 @@ func main() {
 		setupLog.Error(err, "unable to set up ready check")
 		os.Exit(1)
 	}
+
+	_ = hook.ClearHooks()
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
