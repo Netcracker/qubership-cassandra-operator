@@ -1,8 +1,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "credentials-saver"
-  labels:
+  name: {{ printf "credentials-saver-%s" (lower (randAlphaNum 5)) }}
+  labels: {{- include "cassandra.defaultLabels" . | trim | nindent 4 }}
   annotations:
     "helm.sh/hook": pre-install, pre-upgrade
     "helm.sh/hook-weight": "2"
@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       name: "credentials-saver"
-      labels:
+      labels: {{- include "cassandra.defaultLabels" . | trim | nindent 8 }}
     spec:
       restartPolicy: Never
       serviceAccountName: hook-sa
