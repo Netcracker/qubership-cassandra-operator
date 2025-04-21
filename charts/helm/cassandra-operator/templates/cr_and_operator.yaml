@@ -114,7 +114,7 @@ spec:
     priorityClassName: {{ .Values.cassandra.priorityClassName | quote }}
     {{- end }}
     {{- if .Values.cassandra.affinity }}
-    priorityClassName: {{ .Values.cassandra.affinity | quote }}
+    affinity: {{ .Values.cassandra.affinity | quote }}
     {{- end }}
     username: {{template "fromEnv" (dict "envName" .Values.INFRA_CASSANDRA_USERNAME "default" .Values.cassandra.username) }}
     secretName: {{ .Values.cassandra.secretName }}
