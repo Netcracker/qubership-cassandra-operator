@@ -323,6 +323,33 @@ func CassandraReplicaTemplate(
 		}
 		containers = append(containers, reaperContainer)
 	}
+	// Default anti-affinity rule (used only if user didn't provide one)
+	defaultAffinity := &v13.Affinity{
+		PodAntiAffinity: &v13.PodAntiAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: []v13.PodAffinityTerm{
+				{
+					LabelSelector: &v12.LabelSelector{
+						MatchExpressions: []v12.LabelSelectorRequirement{
+							{
+								Key:      utils.Service,
+								Operator: v12.LabelSelectorOpIn,
+								Values:   []string{utils.CassandraCluster},
+							},
+						},
+					},
+					TopologyKey: utils.KubeHostName,
+				},
+			},
+		},
+	}
+
+	// Use user-defined affinity if available; otherwise use default
+	var affinity *v13.Affinity
+	if spec.Spec.Cassandra.Affinity != nil {
+		affinity = spec.Spec.Cassandra.Affinity
+	} else {
+		affinity = defaultAffinity
+	}
 
 	return &v1.StatefulSet{
 		ObjectMeta: v12.ObjectMeta{
@@ -342,33 +369,14 @@ func CassandraReplicaTemplate(
 				},
 				Spec: v13.PodSpec{
 					TerminationGracePeriodSeconds: &tgps,
-					Affinity: &v13.Affinity{
-						PodAntiAffinity: &v13.PodAntiAffinity{
-							RequiredDuringSchedulingIgnoredDuringExecution: []v13.PodAffinityTerm{
-								v13.PodAffinityTerm{
-									LabelSelector: &v12.LabelSelector{
-										MatchExpressions: []v12.LabelSelectorRequirement{
-											v12.LabelSelectorRequirement{
-												Key:      utils.Service,
-												Operator: "In",
-												Values: []string{
-													utils.CassandraCluster,
-												},
-											},
-										},
-									},
-									TopologyKey: utils.KubeHostName,
-								},
-							},
-						},
-					},
-					HostNetwork:        hostNework,
-					PriorityClassName:  spec.Spec.PriorityClassName,
-					ServiceAccountName: spec.Spec.ServiceAccountName,
-					NodeSelector:       nodeSelector,
-					Tolerations:        tolerations,
-					SecurityContext:    podSecurityContext,
-					Containers:         containers,
+					Affinity:                      affinity,
+					HostNetwork:                   hostNework,
+					PriorityClassName:             spec.Spec.PriorityClassName,
+					ServiceAccountName:            spec.Spec.ServiceAccountName,
+					NodeSelector:                  nodeSelector,
+					Tolerations:                   tolerations,
+					SecurityContext:               podSecurityContext,
+					Containers:                    containers,
 					Volumes: append(volumes, []v13.Volume{
 						{
 							Name: utils.Configuration,

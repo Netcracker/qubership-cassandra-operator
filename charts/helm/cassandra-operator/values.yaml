@@ -19,6 +19,7 @@ operator:
       cpu: 100m
       memory: 128Mi
   nodeLabels:
+  affinity:
 # PV recycler settings
 recycler:
   install: false
@@ -126,6 +127,7 @@ cassandra:
   password: admin
   secretName: cassandra-secret.v1
   envs:
+  affinity:
   # Additional Env variables for docker container
   # for example
   #  envs:
