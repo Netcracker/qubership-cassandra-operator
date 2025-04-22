@@ -114,7 +114,7 @@ spec:
     priorityClassName: {{ .Values.cassandra.priorityClassName | quote }}
     {{- end }}
     {{- if .Values.cassandra.affinity }}
-    affinity: {{ .Values.cassandra.affinity | quote }}
+    affinity: {{ .Values.cassandra.affinity }}
     {{- end }}
     username: {{template "fromEnv" (dict "envName" .Values.INFRA_CASSANDRA_USERNAME "default" .Values.cassandra.username) }}
     secretName: {{ .Values.cassandra.secretName }}
@@ -396,7 +396,7 @@ spec:
       {{- end }}
       {{- if .Values.operator.affinity }}
       affinity:
-        {{- toYaml .Values.operator.affinity | nindent 8 }}
+        {{ .Values.operator.affinity }}
       {{- end }}
       {{- if .Values.tls.enabled }}
       volumes:
