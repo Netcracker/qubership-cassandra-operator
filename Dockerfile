@@ -14,7 +14,7 @@ RUN go mod tidy
 # Build
 ARG TARGETOS TARGETARCH
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o ./bin/cassandra-operator \
--gcflags all=-trimpath=${GOPATH} -asmflags all=-trimpath=${GOPATH} ./main.go
+    -gcflags all=-trimpath=${GOPATH} -asmflags all=-trimpath=${GOPATH} ./main.go
 
 FROM alpine:3.20.3
 
