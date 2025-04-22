@@ -115,7 +115,7 @@ spec:
     {{- end }}
     {{- if .Values.cassandra.affinity }}
     affinity:
-      {{- toYaml .Values.cassandra.affinity | nindent 2 }}
+      {{- toYaml .Values.cassandra.affinity | nindent 4 }}
     {{- end }}
     username: {{template "fromEnv" (dict "envName" .Values.INFRA_CASSANDRA_USERNAME "default" .Values.cassandra.username) }}
     secretName: {{ .Values.cassandra.secretName }}

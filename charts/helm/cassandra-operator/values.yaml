@@ -6,7 +6,7 @@ global:
   profile: ""
 
 operator:
-  name: operator-service 
+  name: operator-service
   image: to_replace
   initImage: to_replace
   podName: cassandra-operator
@@ -66,7 +66,6 @@ publicCloud:
 #     value: "value"
 #     effect: "NoSchedule"
 
-
 reaper:
   install: false
   username: admin
@@ -104,12 +103,12 @@ tls:
     clusterIssuerName: ""
     duration: 365
     subjectAlternativeName:
-      additionalDnsNames: [ ]
-      additionalIpAddresses: [ ]
+      additionalDnsNames: []
+      additionalIpAddresses: []
   certificates:
-    tls_key: 
-    tls_crt: 
-    ca_crt: 
+    tls_key:
+    tls_crt:
+    ca_crt:
 
 cassandra:
   install: true
@@ -239,7 +238,6 @@ cassandra:
   jvm_options: |-
 
   cassandra_env: |-
-
 
 vaultRegistration:
   tokenSecretName: vault-secret
