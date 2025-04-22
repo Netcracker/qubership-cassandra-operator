@@ -396,7 +396,7 @@ spec:
       {{- end }}
       {{- if .Values.operator.affinity }}
       affinity:
-        {{ .Values.operator.affinity }}
+        {{- toYaml .Values.operator.affinity | nindent 8 }}
       {{- end }}
       {{- if .Values.tls.enabled }}
       volumes:
