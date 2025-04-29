@@ -347,7 +347,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Values.operator.podName }}
-          image: {{template "find_image" (dict "deployName" "cassandraOperator" "SERVICE_NAME" "cassandra-operator" "vals" .Values "default" .Values.operator.image) }}
+          image: {{template "find_image" (dict "deployName" "dockerCassandraOperator" "SERVICE_NAME" "dockerCassandraOperator" "vals" .Values "default" .Values.operator.image) }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false
