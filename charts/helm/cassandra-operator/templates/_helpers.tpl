@@ -489,7 +489,7 @@ app.kubernetes.io/managed-by: {{ default "operator" .Values.MANAGED_BY }}
 
 {{- define "cassandra.monitoredImages" -}}
   {{- if .Values.deployDescriptor -}}
-    {{- printf "deployment cassandra-operator cassandra-operator %s, " (include "find_image" (dict "deployName" "cassandraOperator" "SERVICE_NAME" "cassandra-operator" "vals" .Values "default" "not_found")) -}}
+    {{- printf "deployment cassandra-operator cassandra-operator %s, " (include "find_image" (dict "deployName" "dockerCassandraOperator" "SERVICE_NAME" "dockerCassandraOperator" "vals" .Values "default" "not_found")) -}}
     {{- if .Values.cassandra.install -}}
       {{- printf "statefulset cassandra0 cassandra0 %s, " (include "find_image" (dict "deployName" "cassandra" "SERVICE_NAME" "cassandra" "vals" .Values "default" "not_found")) -}}
       {{- if .Values.reaper.install -}}
