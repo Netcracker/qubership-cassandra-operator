@@ -4,7 +4,7 @@ on:
     types: [created]
   push:
     branches:
-      - '**'
+      - "**"
   workflow_dispatch:
     inputs:
       publish_docker:
@@ -33,6 +33,12 @@ jobs:
           - name: qubership-cassandra-operator-transfer
             file: docker-transfer/Dockerfile
             context: ""
+          - name: qubership-cassandra-transfer_4.1
+            file: docker-transfer/cassandra4/Dockerfile
+            context: ""
+          - name: qubership-cassandra-transfer_5.0
+            file: docker-transfer/cassandra5/Dockerfile
+            context: ""
     runs-on: ubuntu-24.04
     steps:
       - name: Validate
@@ -55,13 +61,13 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Prepare Tag
         run: echo "TAG_NAME=$(echo ${TAG_NAME} | sed 's@refs/tags/@@;s@refs/heads/@@;s@/@_@g')" >> $GITHUB_ENV
-      - name: Get package IDs for delete 
+      - name: Get package IDs for delete
         id: get-ids-for-delete
         uses: Netcracker/get-package-ids@v0.0.1
         with:
           component-name: ${{ matrix.component.name }}
           component-tag: ${{ env.TAG_NAME }}
-          access-token: ${{ secrets.GITHUB_TOKEN }} 
+          access-token: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ env.PUSH }}
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -74,8 +80,8 @@ jobs:
           tags: ghcr.io/netcracker/${{ matrix.component.name }}:${{ env.TAG_NAME }}
           provenance: false
       - uses: actions/delete-package-versions@v5
-        with: 
+        with:
           package-name: ${{ matrix.component.name }}
-          package-type: 'container'
+          package-type: "container"
           package-version-ids: ${{ steps.get-ids-for-delete.outputs.ids-for-delete }}
         if: ${{ steps.get-ids-for-delete.outputs.ids-for-delete != '' }}

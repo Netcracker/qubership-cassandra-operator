@@ -1,4 +1,4 @@
 FROM scratch
 
 # Transfer
-COPY charts /charts
+COPY charts/helm/cassandra-operator /charts/helm/cassandra-operator
