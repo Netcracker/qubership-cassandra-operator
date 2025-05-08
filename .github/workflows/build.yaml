@@ -33,10 +33,10 @@ jobs:
           - name: qubership-cassandra-operator-transfer
             file: docker-transfer/Dockerfile
             context: ""
-          - name: qubership-cassandra-transfer_4.1
+          - name: qubership-cassandra-transfer_4_1
             file: docker-transfer/cassandra4/Dockerfile
             context: ""
-          - name: qubership-cassandra-transfer_5.0
+          - name: qubership-cassandra-transfer_5_0
             file: docker-transfer/cassandra5/Dockerfile
             context: ""
     runs-on: ubuntu-24.04

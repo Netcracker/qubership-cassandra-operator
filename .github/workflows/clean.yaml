@@ -17,6 +17,10 @@ jobs:
             context: ""
           - name: qubership-cassandra-operator-transfer
             context: ""
+          - name: qubership-cassandra-transfer_4_1
+            context: ""
+          - name: qubership-cassandra-transfer_5_0
+            context: ""
     steps:
       - name: Prepare Tag
         run: echo "TAG_NAME=$(echo ${TAG_NAME} | sed 's@refs/heads/@@;s@/@_@g')" >> $GITHUB_ENV
@@ -26,7 +30,7 @@ jobs:
           registry: ghcr.io
           username: ${GITHUB_ACTOR}
           password: ${{secrets.GITHUB_TOKEN}}
-      - name: Get package IDs for delete 
+      - name: Get package IDs for delete
         id: get-ids-for-delete
         uses: Netcracker/get-package-ids@v0.0.1
         with:
@@ -34,8 +38,8 @@ jobs:
           component-tag: ${{ env.TAG_NAME }}
           access-token: ${{secrets.GITHUB_TOKEN}}
       - uses: actions/delete-package-versions@v5
-        with: 
+        with:
           package-name: ${{ matrix.component.name }}
-          package-type: 'container'
+          package-type: "container"
           package-version-ids: ${{ steps.get-ids-for-delete.outputs.ids-for-delete }}
         if: ${{ steps.get-ids-for-delete.outputs.ids-for-delete != '' }}
