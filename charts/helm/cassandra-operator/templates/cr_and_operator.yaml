@@ -113,6 +113,10 @@ spec:
     {{- if .Values.cassandra.priorityClassName }}
     priorityClassName: {{ .Values.cassandra.priorityClassName | quote }}
     {{- end }}
+    {{- if .Values.cassandra.affinity }}
+    affinity:
+      {{- toYaml .Values.cassandra.affinity | nindent 6 }}
+    {{- end }}
     username: {{template "fromEnv" (dict "envName" .Values.INFRA_CASSANDRA_USERNAME "default" .Values.cassandra.username) }}
     secretName: {{ .Values.cassandra.secretName }}
     {{ template "getCassandraResourcesForProfile" (dict "envVar" .Values.CASSANDRA_PROFILE "dotVar" .Values.global.profile "values" .Values) }}
@@ -390,6 +394,10 @@ spec:
       nodeSelector:
         {{- range $key, $value := .Values.operator.nodeLabels }}
         {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+      {{- if .Values.operator.affinity }}
+      affinity:
+        {{- toYaml .Values.operator.affinity | nindent 8 }}
       {{- end }}
       {{- if .Values.tls.enabled }}
       volumes:
