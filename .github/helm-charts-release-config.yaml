@@ -1,0 +1,10 @@
+---
+charts:
+  - name: qubership-cassandra-operator
+    chart_file: deployments/charts/cassandra-operator/Chart.yaml
+    values_file: deployments/charts/cassandra-operator/values.yaml
+    image:
+      - ghcr.io/netcracker/qubership-cassandra-operator:${release}
+      - ghcr.io/netcracker/qubership-cassandra-operator-transfer:${release}
+      - ghcr.io/netcracker/qubership-cassandra:${release}
+      - ghcr.io/netcracker/qubership-cassandra-reaper:${release}
