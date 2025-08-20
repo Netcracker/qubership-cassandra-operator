@@ -1,8 +1,8 @@
 ---
 charts:
   - name: qubership-cassandra-operator
-    chart_file: deployments/charts/cassandra-operator/Chart.yaml
-    values_file: deployments/charts/cassandra-operator/values.yaml
+    chart_file: charts/helm/cassandra-operator/Chart.yaml
+    values_file: charts/helm/cassandra-operator/values.yaml
     image:
       - ghcr.io/netcracker/qubership-cassandra-operator:${release}
       - ghcr.io/netcracker/qubership-cassandra-operator-transfer:${release}
