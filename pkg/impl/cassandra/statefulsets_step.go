@@ -56,7 +56,7 @@ func (r *CassandraStatefulSetStep) Execute(ctx core.ExecutionContext) error {
 			coreUtils.GetPlainTextEnvVar("REAPER_JMX_AUTH_PASSWORD", "reaperPass"),
 			coreUtils.GetPlainTextEnvVar("REAPER_STORAGE_TYPE", "cassandra"),
 			coreUtils.GetPlainTextEnvVar("REAPER_CASS_CLUSTER_NAME", request.Namespace), //todo!
-			coreUtils.GetPlainTextEnvVar("REAPER_CASS_CONTACT_POINTS", "[127.0.0.1]"),
+			coreUtils.GetPlainTextEnvVar("REAPER_CASS_CONTACT_POINTS", `[{"host":"127.0.0.1","port":9042}]`),
 			coreUtils.GetPlainTextEnvVar("REAPER_CASS_KEYSPACE", "reaper_db"),
 			coreUtils.GetPlainTextEnvVar("REAPER_CASS_AUTH_ENABLED", "true"),
 			coreUtils.GetPlainTextEnvVar("REAPER_DATACENTER_AVAILABILITY", "SIDECAR"),
