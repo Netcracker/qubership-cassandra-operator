@@ -223,6 +223,10 @@ func (r *CassandraStatefulSetStep) Execute(ctx core.ExecutionContext) error {
 				tolerations = spec.Spec.Policies.Tolerations
 			}
 
+			if spec.Spec.Reaper.Install {
+				reaperContainer.Env = append(reaperContainer.Env, coreUtils.GetPlainTextEnvVar("REAPER_CASS_LOCAL_DC", dcReplicas[dc].Name))
+			}
+
 			ss := CassandraReplicaTemplate(
 				replicaEnvs,
 				reaperContainer,
