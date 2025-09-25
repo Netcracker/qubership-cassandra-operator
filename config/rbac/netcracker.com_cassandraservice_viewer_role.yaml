@@ -12,7 +12,7 @@ metadata:
   name: cassandraservice-viewer-role
 rules:
 - apiGroups:
-  - qubership.org
+  - netcracker.com
   resources:
   - cassandraservices
   verbs:
@@ -20,7 +20,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - qubership.org
+  - netcracker.com
   resources:
   - cassandraservices/status
   verbs:

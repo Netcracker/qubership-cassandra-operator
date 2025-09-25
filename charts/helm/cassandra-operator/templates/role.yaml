@@ -6,7 +6,7 @@ metadata:
     {{- include "cassandra.defaultLabels" . | nindent 4 }}
 rules:
 - apiGroups:
-  - qubership.org
+  - netcracker.com
   resources:
   - '*'
   verbs:

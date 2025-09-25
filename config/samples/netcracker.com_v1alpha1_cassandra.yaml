@@ -1,4 +1,4 @@
-apiVersion: qubership.org.qubership.org/v1alpha1
+apiVersion: netcracker.com.netcracker.com/v1alpha1
 kind: Cassandra
 metadata:
   labels:
