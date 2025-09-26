@@ -1,6 +1,6 @@
 {
   "statusPolling":{
-    "resourceType": "cassandradeployments.qubership.org",
+    "resourceType": "cassandradeployments.netcracker.com",
     "resourceName": "cassandra-operator",
     "statusPath": "$.status.conditions[?(@.type=='Successful')]",
     "statusPathFail": "$.status.conditions[?(@.type=='Failed')]",

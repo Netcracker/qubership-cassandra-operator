@@ -40,9 +40,9 @@ type CassandraReconciler struct {
 	Reconciler reconcile.Reconciler
 }
 
-//+kubebuilder:rbac:groups=qubership.org,resources=cassandras,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=qubership.org,resources=cassandras/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=qubership.org,resources=cassandras/finalizers,verbs=update
+//+kubebuilder:rbac:groups=netcracker.com,resources=cassandras,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=netcracker.com,resources=cassandras/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=netcracker.com,resources=cassandras/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

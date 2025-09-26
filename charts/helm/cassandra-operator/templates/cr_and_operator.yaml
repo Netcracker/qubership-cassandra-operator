@@ -1,6 +1,6 @@
 {{/* Generating deployment version each time */}}
   {{- $deploymentVersion := randAlphaNum 10 -}}
-apiVersion: qubership.org/v1alpha1
+apiVersion: netcracker.com/v1alpha1
 kind: CassandraDeployment
 metadata:
   name: cassandra-operator

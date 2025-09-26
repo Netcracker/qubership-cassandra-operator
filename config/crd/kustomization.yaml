@@ -2,8 +2,8 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/qubership.org_cassandraservices.yaml
-- bases/qubership.org.qubership.org_cassandras.yaml
+- bases/netcracker.comcassandraservices.yaml
+- bases/netcracker.com.netcracker.com_cassandras.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
