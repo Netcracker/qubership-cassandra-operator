@@ -63,3 +63,15 @@ rules:
   - networking.k8s.io
   resources:
   - ingresses
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  - delete
