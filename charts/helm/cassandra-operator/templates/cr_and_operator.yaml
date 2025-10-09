@@ -353,6 +353,10 @@ spec:
         - name: {{ .Values.operator.podName }}
           image: {{template "find_image" (dict "deployName" "dockerCassandraOperator" "SERVICE_NAME" "dockerCassandraOperator" "vals" .Values "default" .Values.operator.image) }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: healthz
+              containerPort: 8081
+              protocol: TCP
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -365,6 +369,22 @@ spec:
             limits:
               cpu: {{ .Values.operator.resources.limits.cpu | quote }}
               memory: {{ .Values.operator.resources.limits.memory }}
+          livenessProbe:
+              httpGet:
+                path: /healthz
+                port: 8081
+              initialDelaySeconds: 15
+              periodSeconds: 20
+              timeoutSeconds: 2
+              failureThreshold: 3
+          readinessProbe:
+              httpGet:
+                path: /readyz
+                port: 8081
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              timeoutSeconds: 2
+              failureThreshold: 3
           env:
             - name: HOST_IP
               valueFrom:

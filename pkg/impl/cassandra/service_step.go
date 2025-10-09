@@ -56,7 +56,13 @@ func (r *CassandraServicesStep) Execute(ctx core.ExecutionContext) error {
 	templates = append(templates, cUtils.SimpleServiceTemplate(
 		utils.CassandraMetrics,
 		map[string]string{
+			constants.App:          utils.CassandraCluster,
 			constants.Microservice: utils.CassandraMetrics,
+			utils.Name:             utils.Cassandra,
+			utils.AppName:          utils.Cassandra,
+			utils.AppTechnology:    "go",
+			utils.AppComponent:     "backend",
+			utils.AppInstance:      spec.Spec.Instance,
 		},
 		map[string]string{
 			utils.Service: utils.CassandraCluster,
@@ -74,6 +80,11 @@ func (r *CassandraServicesStep) Execute(ctx core.ExecutionContext) error {
 			map[string]string{
 				constants.App:          utils.CassandraCluster,
 				constants.Microservice: dcLabel,
+				utils.Name:             utils.Cassandra,
+				utils.AppName:          utils.Cassandra,
+				utils.AppTechnology:    "go",
+				utils.AppComponent:     "backend",
+				utils.AppInstance:      spec.Spec.Instance,
 			},
 			map[string]string{
 				utils.App: dcLabel,

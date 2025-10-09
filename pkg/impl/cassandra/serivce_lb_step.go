@@ -29,6 +29,11 @@ func (r *CassandraLoadbalancerService) Execute(ctx core.ExecutionContext) error 
 		map[string]string{
 			constants.App:          utils.CassandraCluster,
 			constants.Microservice: utils.CassandraLb,
+			utils.Name:             utils.Cassandra,
+			utils.AppName:          utils.Cassandra,
+			utils.AppTechnology:    "go",
+			utils.AppComponent:     "backend",
+			utils.AppInstance:      spec.Spec.Instance,
 		},
 		map[string]string{
 			utils.Service: utils.CassandraCluster,
