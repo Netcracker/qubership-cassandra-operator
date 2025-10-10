@@ -35,6 +35,7 @@ func (r *CassandraServicesStep) Execute(ctx core.ExecutionContext) error {
 			utils.AppName:          utils.Cassandra,
 			utils.AppTechnology:    "java",
 			utils.AppComponent:     "backend",
+			utils.AppManagedBy:     "operator",
 			utils.AppInstance:      spec.Spec.Instance,
 		},
 		map[string]string{
@@ -62,6 +63,7 @@ func (r *CassandraServicesStep) Execute(ctx core.ExecutionContext) error {
 			utils.AppName:          utils.Cassandra,
 			utils.AppTechnology:    "go",
 			utils.AppComponent:     "backend",
+			utils.AppManagedBy:     "operator",
 			utils.AppInstance:      spec.Spec.Instance,
 		},
 		map[string]string{
@@ -84,6 +86,7 @@ func (r *CassandraServicesStep) Execute(ctx core.ExecutionContext) error {
 				utils.AppName:          utils.Cassandra,
 				utils.AppTechnology:    "go",
 				utils.AppComponent:     "backend",
+				utils.AppManagedBy:     "operator",
 				utils.AppInstance:      spec.Spec.Instance,
 			},
 			map[string]string{

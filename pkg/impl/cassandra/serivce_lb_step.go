@@ -33,6 +33,7 @@ func (r *CassandraLoadbalancerService) Execute(ctx core.ExecutionContext) error 
 			utils.AppName:          utils.Cassandra,
 			utils.AppTechnology:    "go",
 			utils.AppComponent:     "backend",
+			utils.AppManagedBy:     "operator",
 			utils.AppInstance:      spec.Spec.Instance,
 		},
 		map[string]string{
