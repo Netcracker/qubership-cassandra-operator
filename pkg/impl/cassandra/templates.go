@@ -191,7 +191,7 @@ func CassandraReplicaTemplate(
 				},
 				Items: []v13.KeyToPath{
 					{
-						Path: "jvm8-server.options",
+						Path: "jvm-server.options",
 						Key:  utils.Config,
 					},
 				},
