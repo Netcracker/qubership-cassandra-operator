@@ -59,13 +59,14 @@ func CassandraReplicaTemplate(
 		panic(err)
 	}
 	labels := map[string]string{
-		utils.Service:       utils.CassandraCluster,
-		utils.App:           dcServiceName,
-		utils.ReplicaNumber: fmt.Sprintf("%v", replicaNumber),
-		utils.AppPartOf:     spec.Spec.PartOf,
-		utils.AppManagedBy:  spec.Spec.ManagedBy,
-		utils.CloneModeType: "data",
-		utils.AppVersion:    reg.FindString(dockerImage),
+		utils.Service:              utils.CassandraCluster,
+		utils.App:                  dcServiceName,
+		utils.ReplicaNumber:        fmt.Sprintf("%v", replicaNumber),
+		utils.AppPartOf:            spec.Spec.PartOf,
+		utils.AppManagedBy:         spec.Spec.ManagedBy,
+		utils.CloneModeType:        "data",
+		utils.AppVersion:           reg.FindString(dockerImage),
+		utils.AppManagedByOperator: "cassandra-operator",
 	}
 
 	name := fmt.Sprintf(utils.CassandraReplicaNameFormat, replicaNumber)
