@@ -29,13 +29,15 @@ func (r *CassandraServicesStep) Execute(ctx core.ExecutionContext) error {
 	headless := cUtils.HeadlessServiceTemplate(
 		utils.Cassandra,
 		map[string]string{
-			constants.App:          utils.CassandraCluster,
-			constants.Microservice: utils.Cassandra,
-			utils.Name:             utils.Cassandra,
-			utils.AppName:          utils.Cassandra,
-			utils.AppTechnology:    "java",
-			utils.AppComponent:     "backend",
-			utils.AppInstance:      spec.Spec.Instance,
+			constants.App:              utils.CassandraCluster,
+			constants.Microservice:     utils.Cassandra,
+			utils.Name:                 utils.Cassandra,
+			utils.AppName:              utils.Cassandra,
+			utils.AppTechnology:        "java",
+			utils.AppComponent:         "backend",
+			utils.AppManagedBy:         "operator",
+			utils.AppInstance:          spec.Spec.Instance,
+			utils.AppManagedByOperator: "cassandra-operator",
 		},
 		map[string]string{
 			utils.Service: utils.CassandraCluster,
@@ -56,7 +58,15 @@ func (r *CassandraServicesStep) Execute(ctx core.ExecutionContext) error {
 	templates = append(templates, cUtils.SimpleServiceTemplate(
 		utils.CassandraMetrics,
 		map[string]string{
-			constants.Microservice: utils.CassandraMetrics,
+			constants.App:              utils.CassandraCluster,
+			constants.Microservice:     utils.CassandraMetrics,
+			utils.Name:                 utils.Cassandra,
+			utils.AppName:              utils.Cassandra,
+			utils.AppTechnology:        "go",
+			utils.AppComponent:         "backend",
+			utils.AppManagedBy:         "operator",
+			utils.AppInstance:          spec.Spec.Instance,
+			utils.AppManagedByOperator: "cassandra-operator",
 		},
 		map[string]string{
 			utils.Service: utils.CassandraCluster,
@@ -72,8 +82,15 @@ func (r *CassandraServicesStep) Execute(ctx core.ExecutionContext) error {
 		templates = append(templates, cUtils.HeadlessServiceTemplate(
 			dcLabel,
 			map[string]string{
-				constants.App:          utils.CassandraCluster,
-				constants.Microservice: dcLabel,
+				constants.App:              utils.CassandraCluster,
+				constants.Microservice:     dcLabel,
+				utils.Name:                 utils.Cassandra,
+				utils.AppName:              utils.Cassandra,
+				utils.AppTechnology:        "go",
+				utils.AppComponent:         "backend",
+				utils.AppManagedBy:         "operator",
+				utils.AppInstance:          spec.Spec.Instance,
+				utils.AppManagedByOperator: "cassandra-operator",
 			},
 			map[string]string{
 				utils.App: dcLabel,

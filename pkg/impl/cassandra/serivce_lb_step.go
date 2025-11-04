@@ -27,8 +27,15 @@ func (r *CassandraLoadbalancerService) Execute(ctx core.ExecutionContext) error 
 	service := cUtils.SimpleServiceTemplate(
 		utils.CassandraLb,
 		map[string]string{
-			constants.App:          utils.CassandraCluster,
-			constants.Microservice: utils.CassandraLb,
+			constants.App:              utils.CassandraCluster,
+			constants.Microservice:     utils.CassandraLb,
+			utils.Name:                 utils.Cassandra,
+			utils.AppName:              utils.Cassandra,
+			utils.AppTechnology:        "go",
+			utils.AppComponent:         "backend",
+			utils.AppManagedBy:         "operator",
+			utils.AppInstance:          spec.Spec.Instance,
+			utils.AppManagedByOperator: "cassandra-operator",
 		},
 		map[string]string{
 			utils.Service: utils.CassandraCluster,

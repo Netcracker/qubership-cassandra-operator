@@ -265,7 +265,7 @@ vaultDBEngine:
   connectTimeout: 10s
 
 SERVICE_NAME: "cassandra"
-PART_OF: "cassandra"
+PART_OF: "CASSANDRA"
 DELIMITER: "-"
 ARTIFACT_DESCRIPTOR_VERSION: "" # TO_BE_REPLACED
 MANAGED_BY: "operator"
