@@ -22,7 +22,7 @@ ENV OPERATOR=/usr/local/bin/cassandra-operator \
     USER_UID=1001 \
     USER_NAME=cassandra-operator
 
-RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/main/' > /etc/apk/repositories \
+RUN echo 'https://dl-cdn.alpinelinux.org/alpine/edge/main/' > /etc/apk/repositories \
     && apk add --no-cache openssl curl \
     && apk update \
     && apk upgrade

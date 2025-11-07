@@ -8,8 +8,8 @@ github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5/go.mod h1:tT
 github.com/Microsoft/hcsshim v0.8.9/go.mod h1:5692vkUqntj1idxauYlpoINNKeqCiG6Sg38RRsjT5y8=
 github.com/Netcracker/qubership-cql-driver v0.0.2 h1:IZEj1sEw9Rbaf9nef+ka+ECrFUtYDZSGFyEe4MRSbUY=
 github.com/Netcracker/qubership-cql-driver v0.0.2/go.mod h1:s1hLTD1Lsd4AG/v5wef12/idR8GwVU+cEHA3WAPTVmk=
-github.com/Netcracker/qubership-credential-manager v0.0.8 h1:Nl84wDrAEgr47i5DEpcIfT0LBToh/r6EYND75wmB8OY=
-github.com/Netcracker/qubership-credential-manager v0.0.8/go.mod h1:EY5fTjRnjtCzZftbt6YbdiDYMSBWicGokC0rmLE3XGc=
+github.com/Netcracker/qubership-credential-manager v0.0.11 h1:6ZTvgid2F07ZIXpitgGpcKM/E9ksl2E3ppzgEwF2yqY=
+github.com/Netcracker/qubership-credential-manager v0.0.11/go.mod h1:+L+rqzKzm/otrXb29M6bUo9z9yb70XNs+DUEGZSSzAc=
 github.com/Netcracker/qubership-nosqldb-operator-core v1.0.7 h1:LpRVSfaj3uOGhzSvdOYxk/apBc3qWy0XMHqRJDQDki0=
 github.com/Netcracker/qubership-nosqldb-operator-core v1.0.7/go.mod h1:TXQTs0LbMMjcan++/ArHKOXlA4z72pQ7u+vrf6H2+34=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
