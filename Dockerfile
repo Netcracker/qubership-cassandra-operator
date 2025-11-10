@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24.7-alpine3.22 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25.3-alpine3.22 AS builder
 
 ENV GOSUMDB=off GOPRIVATE=github.com/Netcracker
 
@@ -16,13 +16,13 @@ ARG TARGETOS TARGETARCH
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o ./bin/cassandra-operator \
     -gcflags all=-trimpath=${GOPATH} -asmflags all=-trimpath=${GOPATH} ./main.go
 
-FROM alpine:3.22.1
+FROM alpine:3.22.2
 
 ENV OPERATOR=/usr/local/bin/cassandra-operator \
     USER_UID=1001 \
     USER_NAME=cassandra-operator
 
-RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/main/' > /etc/apk/repositories \
+RUN echo 'https://dl-cdn.alpinelinux.org/alpine/edge/main/' > /etc/apk/repositories \
     && apk add --no-cache openssl curl \
     && apk update \
     && apk upgrade
