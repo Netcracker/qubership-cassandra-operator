@@ -97,7 +97,7 @@ Usage example:
 {{template "nosql.core.secret.vault.fromEnv" (dict "vltEnabled" .Values.vaultRegistration "vltPath" "kv_path" "secret" .Values.cassandra "userEnv" .Values.INFRA_CASSANDRA_USERNAME "passEnv" .Values.INFRA_CASSANDRA_PASSWORD )}}
 */}}
 {{- define "nosql.core.secret.vault.fromEnv" -}}
-apiVersion: v2
+apiVersion: v1
 kind: Secret
 metadata:
   name: {{ .secret.secretName }}
