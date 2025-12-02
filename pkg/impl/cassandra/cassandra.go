@@ -230,7 +230,7 @@ func (r *CassandraBuilder) Build(ctx core.ExecutionContext) core.Executable {
 
 func (r *Cassandra) Condition(ctx core.ExecutionContext) (bool, error) {
 	spec := ctx.Get(constants.ContextSpec).(*v1alpha1.CassandraDeployment)
-	microServiceCheck, microserviceCheckErr := core.CheckSpecChange(ctx, spec.Spec, utils.Cassandra)
+	microServiceCheck, microserviceCheckErr := core.CheckSpecChange(ctx, spec.Spec.Cassandra, utils.Cassandra)
 	commonCheck := ctx.Get(constants.IsAnyCommonParameterChanged).(bool)
 
 	if microserviceCheckErr != nil {
