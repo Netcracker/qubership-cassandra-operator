@@ -12,11 +12,11 @@ jobs:
     outputs:
       conclusion: ${{ steps.wait.outputs.conclusion }}
     steps:
-      - name: Wait for push.yml to complete
+      - name: Wait for build.yaml to complete
         uses: netcracker/qubership-workflow-hub/actions/wait-for-workflow@main
         id: wait
         with:
-          workflow: push.yml
+          workflow: build.yaml
           token: ${{ secrets.GITHUB_TOKEN }}
           poll-interval: 20
   Cassandra-Pipeline:
