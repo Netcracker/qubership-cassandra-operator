@@ -26,4 +26,4 @@ jobs:
     with:
       service_branch: '${{ github.head_ref || github.ref_name }}'
       versions_file: '.github/versions.yaml'
-      pipeline_branch: 'v1.0.1' #this value must match the value after '@' in 'uses'
+      pipeline_branch: 'feat/cassandra_test_pipe' #this value must match the value after '@' in 'uses'
