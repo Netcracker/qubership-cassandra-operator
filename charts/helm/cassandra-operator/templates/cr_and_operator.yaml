@@ -108,7 +108,7 @@ spec:
     install: {{ .Values.cassandra.install }}
     smoketestKeyspace: {{ .Values.cassandra.smoketestKeyspace }}
     hostNetwork: {{ .Values.cassandra.hostNetwork }}
-    dockerImage: {{template "find_image" (dict "deployName" "dockerCassandra" "SERVICE_NAME" "dockerCassandra" "vals" .Values "default" .Values.cassandra.dockerImage) }}
+    dockerImage: {{template "find_image" (dict "deployName" "cassandra" "SERVICE_NAME" "cassandra" "vals" .Values "default" .Values.cassandra.dockerImage) }}
     auditLogEnabled: {{ .Values.cassandra.auditLogEnabled }}
     {{- if .Values.cassandra.priorityClassName }}
     priorityClassName: {{ .Values.cassandra.priorityClassName | quote }}
