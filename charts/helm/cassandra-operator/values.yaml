@@ -7,8 +7,8 @@ global:
 
 operator:
   name: operator-service
-  image: ghcr.io/netcracker/qubership-cassandra-supplementary:main
-  initImage: ghcr.io/netcracker/qubership-credential-manager:main
+  image: to_replace
+  initImage: to_replace
   podName: cassandra-operator
   priorityClassName:
   resources:
@@ -74,7 +74,7 @@ reaper:
   secretName: cassandra-reaper-secret.v1
   truststoreSecretName: cassandra-truststore-reaper-secret
   truststorePassword: reaper_password
-  dockerImage: ghcr.io/netcracker/netcracker/qubership-cassandra-reaper:main
+  dockerImage: to_replace
   ingressHost:
   envs:
   # Additional Env variables for docker container from https://hub.docker.com/r/thelastpickle/cassandra-reaper/
@@ -116,7 +116,7 @@ cassandra:
   pdb: false
   auditLogEnabled: false
   # Mandatory docker image link
-  dockerImage: artifactorycn.netcracker.com:17008/product/prod.platform.databases_cassandra:master_latest_version_5.0.4
+  dockerImage: to_replace
 
   priorityClassName:
   # Keyspace Name
@@ -241,7 +241,7 @@ cassandra:
 
 vaultRegistration:
   tokenSecretName: vault-secret
-  dockerImage: banzaicloud/vault-env:1.19.0
+  dockerImage: to_replace
   enabled: false
   path: kv
   url:
