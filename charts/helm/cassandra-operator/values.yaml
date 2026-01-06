@@ -116,7 +116,7 @@ cassandra:
   pdb: false
   auditLogEnabled: false
   # Mandatory docker image link
-  dockerImage: artifactorycn.netcracker.com:17008/product/prod.platform.databases_cassandra:master_latest_version_5.0.4
+  dockerImage: ghcr.io/netcracker/cassandra_5.0:main
 
   priorityClassName:
   # Keyspace Name
