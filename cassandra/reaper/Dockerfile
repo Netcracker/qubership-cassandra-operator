@@ -3,7 +3,7 @@ FROM thelastpickle/cassandra-reaper:4.0.1
 ENV USER_ID=999
 
 USER root
-ADD run.sh /
+RUN cp run.sh /
 
 RUN echo 'https://dl-cdn.alpinelinux.org/alpine/edge/main/' > /etc/apk/repositories \
     && apk add --no-cache openssl \
