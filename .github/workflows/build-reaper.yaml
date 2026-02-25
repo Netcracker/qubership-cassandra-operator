@@ -25,6 +25,7 @@ jobs:
         component:
           - name: qubership-cassandra-reaper
             file: cassandra/reaper/Dockerfile
+            context: cassandra/reaper
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
