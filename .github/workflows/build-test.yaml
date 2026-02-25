@@ -1,4 +1,4 @@
-name: Build Artifacts
+name: Test Build Artifact
 on:
   release:
     types: [created]

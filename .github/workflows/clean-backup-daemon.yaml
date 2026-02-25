@@ -1,4 +1,4 @@
-name: Branch Deleted
+name: Backup Deamon Branch Deleted
 on: delete
 
 env:

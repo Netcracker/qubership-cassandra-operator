@@ -1,4 +1,4 @@
-name: Build Artifacts
+name: Services Build Artifact
 on:
   release:
     types: [created]

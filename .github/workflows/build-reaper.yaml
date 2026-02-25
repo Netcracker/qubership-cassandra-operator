@@ -1,4 +1,4 @@
-name: Build Artifacts
+name: Reaper Build Artifact
 on:
   release:
     types: [created]

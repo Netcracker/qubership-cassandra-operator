@@ -1,4 +1,4 @@
-name: Build Artifacts
+name: Cassnadra Build Artifacts
 on:
   release:
     types: [created]

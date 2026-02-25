@@ -1,4 +1,4 @@
-name: Branch Deleted
+name: Services Branch Deleted
 on: delete
 
 env:

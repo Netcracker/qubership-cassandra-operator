@@ -1,4 +1,4 @@
-name: Branch Deleted
+name: Test Branch Deleted
 on: delete
 
 env:

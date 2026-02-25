@@ -1,4 +1,4 @@
-name: Branch Deleted
+name: Dbaas Adapter Branch Deleted
 on: delete
 
 env:
