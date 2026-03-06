@@ -2,9 +2,9 @@ FROM ghcr.io/netcracker/qubership-backup-daemon:main_alpine
 
 RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/main/' > /etc/apk/repositories \
     && echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/community' >> /etc/apk/repositories \
-    && apk add --no-cache wget net-tools openssh-client rsync ansible openjdk8 jq zip unzip bash grep libarchive-tools curl \
     && apk update \
     && apk upgrade \
+    && apk add --no-cache wget net-tools openssh-client rsync ansible openjdk17 jq zip unzip bash grep libarchive-tools curl gcc g++ python3-dev musl-dev libffi-dev openssl-dev cargo make \
     # ping takes over 999 uid 
     && sed -i "s/999/99/" /etc/group 
 
