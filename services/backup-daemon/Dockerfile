@@ -4,13 +4,13 @@ RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/main/' > /etc/apk/reposito
     && echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/community' >> /etc/apk/repositories \
     && apk update \
     && apk upgrade \
-    && apk add --no-cache wget net-tools openssh-client rsync ansible openjdk17 jq zip unzip bash grep libarchive-tools curl gcc g++ python3-dev musl-dev libffi-dev openssl-dev cargo make \
+    && apk add --no-cache wget net-tools openssh-client rsync ansible openjdk17 jq zip unzip bash libarchive-tools curl python3 py3-pip gcc g++ python3-dev musl-dev libffi-dev openssl-dev cargo make \
     # ping takes over 999 uid 
     && sed -i "s/999/99/" /etc/group 
 
 
 RUN pip install --upgrade pip setuptools wheel && \
-    CASS_DRIVER_NO_EXTENSIONS=1 pip install cassandra-driver boto3==1.40.69 jq
+    pip install cassandra-driver boto3==1.40.69 jq
 
 ENV CASSANDRA_HOME=/opt/cassandra
 ENV CASSANDRA4_DIR=4.1.9
