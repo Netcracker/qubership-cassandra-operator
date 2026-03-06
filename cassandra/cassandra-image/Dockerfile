@@ -6,8 +6,8 @@ ENV CASSANDRA_VERSION $version
 ARG exp_version
 ENV EXPORTER_VERSION $exp_version
 
-RUN echo 'https://dl-cdn.alpinelinux.org/alpine/3.22/main' > /etc/apk/repositories \
-    && echo 'https://dl-cdn.alpinelinux.org/alpine/3.22/community' >> /etc/apk/repositories \
+RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.23/main' > /etc/apk/repositories \
+    && echo 'https://dl-cdn.alpinelinux.org/alpine/v3.23/community' >> /etc/apk/repositories \
     && apk add --no-cache wget net-tools jq openjdk11 openssh-server bash python3 python3-dev py3-pip libev-dev build-base linux-headers libffi-dev openssl-dev rsync libarchive-tools grep openssl \
     # ping takes over 999 uid 
     && sed -i "s/999/99/" /etc/group 
