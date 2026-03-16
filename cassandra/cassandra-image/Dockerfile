@@ -1,4 +1,4 @@
-FROM alpine:3.23
+FROM eclipse-temurin:11-jre
 
 ARG version
 ENV CASSANDRA_VERSION $version
@@ -6,12 +6,29 @@ ENV CASSANDRA_VERSION $version
 ARG exp_version
 ENV EXPORTER_VERSION $exp_version
 
-RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/main' > /etc/apk/repositories \
-    && echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/community' >> /etc/apk/repositories \
-    && apk add --no-cache wget net-tools jq openjdk11 openssh-server bash python3 python3-dev py3-pip libev-dev build-base linux-headers libffi-dev openssl-dev rsync libarchive-tools grep openssl \
-    # ping takes over 999 uid 
-    && sed -i "s/999/99/" /etc/group 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        wget \
+        net-tools \
+        jq \
+        openssh-server \
+        bash \
+        python3 \
+        python3-dev \
+        python3-pip \
+        libev-dev \
+        build-essential \
+        libffi-dev \
+        libssl-dev \
+        rsync \
+        libarchive-tools \
+        grep \
+        openssl \
+    && rm -rf /var/lib/apt/lists/*
 
+RUN sed -i "s/999/99/" /etc/group
+
+RUN ln -s /opt/java/openjdk/bin/java /usr/bin/java
 
 ENV CASSANDRA_CONFIG_DIR /opt/cassandra/conf
 ENV CASSANDRA_INIT_CONFIG_DIR /var/lib/cassandra/configuration
@@ -19,7 +36,7 @@ ENV CASSANDRA_DATA /var/lib/cassandra/data
 ENV CASSANDRA_HOME /opt/cassandra
 
 COPY pip.conf /etc/pip.conf
-RUN pip3 install cassandra-driver --break-system-packages
+RUN pip3 install cassandra-driver cqlsh --break-system-packages
 
 RUN wget -qO- https://archive.apache.org/dist/cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz | tar xvfz - -C /tmp/ && mv /tmp/apache-cassandra-${CASSANDRA_VERSION} $CASSANDRA_HOME
 ENV PATH $PATH:$CASSANDRA_HOME/bin:$CASSANDRA_HOME/tools/bin

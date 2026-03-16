@@ -1,16 +1,39 @@
-FROM ghcr.io/netcracker/qubership-backup-daemon:main_alpine
+FROM eclipse-temurin:11-jre AS java
 
-RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/main/' > /etc/apk/repositories \
-    && echo 'https://dl-cdn.alpinelinux.org/alpine/v3.22/community' >> /etc/apk/repositories \
-    && apk update \
-    && apk upgrade \
-    && apk add --no-cache wget net-tools openssh-client rsync ansible openjdk17 jq zip unzip bash libarchive-tools curl python3 py3-pip gcc g++ python3-dev musl-dev libffi-dev openssl-dev cargo make \
-    # ping takes over 999 uid 
-    && sed -i "s/999/99/" /etc/group 
+FROM ghcr.io/netcracker/qubership-backup-daemon-go:debian_image
 
+RUN apt-get update && apt-get install -y \
+        python3 \
+        python3-dev \
+        python3-pip \
+        build-essential \
+        libffi-dev \
+        libssl-dev \
+        libev-dev \
+        wget \
+        curl \
+        unzip \
+        bash \
+        rsync \
+        ansible \
+        jq \
+        net-tools \
+        openssh-client \
+        zip \
+        grep \
+        libarchive-tools \
+    && pip3 install --no-cache-dir --break-system-packages \
+        setuptools \
+        cassandra-driver \
+        boto3 \
+        jq \
+    && rm -rf /var/lib/apt/lists/* \
+    && sed -i "s/999/99/" /etc/group
 
-RUN pip install --upgrade pip setuptools wheel && \
-    pip install cassandra-driver boto3==1.40.69 jq
+COPY --from=java /opt/java/openjdk /opt/java/openjdk
+
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="$JAVA_HOME/bin:$PATH"
 
 ENV CASSANDRA_HOME=/opt/cassandra
 ENV CASSANDRA4_DIR=4.1.9
@@ -23,6 +46,7 @@ RUN wget -qO- https://archive.apache.org/dist/cassandra/${CASSANDRA4_DIR}/apache
 
 RUN echo 'export PATH=$PATH:'"$CASSANDRA_HOME/bin" > $CASSANDRA_HOME/.profile 
 RUN mkdir /var/lib/cassandra /var/log/cassandra
+
 VOLUME /backup-storage
 
 ADD files/ /opt/backup/
@@ -35,4 +59,3 @@ RUN chmod -R 777 /opt/backup  /opt/downloads  /opt/cassandra /etc/passwd
 
 
 CMD ["/opt/backup/run.sh"]
-
