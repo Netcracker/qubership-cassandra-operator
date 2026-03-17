@@ -100,7 +100,8 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 	env []v1.EnvVar,
 	storageDirectory string,
 	emptyDir bool,
-	port int32) *v12.Deployment {
+	port int32,
+	uriScheme v1.URIScheme) *v12.Deployment {
 	var replicas int32 = 1
 	storage := utils.BackupStorage
 
@@ -153,6 +154,34 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 								},
 								AllowPrivilegeEscalation: &allowPrivilegeEscalation,
 							},
+							LivenessProbe: &v1.Probe{
+								ProbeHandler: v1.ProbeHandler{
+									HTTPGet: &v1.HTTPGetAction{
+										Path:   "/health",
+										Port:   intstr.FromInt(int(port)),
+										Scheme: uriScheme,
+									},
+								},
+								InitialDelaySeconds: 5,
+								TimeoutSeconds:      30,
+								PeriodSeconds:       7,
+								SuccessThreshold:    1,
+								FailureThreshold:    12,
+							},
+							ReadinessProbe: &v1.Probe{
+								ProbeHandler: v1.ProbeHandler{
+									HTTPGet: &v1.HTTPGetAction{
+										Path:   "/health",
+										Port:   intstr.FromInt(int(port)),
+										Scheme: uriScheme,
+									},
+								},
+								InitialDelaySeconds: 5,
+								TimeoutSeconds:      30,
+								PeriodSeconds:       7,
+								SuccessThreshold:    1,
+								FailureThreshold:    12,
+							},
 							Ports: []v1.ContainerPort{
 								v1.ContainerPort{
 									Name:          "http",
@@ -167,30 +196,6 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 									Name:      storage,
 									MountPath: storageDirectory,
 								},
-							},
-							LivenessProbe: &v1.Probe{
-								ProbeHandler: v1.ProbeHandler{
-									TCPSocket: &v1.TCPSocketAction{
-										Port: intstr.IntOrString{Type: intstr.Int, IntVal: port},
-									},
-								},
-								InitialDelaySeconds: 5,
-								TimeoutSeconds:      30,
-								PeriodSeconds:       7,
-								SuccessThreshold:    1,
-								FailureThreshold:    12,
-							},
-							ReadinessProbe: &v1.Probe{
-								ProbeHandler: v1.ProbeHandler{
-									TCPSocket: &v1.TCPSocketAction{
-										Port: intstr.IntOrString{Type: intstr.Int, IntVal: port},
-									},
-								},
-								InitialDelaySeconds: 5,
-								TimeoutSeconds:      30,
-								PeriodSeconds:       7,
-								SuccessThreshold:    1,
-								FailureThreshold:    12,
 							},
 						},
 					},

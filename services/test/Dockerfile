@@ -1,4 +1,4 @@
-FROM ghcr.io/netcracker/qubership-docker-integration-tests:lts_0.1.x
+FROM ghcr.io/netcracker/qubership-docker-integration-tests-debian:main
 
 ENV ROBOT_OUTPUT=${ROBOT_HOME}/output \
     DISTR_DIR=/tmp/deps
@@ -9,13 +9,17 @@ RUN mkdir -p ${ROBOT_HOME} \
 COPY requirements.txt ${ROBOT_HOME}/requirements.txt
 COPY robot ${ROBOT_HOME}
 
-# Upgrade all tools to avoid vulnerabilities
-RUN set -x && apk upgrade --no-cache --available
+RUN set -x \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        gcc \
+        python3-dev \
+        libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 
 RUN set -x \
-    && pip3 install -r ${ROBOT_HOME}/requirements.txt \
-    && rm -rf /var/cache/apk/*
-
+    && pip3 install --no-cache-dir -r ${ROBOT_HOME}/requirements.txt
 
 USER root
 RUN chmod -R 777 ${ROBOT_HOME}

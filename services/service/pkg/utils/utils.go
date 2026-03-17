@@ -184,6 +184,13 @@ func GetHTTPProtocol(tlsEnabled bool) string {
 	return "http"
 }
 
+func GetUriScheme(tlsEnabled bool) v1.URIScheme {
+	if tlsEnabled {
+		return v1.URISchemeHTTPS
+	}
+	return v1.URISchemeHTTP
+}
+
 func IsTLSEnableForDBAAS(aggregatorRegistrationAddress string, tlsEnabled bool) bool {
 	if !strings.Contains(aggregatorRegistrationAddress, "https") {
 		return false

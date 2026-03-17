@@ -110,7 +110,8 @@ func (r *LegacyBackupDeployment) Execute(ctx core.ExecutionContext) error {
 		envs,
 		backup.StorageDirectory,
 		backup.Storage.EmptyDir,
-		utils.GetHTTPPort(spec.Spec.TLS.Enabled))
+		utils.GetHTTPPort(spec.Spec.TLS.Enabled),
+		utils.GetUriScheme(spec.Spec.TLS.Enabled))
 
 	err := credsManager.AddCredHashToPodTemplate([]string{spec.Spec.Cassandra.SecretName}, &dc.Spec.Template)
 	if err != nil {
