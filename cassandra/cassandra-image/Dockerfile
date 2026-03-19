@@ -29,7 +29,7 @@ RUN apt-get update \
 RUN groupadd -g 999 cassandra \
  && groupadd -g 1001 appgroup
 
-RUN sed -i "s/999/99/" /etc/group
+#RUN sed -i "s/999/99/" /etc/group
 
 RUN ln -s /opt/java/openjdk/bin/java /usr/bin/java
 
