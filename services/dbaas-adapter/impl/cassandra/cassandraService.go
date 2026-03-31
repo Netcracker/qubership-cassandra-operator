@@ -2,6 +2,7 @@ package cassandra
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/Netcracker/qubership-dbaas-adapter-core/pkg/utils"
@@ -16,7 +17,8 @@ type CassandraService interface {
 	GetRolesForKeyspace(ctx context.Context, session Session, keyspace string) (map[string]bool, error)
 	GetAllRoles(ctx context.Context, session Session) (map[string]bool, error)
 	DropResource(ctx context.Context, session Session, resourceKind, name string) error
-	GetKeyspaces(ctx context.Context, session Session) error
+	EnsureMetadataTable(ctx context.Context, session Session, dbName string) error
+	UpsertMetadataSetting(ctx context.Context, session Session, dbName, key string, value map[string]interface{}) error
 }
 
 type CassandraServiceImpl struct {
@@ -33,6 +35,30 @@ func (r *CassandraServiceImpl) executeStatement(ctx context.Context, session Ses
 	return err
 }
 
+func (r *CassandraServiceImpl) EnsureMetadataTable(ctx context.Context, session Session, dbName string) error {
+	cql := fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s.metadata (
+			setting_key text PRIMARY KEY,
+			setting_value text
+		)`, dbName)
+
+	return r.executeStatement(ctx, session, cql)
+}
+
+func (r *CassandraServiceImpl) UpsertMetadataSetting(ctx context.Context, session Session, dbName, key string, value map[string]interface{}) error {
+	settingJSON, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Errorf("failed to marshal setting %v: %w", value, err)
+	}
+
+	cql := fmt.Sprintf(`
+		INSERT INTO %s.metadata (setting_key, setting_value)
+		VALUES ('%s', '%s')
+	`, dbName, key, string(settingJSON))
+
+	return r.executeStatement(ctx, session, cql)
+}
+
 func (r *CassandraServiceImpl) DropResource(ctx context.Context, session Session, resourceKind, name string) error {
 	return r.executeStatement(ctx, session, fmt.Sprintf("drop %s if exists %s", resourceKind, name))
 }
@@ -40,24 +66,6 @@ func (r *CassandraServiceImpl) DropResource(ctx context.Context, session Session
 func (r *CassandraServiceImpl) CreateKeyspace(ctx context.Context, session Session, dbName, settings string) error {
 	return r.executeStatement(ctx, session, fmt.Sprintf("create KEYSPACE %s WITH REPLICATION = %s",
 		dbName, settings))
-}
-
-func (r *CassandraServiceImpl) GetKeyspaces(ctx context.Context, session Session) error {
-	query := "SELECT keyspace_name FROM system_schema.keyspaces"
-
-	iter := session.Query(query).Iter()
-
-	var keyspace string
-
-	for iter.Scan(&keyspace) {
-		fmt.Println(keyspace)
-	}
-
-	if err := iter.Close(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *CassandraServiceImpl) CreateTable(ctx context.Context, session Session, dbName, tableName string) error {

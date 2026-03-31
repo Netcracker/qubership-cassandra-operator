@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -237,26 +236,70 @@ func (c *CassandraDbAdministration) getKeySpaceConnectionProperties(keyspaceName
 }
 
 func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ctx) error {
+
 	logger := utils.AddLoggerContext(c.logger, context.Background())
+	logger.Info("Received request to update settings")
 
-	logger.Info("Update setting started")
+	dbName := ctx.Params("dbName")
+	logger.Info("DBName ========")
+	logger.Info(dbName)
 
-	test := c.sessionService.NewAutoCloseSession(func(sessionInterface cassandra.Session) interface{} {
-		var dbsList []string
-		dbsListIterator := sessionInterface.Query(
-			"SELECT keyspace_name FROM system_schema.keyspaces").Iter()
-		var dbName string
-		for dbsListIterator.Scan(&dbName) {
-			dbsList = append(dbsList, dbName)
+	if !mUtils.ValidateDbIdentifierParam(context.Background(), "dbName", dbName, dbNameRegexpExpression) {
+		return mUtils.SendInvalidParameterResponse(ctx, "dbName", dbName, dbNameRegexpExpression)
+	}
+
+	var updateSettingsRequest cassandra.CassandraUpdateSettingsRequest
+	err := ctx.BodyParser(&updateSettingsRequest)
+	if err != nil {
+		logger.Error("Failed to parse request in update settings handler", zap.Error(err))
+		return ctx.Status(500).SendString(err.Error())
+	}
+
+	logger.Sugar().Infof("Update settings %+v", updateSettingsRequest)
+
+	// --- Compare current and new replication settings ---
+	currentReplication, okCurr := updateSettingsRequest.CurrentSettings["replication"].(map[string]interface{})
+	newReplication, okNew := updateSettingsRequest.NewSettings["replication"].(map[string]interface{})
+
+	if okCurr && okNew {
+		if equalReplicationSettings(currentReplication, newReplication) {
+			logger.Info("Replication settings are identical, no update needed")
+			return ctx.Status(200).SendString("No changes detected in replication settings")
 		}
-		defer dbsListIterator.Close()
-		return dbsList
-	}).([]string)
 
-	log.Println("test ========", test)
-	logger.Info("test =======")
-	logger.Info(strings.Join(test, ", "))
-	return nil
+		c.sessionService.NewAutoCloseSession(func(sessionInterface cassandra.Session) interface{} {
+			// Ensure metadata table exists
+			if err := c.cassandraService.EnsureMetadataTable(ctx.Context(), sessionInterface, dbName); err != nil {
+				logger.Error("Failed to ensure metadata table exists", zap.Error(err))
+				return ctx.Status(500).SendString(err.Error())
+			}
+
+			// Upsert replication setting
+			if err := c.cassandraService.UpsertMetadataSetting(ctx.Context(), sessionInterface, dbName, "replication", newReplication); err != nil {
+				logger.Error("Failed to upsert replication metadata", zap.Error(err))
+				return ctx.Status(500).SendString(err.Error())
+			}
+
+			logger.Info("Replication settings successfully updated in metadata table")
+			return nil
+		})
+	} else {
+		logger.Warn("Replication key missing or invalid in current/new settings")
+	}
+
+	return ctx.Status(200).SendString("Update settings processed successfully")
+}
+
+func equalReplicationSettings(a, b map[string]interface{}) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, v := range a {
+		if bv, exists := b[k]; !exists || bv != v {
+			return false
+		}
+	}
+	return true
 }
 
 func (c *CassandraDbAdministration) CreateDatabase(ctx context.Context, requestOnCreateDb dao.DbCreateRequest) (string, *dao.LogicalDatabaseDescribed, error) {
@@ -303,6 +346,17 @@ func (c *CassandraDbAdministration) CreateDatabase(ctx context.Context, requestO
 			string(marshaledMeta)).Exec(true)
 
 		logger.Debug(fmt.Sprintf("Created metadata for %s keyspace", logicalDatabaseName))
+
+		replicationValue, ok := requestOnCreateDb.Settings[replicationKey].(string)
+		if ok {
+			sessionInterface.Query(
+				fmt.Sprintf("INSERT INTO %s.metadata (setting_key, setting_value) VALUES (?, ?)", logicalDatabaseName),
+				"replication",
+				replicationValue,
+			).Exec(true)
+		}
+
+		logger.Debug(fmt.Sprintf("Added settings for %s keyspace", logicalDatabaseName))
 
 		resources = append(resources, dao.DbResource{
 			Kind: mUtils.DbResourceKind,
