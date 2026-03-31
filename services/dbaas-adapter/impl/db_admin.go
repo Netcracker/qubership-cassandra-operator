@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"github.com/Netcracker/qubership-dbaas-adapter-core/pkg/service"
 	"github.com/Netcracker/qubership-dbaas-adapter-core/pkg/utils"
 	"github.com/gocql/gocql"
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -232,6 +234,29 @@ func (c *CassandraDbAdministration) getKeySpaceConnectionProperties(keyspaceName
 	}
 
 	return connectionProps
+}
+
+func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ctx) error {
+	logger := utils.AddLoggerContext(c.logger, context.Background())
+
+	logger.Info("Update setting started")
+
+	test := c.sessionService.NewAutoCloseSession(func(sessionInterface cassandra.Session) interface{} {
+		var dbsList []string
+		dbsListIterator := sessionInterface.Query(
+			"SELECT keyspace_name FROM system_schema.keyspaces").Iter()
+		var dbName string
+		for dbsListIterator.Scan(&dbName) {
+			dbsList = append(dbsList, dbName)
+		}
+		defer dbsListIterator.Close()
+		return dbsList
+	}).([]string)
+
+	log.Println("test ========", test)
+	logger.Info("test =======")
+	logger.Info(strings.Join(test, ", "))
+	return nil
 }
 
 func (c *CassandraDbAdministration) CreateDatabase(ctx context.Context, requestOnCreateDb dao.DbCreateRequest) (string, *dao.LogicalDatabaseDescribed, error) {

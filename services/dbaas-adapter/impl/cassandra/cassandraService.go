@@ -16,6 +16,7 @@ type CassandraService interface {
 	GetRolesForKeyspace(ctx context.Context, session Session, keyspace string) (map[string]bool, error)
 	GetAllRoles(ctx context.Context, session Session) (map[string]bool, error)
 	DropResource(ctx context.Context, session Session, resourceKind, name string) error
+	GetKeyspaces(ctx context.Context, session Session) error
 }
 
 type CassandraServiceImpl struct {
@@ -39,6 +40,24 @@ func (r *CassandraServiceImpl) DropResource(ctx context.Context, session Session
 func (r *CassandraServiceImpl) CreateKeyspace(ctx context.Context, session Session, dbName, settings string) error {
 	return r.executeStatement(ctx, session, fmt.Sprintf("create KEYSPACE %s WITH REPLICATION = %s",
 		dbName, settings))
+}
+
+func (r *CassandraServiceImpl) GetKeyspaces(ctx context.Context, session Session) error {
+	query := "SELECT keyspace_name FROM system_schema.keyspaces"
+
+	iter := session.Query(query).Iter()
+
+	var keyspace string
+
+	for iter.Scan(&keyspace) {
+		fmt.Println(keyspace)
+	}
+
+	if err := iter.Close(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *CassandraServiceImpl) CreateTable(ctx context.Context, session Session, dbName, tableName string) error {
