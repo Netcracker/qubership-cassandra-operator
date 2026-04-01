@@ -269,7 +269,7 @@ func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ct
 			return nil
 		})
 	} else {
-		logger.Warn("Replication key missing or invalid in current/new settings")
+		logger.Warn("Replication key missing or invalid in new settings")
 	}
 
 	return ctx.Status(200).SendString("Update settings processed successfully")
@@ -318,11 +318,7 @@ func (c *CassandraDbAdministration) CreateDatabase(ctx context.Context, requestO
 			mUtils.MetadataKey,
 			string(marshaledMeta)).Exec(true)
 
-		logger.Info(fmt.Sprintf("Created metadata for %s keyspace", logicalDatabaseName))
-
-		logger.Info("repication key")
-		logger.Info(requestOnCreateDb.Settings[replicationKey].(string))
-
+		logger.Debug(fmt.Sprintf("Created metadata for %s keyspace", logicalDatabaseName))
 		replicationValue, ok := requestOnCreateDb.Settings[replicationKey].(string)
 		if ok {
 			sessionInterface.Query(
@@ -333,7 +329,6 @@ func (c *CassandraDbAdministration) CreateDatabase(ctx context.Context, requestO
 		}
 
 		logger.Debug(fmt.Sprintf("Added settings for %s keyspace", logicalDatabaseName))
-
 		resources = append(resources, dao.DbResource{
 			Kind: mUtils.DbResourceKind,
 			Name: logicalDatabaseName,
