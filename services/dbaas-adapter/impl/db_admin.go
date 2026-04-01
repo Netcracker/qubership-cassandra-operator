@@ -239,10 +239,7 @@ func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ct
 
 	logger := utils.AddLoggerContext(c.logger, context.Background())
 	logger.Info("Received request to update settings")
-
 	dbName := ctx.Params("dbName")
-	logger.Info("DBName ========")
-	logger.Info(dbName)
 
 	if !mUtils.ValidateDbIdentifierParam(context.Background(), "dbName", dbName, dbNameRegexpExpression) {
 		return mUtils.SendInvalidParameterResponse(ctx, "dbName", dbName, dbNameRegexpExpression)
@@ -254,25 +251,14 @@ func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ct
 		logger.Error("Failed to parse request in update settings handler", zap.Error(err))
 		return ctx.Status(500).SendString(err.Error())
 	}
-
 	logger.Sugar().Infof("Update settings %+v", updateSettingsRequest)
 
-	// --- Compare current and new replication settings ---
-	currentReplication, okCurr := updateSettingsRequest.CurrentSettings["replication"].(map[string]interface{})
-	newReplication, okNew := updateSettingsRequest.NewSettings["replication"].(map[string]interface{})
-
-	logger.Sugar().Infof("currentReplication settings %+v", currentReplication)
-	logger.Sugar().Infof("newReplication settings %+v", newReplication)
+	newReplication, okNew := updateSettingsRequest.NewSettings["replication"].(string)
 
 	logger.Sugar().Infof("newReplication settings interface %v", updateSettingsRequest.NewSettings["replication"])
-	logger.Sugar().Infof("newReplication settings string %v", updateSettingsRequest.NewSettings["replication"].(string))
+	logger.Sugar().Infof("newReplication settings string %v", newReplication)
 
-	if okCurr && okNew {
-		if equalReplicationSettings(currentReplication, newReplication) {
-			logger.Info("Replication settings are identical, no update needed")
-			return ctx.Status(200).SendString("No changes detected in replication settings")
-		}
-
+	if okNew {
 		c.sessionService.NewAutoCloseSession(func(sessionInterface cassandra.Session) interface{} {
 			// Ensure metadata table exists
 			if err := c.cassandraService.EnsureMetadataTable(ctx.Context(), sessionInterface, dbName); err != nil {
@@ -294,18 +280,6 @@ func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ct
 	}
 
 	return ctx.Status(200).SendString("Update settings processed successfully")
-}
-
-func equalReplicationSettings(a, b map[string]interface{}) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for k, v := range a {
-		if bv, exists := b[k]; !exists || bv != v {
-			return false
-		}
-	}
-	return true
 }
 
 func (c *CassandraDbAdministration) CreateDatabase(ctx context.Context, requestOnCreateDb dao.DbCreateRequest) (string, *dao.LogicalDatabaseDescribed, error) {
@@ -361,7 +335,7 @@ func (c *CassandraDbAdministration) CreateDatabase(ctx context.Context, requestO
 			sessionInterface.Query(
 				fmt.Sprintf("INSERT INTO %s.metadata (id, value) VALUES (?, ?)", logicalDatabaseName),
 				"replication",
-				replicationValue,
+				strings.TrimSpace(replicationValue),
 			).Exec(true)
 		}
 

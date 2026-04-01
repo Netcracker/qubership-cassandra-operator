@@ -2,7 +2,6 @@ package cassandra
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/Netcracker/qubership-dbaas-adapter-core/pkg/utils"
@@ -18,7 +17,7 @@ type CassandraService interface {
 	GetAllRoles(ctx context.Context, session Session) (map[string]bool, error)
 	DropResource(ctx context.Context, session Session, resourceKind, name string) error
 	EnsureMetadataTable(ctx context.Context, session Session, dbName string) error
-	UpsertMetadataSetting(ctx context.Context, session Session, dbName, key string, value map[string]interface{}) error
+	UpsertMetadataSetting(ctx context.Context, session Session, dbName, key string, value string) error
 }
 
 type CassandraServiceImpl struct {
@@ -45,19 +44,13 @@ func (r *CassandraServiceImpl) EnsureMetadataTable(ctx context.Context, session 
 	return r.executeStatement(ctx, session, cql)
 }
 
-func (r *CassandraServiceImpl) UpsertMetadataSetting(ctx context.Context, session Session, dbName, key string, value map[string]interface{}) error {
-
-	settingJSON, err := json.Marshal(value)
-	if err != nil {
-		return fmt.Errorf("failed to marshal setting %v: %w", value, err)
-	}
-
+func (r *CassandraServiceImpl) UpsertMetadataSetting(ctx context.Context, session Session, dbName, key string, value string) error {
 	query := fmt.Sprintf(
 		"INSERT INTO %s.metadata (id, value) VALUES (?, ?)",
 		dbName,
 	)
 
-	return session.Query(query, key, string(settingJSON)).Exec(true)
+	return session.Query(query, key, string(value)).Exec(true)
 }
 
 func (r *CassandraServiceImpl) DropResource(ctx context.Context, session Session, resourceKind, name string) error {

@@ -106,11 +106,11 @@ func (_m *CassandraService) GetAllRoles(ctx context.Context, session cassandra.S
 	return r0, r1
 }
 
-func (_m *CassandraService) UpsertMetadataSetting(ctx context.Context, session cassandra.Session, dbName, key string, value map[string]interface{}) error {
+func (_m *CassandraService) UpsertMetadataSetting(ctx context.Context, session cassandra.Session, dbName, key string, value string) error {
 	ret := _m.Called(session, dbName, key, value)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(cassandra.Session, string, string, map[string]interface{}) error); ok {
+	if rf, ok := ret.Get(0).(func(cassandra.Session, string, string, string) error); ok {
 		r0 = rf(session, dbName, key, value)
 	} else {
 		r0 = ret.Error(0)
