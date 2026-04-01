@@ -250,13 +250,7 @@ func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ct
 		logger.Error("Failed to parse request in update settings handler", zap.Error(err))
 		return ctx.Status(500).SendString(err.Error())
 	}
-	logger.Sugar().Infof("Update settings %+v", updateSettingsRequest)
-
 	newReplication, okNew := updateSettingsRequest.NewSettings["replication"].(string)
-
-	logger.Sugar().Infof("newReplication settings interface %v", updateSettingsRequest.NewSettings["replication"])
-	logger.Sugar().Infof("newReplication settings string %v", newReplication)
-
 	if okNew {
 		c.sessionService.NewAutoCloseSession(func(sessionInterface cassandra.Session) interface{} {
 			// Ensure metadata table exists
