@@ -236,7 +236,6 @@ func (c *CassandraDbAdministration) getKeySpaceConnectionProperties(keyspaceName
 }
 
 func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ctx) error {
-
 	logger := utils.AddLoggerContext(c.logger, context.Background())
 	logger.Info("Received request to update settings")
 	dbName := ctx.Params("dbName")
