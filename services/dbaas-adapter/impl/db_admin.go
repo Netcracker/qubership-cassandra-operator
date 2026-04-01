@@ -261,6 +261,11 @@ func (c *CassandraDbAdministration) UpdateCassandraSettingsHandler(ctx *fiber.Ct
 	currentReplication, okCurr := updateSettingsRequest.CurrentSettings["replication"].(map[string]interface{})
 	newReplication, okNew := updateSettingsRequest.NewSettings["replication"].(map[string]interface{})
 
+	logger.Sugar().Infof("currentReplication settings %+v", currentReplication)
+	logger.Sugar().Infof("newReplication settings %+v", newReplication)
+
+	return nil
+
 	if okCurr && okNew {
 		if equalReplicationSettings(currentReplication, newReplication) {
 			logger.Info("Replication settings are identical, no update needed")
