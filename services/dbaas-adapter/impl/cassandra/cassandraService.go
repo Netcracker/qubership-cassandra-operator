@@ -38,25 +38,26 @@ func (r *CassandraServiceImpl) executeStatement(ctx context.Context, session Ses
 func (r *CassandraServiceImpl) EnsureMetadataTable(ctx context.Context, session Session, dbName string) error {
 	cql := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s.metadata (
-			setting_key text PRIMARY KEY,
-			setting_value text
+			id text PRIMARY KEY,
+			value text
 		)`, dbName)
 
 	return r.executeStatement(ctx, session, cql)
 }
 
 func (r *CassandraServiceImpl) UpsertMetadataSetting(ctx context.Context, session Session, dbName, key string, value map[string]interface{}) error {
+
 	settingJSON, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Errorf("failed to marshal setting %v: %w", value, err)
 	}
 
-	cql := fmt.Sprintf(`
-		INSERT INTO %s.metadata (setting_key, setting_value)
-		VALUES ('%s', '%s')
-	`, dbName, key, string(settingJSON))
+	query := fmt.Sprintf(
+		"INSERT INTO %s.metadata (id, value) VALUES (?, ?)",
+		dbName,
+	)
 
-	return r.executeStatement(ctx, session, cql)
+	return session.Query(query, key, string(settingJSON)).Exec(true)
 }
 
 func (r *CassandraServiceImpl) DropResource(ctx context.Context, session Session, resourceKind, name string) error {

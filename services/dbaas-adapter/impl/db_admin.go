@@ -345,12 +345,15 @@ func (c *CassandraDbAdministration) CreateDatabase(ctx context.Context, requestO
 			mUtils.MetadataKey,
 			string(marshaledMeta)).Exec(true)
 
-		logger.Debug(fmt.Sprintf("Created metadata for %s keyspace", logicalDatabaseName))
+		logger.Info(fmt.Sprintf("Created metadata for %s keyspace", logicalDatabaseName))
+
+		logger.Info("repication key")
+		logger.Info(requestOnCreateDb.Settings[replicationKey].(string))
 
 		replicationValue, ok := requestOnCreateDb.Settings[replicationKey].(string)
 		if ok {
 			sessionInterface.Query(
-				fmt.Sprintf("INSERT INTO %s.metadata (setting_key, setting_value) VALUES (?, ?)", logicalDatabaseName),
+				fmt.Sprintf("INSERT INTO %s.metadata (id, value) VALUES (?, ?)", logicalDatabaseName),
 				"replication",
 				replicationValue,
 			).Exec(true)
