@@ -1,10 +1,20 @@
 ---
 charts:
   - name: qubership-cassandra-operator
-    chart_file: charts/helm/cassandra-operator/Chart.yaml
-    values_file: charts/helm/cassandra-operator/values.yaml
+    chart_file: operator/charts/helm/cassandra-operator/Chart.yaml
+    values_file: operator/charts/helm/cassandra-operator/values.yaml
     image:
       - ghcr.io/netcracker/qubership-cassandra-operator:${release}
       - ghcr.io/netcracker/qubership-cassandra-operator-transfer:${release}
       - ghcr.io/netcracker/qubership-cassandra:${release}
       - ghcr.io/netcracker/qubership-cassandra-reaper:${release}
+  
+  - name: qubership-cassandra-supplementary
+    chart_file: services/service/charts/helm/cassandra-services/Chart.yaml
+    values_file: services/service/charts/helm/cassandra-services/values.yaml
+    image:
+      - ghcr.io/netcracker/qubership-cassandra-supplementary:${release}
+      - ghcr.io/netcracker/qubership-cassandra-supplementary-transfer:${release}
+      - ghcr.io/netcracker/qubership-cassandra-dbaas-adapter:${release}
+      - ghcr.io/netcracker/qubership-cassandra-backup-daemon:${release}
+      - ghcr.io/netcracker/qubership-cassandra-tests:${release}
