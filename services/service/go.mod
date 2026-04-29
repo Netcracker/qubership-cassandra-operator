@@ -6,7 +6,7 @@ require (
 	github.com/Netcracker/qubership-cql-driver v0.0.2
 	github.com/Netcracker/qubership-credential-manager v0.0.11
 	github.com/Netcracker/qubership-nosqldb-operator-core v1.0.7
-	github.com/gocql/gocql v1.6.0
+	github.com/gocql/gocql v1.7.0
 	github.com/hashicorp/vault/api v1.1.2-0.20210713235431-1fc8af4c041f
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
