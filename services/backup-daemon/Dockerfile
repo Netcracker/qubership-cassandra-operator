@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jre AS java
+FROM eclipse-temurin:25-jre AS java
 
 FROM ghcr.io/netcracker/qubership-backup-daemon-go-debian:0.1.8
 
