@@ -9,7 +9,7 @@ tls:
   keystorePass: cassandra
 
 cassandra:
-  install: true
+  install: false
   auditLogEnabled: false
 
   commitlogArchiving:
