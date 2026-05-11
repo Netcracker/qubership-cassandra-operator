@@ -1,10 +1,22 @@
 ---
 charts:
   - name: qubership-cassandra-operator
-    chart_file: charts/helm/cassandra-operator/Chart.yaml
-    values_file: charts/helm/cassandra-operator/values.yaml
+    chart_file: operator/charts/helm/cassandra-operator/Chart.yaml
+    values_file: operator/charts/helm/cassandra-operator/values.yaml
     image:
       - ghcr.io/netcracker/qubership-cassandra-operator:${release}
       - ghcr.io/netcracker/qubership-cassandra-operator-transfer:${release}
-      - ghcr.io/netcracker/qubership-cassandra:${release}
-      - ghcr.io/netcracker/qubership-cassandra-reaper:${release}
+      - ghcr.io/netcracker/docker-cassandra_4.1:${release}
+      - ghcr.io/netcracker/docker-cassandra_5.0:${release}
+      - ghcr.io/netcracker/docker-cassandra_4.1:${release}
+      - ghcr.io/netcracker/docker-cassandra_5.0:${release}
+      - ghcr.io/netcracker/cassandra-docker-reaper:${release}
+  - name: cassandra-services
+    chart_file: services/service/charts/helm/cassandra-services/Chart.yaml
+    values_file: services/service/charts/helm/cassandra-services/values.yaml
+    image:
+      - ghcr.io/netcracker/cassandra-supplementary:${release}
+      - ghcr.io/netcracker/cassandra-supplementary-transfer:${release}
+      - ghcr.io/netcracker/cassandra-docker-backup-daemon:${release}
+      - ghcr.io/netcracker/cassandra-docker-dbaas-adapter:${release}
+      - ghcr.io/netcracker/cassandra-docker-tests:${release}
