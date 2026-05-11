@@ -26,8 +26,8 @@ RUN apt-get update \
         openssl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -g 999 cassandra \
- && groupadd -g 1001 appgroup
+RUN getent group 999 || groupadd -g 999 cassandra \
+ && getent group 1001 || groupadd -g 1001 appgroup
 
 #RUN sed -i "s/999/99/" /etc/group
 
