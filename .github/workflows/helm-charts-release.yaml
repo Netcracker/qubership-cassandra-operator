@@ -40,7 +40,7 @@ jobs:
       - name: Load Docker Configuration
         id: load_component
         run: |
-          verify=$(cat "$GITHUB_WORKSPACE/.github/docker-config.cfg" | jq '
+          verify=$(cat "$GITHUB_WORKSPACE/.github/build-config.cfg" | jq '
           def verify_structure:
           .components as $components
           | .platforms as $platforms
@@ -51,12 +51,12 @@ jobs:
           | if . then true else false end
           ')
           if [ ${verify} == 'true' ]; then
-            echo "✅ $GITHUB_WORKSPACE/.github/docker-config.cfg file is valid"
-            components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/docker-config.cfg")
-            platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/docker-config.cfg")
+            echo "✅ $GITHUB_WORKSPACE/.github/build-config.cfg file is valid"
+            components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/build-config.cfg")
+            platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/build-config.cfg")
           else
-            echo "❗ $GITHUB_WORKSPACE/.github/docker-config.cfg file is invalid"
-            echo "❗ $GITHUB_WORKSPACE/.github/docker-config.cfg file is invalid" >> $GITHUB_STEP_SUMMARY
+            echo "❗ $GITHUB_WORKSPACE/.github/build-config.cfg file is invalid"
+            echo "❗ $GITHUB_WORKSPACE/.github/build-config.cfg file is invalid" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
           echo "components=${components}" >> $GITHUB_OUTPUT
