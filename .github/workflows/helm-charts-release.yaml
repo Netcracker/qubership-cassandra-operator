@@ -82,6 +82,9 @@ jobs:
           dry-run: true
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
+          build-args: |
+            version=${{ matrix.component.build_args.version }}
+            exp_version=${{ matrix.component.build_args.exp_version }}
           tags: "${{ env.IMAGE_VERSION }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -128,6 +131,9 @@ jobs:
           dry-run: false
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
+          build-args: |
+            version=${{ matrix.component.build_args.version }}
+            exp_version=${{ matrix.component.build_args.exp_version }}
           tags: "${{ env.IMAGE_VERSION }},latest"
         env:
           GITHUB_TOKEN: ${{ github.token }}
