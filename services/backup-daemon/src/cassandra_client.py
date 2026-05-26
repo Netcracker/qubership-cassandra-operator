@@ -7,7 +7,7 @@ from cassandra.auth import PlainTextAuthProvider
 from cassandra.cluster import Cluster, ExecutionProfile, EXEC_PROFILE_DEFAULT
 from cassandra import OperationTimedOut
 from cassandra.cluster import NoHostAvailable
-from cassandra.connection import NoConnectionsAvailable
+from cassandra.cluster import NoConnectionsAvailable
 
 
 CASSANDRA_DIR = "/var/lib/cassandra"
