@@ -83,11 +83,6 @@ if [[ $TLS == "true" ]]; then
 fi
 
 
-if ! whoami &>/dev/null; then
-    echo "cassandra:x:$(id -u):$(id -g):cassandra user:${CASSANDRA_HOME}:/bin/bash" >> /etc/passwd
-fi
-
-
 yes y | ssh-keygen -f /var/lib/cassandra/custom_ssh/ssh_host_rsa_key -N '' -t rsa
 /usr/sbin/sshd -f /var/lib/cassandra/custom_ssh/sshd_config &
 cassandra -f "$COMMAND_PARAMS"

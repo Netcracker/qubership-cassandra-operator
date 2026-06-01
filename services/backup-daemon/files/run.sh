@@ -14,12 +14,6 @@ else
     cp -R /opt/downloads/apache-cassandra-"$CASSANDRA3_DIR"/* "$CASSANDRA_HOME"/
 fi
 
-if ! whoami &>/dev/null; then
-  if [ -w /etc/passwd ]; then
-    echo "cassandra:x:$(id -u):$(id -g):cassandra user:${CASSANDRA_HOME}:/bin/bash" >> /etc/passwd
-  fi
-fi
-
 debug_params=""
 if [ "$REMOTE_DEBUG" = "true" ]; then
     debug_params="-m debugpy --listen localhost:5678"
