@@ -161,7 +161,20 @@ func CassandraReplicaTemplate(
 			v13.VolumeMount{
 				Name:      "tmp",
 				MountPath: "/tmp",
-			}),
+			},
+			v13.VolumeMount{
+				Name:      "cassandra-conf",
+				MountPath: "/opt/cassandra/conf",
+			},
+			v13.VolumeMount{
+				Name:      "cassandra-root",
+				MountPath: "/opt/cassandra",
+			},
+			v13.VolumeMount{
+				Name:      "custom-ssh",
+				MountPath: "/var/lib/cassandra/custom_ssh",
+			},
+		),
 	})
 
 	volProj := []v13.VolumeProjection{
@@ -392,6 +405,24 @@ func CassandraReplicaTemplate(
 								EmptyDir: &v13.EmptyDirVolumeSource{
 									SizeLimit: resource.NewScaledQuantity(32, resource.Mega),
 								},
+							},
+						},
+						{
+							Name: "cassandra-conf",
+							VolumeSource: v13.VolumeSource{
+								EmptyDir: &v13.EmptyDirVolumeSource{},
+							},
+						},
+						{
+							Name: "cassandra-root",
+							VolumeSource: v13.VolumeSource{
+								EmptyDir: &v13.EmptyDirVolumeSource{},
+							},
+						},
+						{
+							Name: "custom-ssh",
+							VolumeSource: v13.VolumeSource{
+								EmptyDir: &v13.EmptyDirVolumeSource{},
 							},
 						},
 						{
