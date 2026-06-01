@@ -8,13 +8,30 @@ import logging
 import src.backup_and_restore
 import src.os_utils
 
-TLS_ENABLED = src.os_utils.str_to_bool(os.getenv("TLS_ENABLED", False))
-CASSANDRA_USERNAME = os.getenv('CASSANDRA_USERNAME')
-CASSANDRA_PASSWORD = os.getenv('CASSANDRA_PASSWORD')
 
-aws_access_key = os.getenv('AWS_ACCESS_KEY')
-aws_secret_key = os.getenv('AWS_SECRET_KEY')
-aws_region = os.getenv('AWS_REGION')
+def get_secret(path: str, fallback: str = "") -> str:
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            value = file.read().strip()
+
+            if value:
+                return value
+
+    except Exception:
+        pass
+
+    return fallback
+
+
+TLS_ENABLED = src.os_utils.str_to_bool(os.getenv("TLS_ENABLED", False))
+
+CASSANDRA_USERNAME = get_secret("/var/run/secrets/cassandra/username")
+CASSANDRA_PASSWORD = get_secret("/var/run/secrets/cassandra/password")
+
+aws_access_key = get_secret("/var/run/secrets/aws/accessKey")
+aws_secret_key = get_secret("/var/run/secrets/aws/secretKey")
+aws_region = get_secret("/var/run/secrets/aws/region")
+
 
 
 def parse_args():

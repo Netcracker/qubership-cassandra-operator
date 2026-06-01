@@ -1,7 +1,5 @@
 *** Variables ***
 ${DBAAS_HOST}                                     %{DBAAS_HOST}
-${DBAAS_ADAPTER_USERNAME}                         %{DBAAS_ADAPTER_USERNAME}
-${DBAAS_ADAPTER_PASSWORD}                         %{DBAAS_ADAPTER_PASSWORD}
 
 *** Settings ***
 Library  String
@@ -12,6 +10,8 @@ Library           ../lib/CassandraLibrary.py	${CASSANDRA_HOST}  ${CASSANDRA_USER
 
 *** Keywords ***
 Preparation dbaas shared
+    Load Secrets
+
     &{headers}=  Create Dictionary  Content-Type=application/json  Accept=application/json
     Set Suite Variable  ${headers}
 

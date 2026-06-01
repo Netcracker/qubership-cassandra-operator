@@ -14,6 +14,7 @@ import (
 	"go.uber.org/zap"
 	v1 "k8s.io/api/apps/v1"
 	v13 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -79,12 +80,14 @@ func CassandraReplicaTemplate(
 
 	var containers []v13.Container
 	allowPrivilegeEscalation := false
+	readOnlyRootFilesystem := true
 
 	containers = append(containers, v13.Container{
 		Name:            name,
 		Image:           dockerImage,
 		ImagePullPolicy: spec.Spec.ImagePullPolicy,
 		SecurityContext: &v13.SecurityContext{
+			ReadOnlyRootFilesystem: &readOnlyRootFilesystem,
 			Capabilities: &v13.Capabilities{
 				Drop: []v13.Capability{"ALL"},
 			},
@@ -154,6 +157,10 @@ func CassandraReplicaTemplate(
 			v13.VolumeMount{
 				Name:      utils.Configuration,
 				MountPath: utils.ConfigurationPath,
+			},
+			v13.VolumeMount{
+				Name:      "tmp",
+				MountPath: "/tmp",
 			}),
 	})
 
@@ -379,6 +386,14 @@ func CassandraReplicaTemplate(
 					SecurityContext:               podSecurityContext,
 					Containers:                    containers,
 					Volumes: append(volumes, []v13.Volume{
+						{
+							Name: "tmp",
+							VolumeSource: v13.VolumeSource{
+								EmptyDir: &v13.EmptyDirVolumeSource{
+									SizeLimit: resource.NewScaledQuantity(32, resource.Mega),
+								},
+							},
+						},
 						{
 							Name: utils.Configuration,
 							VolumeSource: v13.VolumeSource{

@@ -101,7 +101,9 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 	storageDirectory string,
 	emptyDir bool,
 	port int32,
-	uriScheme v1.URIScheme) *v12.Deployment {
+	uriScheme v1.URIScheme,
+	volumeMounts []v1.VolumeMount,
+	volumes []v1.Volume) *v12.Deployment {
 	var replicas int32 = 1
 	storage := utils.BackupStorage
 
@@ -121,6 +123,8 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 	}
 
 	allowPrivilegeEscalation := false
+	readOnlyRootFilesystem := true
+
 	dc := &v12.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      utils.BackupDaemon,
@@ -153,6 +157,7 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 									Drop: []v1.Capability{"ALL"},
 								},
 								AllowPrivilegeEscalation: &allowPrivilegeEscalation,
+								ReadOnlyRootFilesystem:   &readOnlyRootFilesystem,
 							},
 							LivenessProbe: &v1.Probe{
 								ProbeHandler: v1.ProbeHandler{
@@ -191,21 +196,27 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 							},
 							Env:       env,
 							Resources: resources,
-							VolumeMounts: []v1.VolumeMount{
-								v1.VolumeMount{
-									Name:      storage,
-									MountPath: storageDirectory,
+							VolumeMounts: append(
+								[]v1.VolumeMount{
+									{
+										Name:      storage,
+										MountPath: storageDirectory,
+									},
 								},
-							},
+								volumeMounts...,
+							),
 						},
 					},
 					NodeSelector: nodeSelector,
-					Volumes: []v1.Volume{
-						{
-							Name:         storage,
-							VolumeSource: volumeSource,
+					Volumes: append(
+						[]v1.Volume{
+							{
+								Name:         storage,
+								VolumeSource: volumeSource,
+							},
 						},
-					},
+						volumes...,
+					),
 				},
 			},
 		},
