@@ -1,6 +1,13 @@
 #!/bin/bash
 set -x
 set -e
+
+mkdir -p /var/lib/cassandra/custom_ssh
+cp /tmp/sshd_config_backup /var/lib/cassandra/custom_ssh/sshd_config
+
+mkdir -p "$CASSANDRA_CONFIG_DIR"
+cp -a /opt/cassandra/conf_backup/. "$CASSANDRA_CONFIG_DIR/"
+
 CASSANDRA_CONFIG=$CASSANDRA_CONFIG_DIR/cassandra.yaml
 
 cp --remove-destination ${CASSANDRA_INIT_CONFIG_DIR}/* ${CASSANDRA_CONFIG_DIR}/
