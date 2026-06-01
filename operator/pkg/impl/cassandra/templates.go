@@ -167,10 +167,6 @@ func CassandraReplicaTemplate(
 				MountPath: "/opt/cassandra/conf",
 			},
 			v13.VolumeMount{
-				Name:      "cassandra-root",
-				MountPath: "/opt/cassandra",
-			},
-			v13.VolumeMount{
 				Name:      "custom-ssh",
 				MountPath: "/var/lib/cassandra/custom_ssh",
 			},
@@ -409,12 +405,6 @@ func CassandraReplicaTemplate(
 						},
 						{
 							Name: "cassandra-conf",
-							VolumeSource: v13.VolumeSource{
-								EmptyDir: &v13.EmptyDirVolumeSource{},
-							},
-						},
-						{
-							Name: "cassandra-root",
 							VolumeSource: v13.VolumeSource{
 								EmptyDir: &v13.EmptyDirVolumeSource{},
 							},
