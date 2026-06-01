@@ -27,7 +27,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN getent group 999 >/dev/null || groupadd -g 999 cassandra && \
-    getent group 1001 >/dev/null || groupadd -g 1001 appgroup
+    getent group 1001 >/dev/null || groupadd -g 1001 appgroup && \
+    getent passwd 999 >/dev/null || useradd -u 999 -g 999 -m -s /bin/bash cassandra
 
 #RUN sed -i "s/999/99/" /etc/group
 
