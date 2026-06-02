@@ -6,7 +6,7 @@ mkdir -p /var/lib/cassandra/custom_ssh
 cp /opt/cassandra/backups/sshd_config_backup /var/lib/cassandra/custom_ssh/sshd_config
 
 mkdir -p "$CASSANDRA_CONFIG_DIR"
-cp -a /opt/cassandra/backups/conf_backup/. "$CASSANDRA_CONFIG_DIR/"
+cp -r /opt/cassandra/backups/conf_backup/. "$CASSANDRA_CONFIG_DIR/"
 
 CASSANDRA_CONFIG=$CASSANDRA_CONFIG_DIR/cassandra.yaml
 

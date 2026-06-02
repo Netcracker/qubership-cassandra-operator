@@ -69,7 +69,7 @@ VOLUME /var/lib/cassandra
 
 RUN mkdir -p /opt/cassandra/backups/
 ADD files/sshd_config /opt/cassandra/backups/sshd_config_backup
-RUN cp -r $CASSANDRA_CONFIG_DIR/. /opt/cassandra/backups/conf_backup/
+RUN cp -a $CASSANDRA_CONFIG_DIR/. /opt/cassandra/backups/conf_backup/
 
 ADD files/run.sh /
 
