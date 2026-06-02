@@ -215,6 +215,10 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 										MountPath: "/opt/backup/hosts",
 									},
 									{
+										Name:      "ansible-home",
+										MountPath: "/home/cassandra",
+									},
+									{
 										Name:      "tmp",
 										MountPath: "/tmp",
 									},
@@ -238,6 +242,12 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 							},
 							{
 								Name: "cassandra-home",
+								VolumeSource: v1.VolumeSource{
+									EmptyDir: &v1.EmptyDirVolumeSource{},
+								},
+							},
+							{
+								Name: "ansible-home",
 								VolumeSource: v1.VolumeSource{
 									EmptyDir: &v1.EmptyDirVolumeSource{},
 								},
