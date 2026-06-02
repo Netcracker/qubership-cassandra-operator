@@ -6,7 +6,7 @@ Library  String
 Library	 Collections
 Library	 RequestsLibrary
 Library  OperatingSystem
-Library           ../lib/CassandraLibrary.py	${CASSANDRA_HOST}  ${CASSANDRA_USERNAME}  ${CASSANDRA_PASSWORD}  ${WAIT_TIMEOUT}
+Library  ${CURDIR}/../lib/CassandraLibrary.py  ${CASSANDRA_HOST}  ${CASSANDRA_USERNAME}  ${CASSANDRA_PASSWORD}  ${WAIT_TIMEOUT}
 
 *** Keywords ***
 Preparation dbaas shared

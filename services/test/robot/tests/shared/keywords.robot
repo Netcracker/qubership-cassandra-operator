@@ -46,7 +46,7 @@ Prepare Shared
     Load Secrets
 
     Import Library
-    ...    ../lib/CassandraLibrary.py
+    ...    ${CURDIR}/../lib/CassandraLibrary.py
     ...    ${CASSANDRA_HOST}
     ...    ${CASSANDRA_USERNAME}
     ...    ${CASSANDRA_PASSWORD}
