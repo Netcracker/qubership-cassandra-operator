@@ -6,11 +6,12 @@ Library  String
 Library	 Collections
 Library	 RequestsLibrary
 Library  OperatingSystem
-Library  ${CURDIR}/../lib/CassandraLibrary.py  ${CASSANDRA_HOST}  ${CASSANDRA_USERNAME}  ${CASSANDRA_PASSWORD}  ${WAIT_TIMEOUT}
 
 *** Keywords ***
 Preparation dbaas shared
     Load Secrets
+
+    Import Library  ${CURDIR}/../lib/CassandraLibrary.py  ${CASSANDRA_HOST}  ${CASSANDRA_USERNAME}  ${CASSANDRA_PASSWORD}  ${WAIT_TIMEOUT}
 
     &{headers}=  Create Dictionary  Content-Type=application/json  Accept=application/json
     Set Suite Variable  ${headers}
