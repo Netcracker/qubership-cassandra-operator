@@ -39,7 +39,7 @@ func (r *RobotDeployment) Execute(ctx core.ExecutionContext) error {
 
 	if spec.Spec.Dbaas.Install {
 		secretVolumes[spec.Spec.Dbaas.Adapter.SecretName] =
-			"/var/run/secrets/dbaas"
+			"/var/run/secrets/dbaas-adapter"
 	}
 
 	secretVolumeMode := int32(256)
