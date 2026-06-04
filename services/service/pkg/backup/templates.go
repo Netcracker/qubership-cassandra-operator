@@ -213,6 +213,7 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 									{
 										Name:      "cassandra-hosts",
 										MountPath: "/opt/backup/hosts",
+										SubPath:   "hosts",
 									},
 									{
 										Name:      "ansible-home",
