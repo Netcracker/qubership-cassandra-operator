@@ -21,7 +21,6 @@ const Roles = "roles"
 
 const SSHSecret = "ssh-keys"
 
-
 const Microservice = "microservice"
 
 const TriesCount = "triesCount"
@@ -33,7 +32,7 @@ const Backup = "backup"
 const BackupDaemon = "cassandra-backup-daemon"
 const BackupStorage = "backup-storage"
 
-var BackupEntrypoint = []string{"/opt/backup/run.sh"}
+var BackupEntrypoint = []string{"/app/run.sh"}
 
 const Robot = "robot-tests"
 
