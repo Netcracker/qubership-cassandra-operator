@@ -203,17 +203,12 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 										MountPath: storageDirectory,
 									},
 									{
-										Name:      "backup-ssh",
-										MountPath: "/opt/backup/.ssh",
-									},
-									{
 										Name:      "cassandra-home",
 										MountPath: "/opt/cassandra",
 									},
 									{
 										Name:      "cassandra-hosts",
-										MountPath: "/opt/backup/hosts",
-										SubPath:   "hosts",
+										MountPath: "/opt/backup",
 									},
 									{
 										Name:      "ansible-home",
@@ -234,12 +229,6 @@ func LegacyBackupDeploymentTemplate(pvcName string, namespace string,
 							{
 								Name:         storage,
 								VolumeSource: volumeSource,
-							},
-							{
-								Name: "backup-ssh",
-								VolumeSource: v1.VolumeSource{
-									EmptyDir: &v1.EmptyDirVolumeSource{},
-								},
 							},
 							{
 								Name: "cassandra-home",

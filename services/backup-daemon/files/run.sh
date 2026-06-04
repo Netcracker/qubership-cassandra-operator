@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cp -pr /app/backup/. /opt/backup/
+
 mkdir /opt/backup/.ssh && chmod 700 /opt/backup/.ssh
 echo "$SSH_PRIVATE_KEY" >/opt/backup/.ssh/id_rsa
 chmod 600 /opt/backup/.ssh/id_rsa
