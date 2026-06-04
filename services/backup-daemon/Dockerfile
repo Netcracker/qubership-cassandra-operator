@@ -59,7 +59,7 @@ ADD config/ssh_config /etc/ssh/
 ADD backup-daemon.conf /etc/backup-daemon.conf
 ADD files/ansible.cfg /etc/ansible/
 
-COPY run.sh /app/run.sh
+COPY files/run.sh /app/run.sh
 RUN chmod +x /app/run.sh
 
 RUN chmod -R 777 /app/backup /opt/downloads /opt/cassandra /etc/passwd
