@@ -51,19 +51,13 @@ RUN mkdir /var/lib/cassandra /var/log/cassandra
 
 VOLUME /backup-storage
 
-RUN mkdir -p /app/backup
-ADD files/ /app/backup/
-ADD main.py /app/backup/
-ADD src/ /app/backup/src/
+ADD files/ /opt/backup/
+ADD main.py /opt/backup/
+ADD src/ /opt/backup/src/
 ADD config/ssh_config /etc/ssh/
 ADD backup-daemon.conf /etc/backup-daemon.conf
 ADD files/ansible.cfg /etc/ansible/
+RUN chmod -R 777 /opt/backup  /opt/downloads  /opt/cassandra /etc/passwd
 
-COPY files/run.sh /app/run.sh
-RUN chmod +x /app/run.sh
 
-RUN mkdir -p /opt/backup && ln -s /app/run.sh /opt/backup/run.sh
-
-RUN chmod -R 777 /app/backup /opt/downloads /opt/cassandra /etc/passwd
-
-CMD ["/app/run.sh"]
+CMD ["/opt/backup/run.sh"]

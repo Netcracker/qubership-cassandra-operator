@@ -237,7 +237,7 @@ def cluster_backup(databases, vault, tls_enabled, cassandra_username, cassandra_
         "ansible-playbook",
         "-vvv",
         "-i",
-        "/opt/backup/hosts",
+        "/opt/backup/cassandra_hosts/hosts",
         "/opt/backup/playbooks/backup.yaml",
         "--extra-vars",
         (

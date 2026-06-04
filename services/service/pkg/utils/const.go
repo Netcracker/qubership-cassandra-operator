@@ -32,7 +32,7 @@ const Backup = "backup"
 const BackupDaemon = "cassandra-backup-daemon"
 const BackupStorage = "backup-storage"
 
-var BackupEntrypoint = []string{"/app/run.sh"}
+var BackupEntrypoint = []string{"/opt/backup/run.sh"}
 
 const Robot = "robot-tests"
 

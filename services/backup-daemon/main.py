@@ -59,7 +59,7 @@ def main():
                         format="[%(asctime)s][%(levelname)s][class=%(name)s][thread=%(thread)d] %(message)s",
                         datefmt="%Y-%m-%dT%H:%M:%S%z")
 
-    hosts_file_path = '/opt/backup/hosts'
+    hosts_file_path = '/opt/backup/cassandra_hosts/hosts'
     hosts_template_path = '/opt/backup/hosts_template'
     src.os_utils.create_hosts_inventory(hosts_file_path, hosts_template_path)
 
