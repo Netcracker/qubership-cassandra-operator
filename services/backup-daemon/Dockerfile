@@ -62,6 +62,8 @@ ADD files/ansible.cfg /etc/ansible/
 COPY files/run.sh /app/run.sh
 RUN chmod +x /app/run.sh
 
+RUN mkdir -p /opt/backup && ln -s /app/run.sh /opt/backup/run.sh
+
 RUN chmod -R 777 /app/backup /opt/downloads /opt/cassandra /etc/passwd
 
 CMD ["/app/run.sh"]
