@@ -163,6 +163,10 @@ func CassandraReplicaTemplate(
 				MountPath: "/tmp",
 			},
 			v13.VolumeMount{
+				Name:      "cassandra-home",
+				MountPath: "/home/cassandra",
+			},
+			v13.VolumeMount{
 				Name:      "cassandra-conf",
 				MountPath: "/opt/cassandra/conf",
 			},
@@ -405,6 +409,12 @@ func CassandraReplicaTemplate(
 						},
 						{
 							Name: "cassandra-conf",
+							VolumeSource: v13.VolumeSource{
+								EmptyDir: &v13.EmptyDirVolumeSource{},
+							},
+						},
+						{
+							Name: "cassandra-home",
 							VolumeSource: v13.VolumeSource{
 								EmptyDir: &v13.EmptyDirVolumeSource{},
 							},
