@@ -86,7 +86,7 @@ func main() {
 			client,
 			48, []string{"-"})
 	}
-
+	// test
 	// Vault
 	isVaultEnabled := utils.GetEnvAsBool("VAULT_ENABLED", false)
 	var vaultClient *utils.VaultClient
