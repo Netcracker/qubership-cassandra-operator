@@ -264,9 +264,6 @@ func GenerateDefaultCassandra(namespace string, cassandraDCs []*v1.DataCenter, b
 					"run-robot",
 				},
 			},
-			VaultRegistration: mTypes.VaultRegistration{
-				InitContainerResources: rr,
-			},
 		},
 	}
 }
@@ -284,7 +281,6 @@ type CaseStruct struct {
 }
 
 func GenerateDefaultCassandraTestCase(
-	vaultImpl mVault.VaultHelper,
 	testName string,
 	cassandraSupplService *v1.CassandraSupplService,
 	runtimeObjects []runtime.Object,
@@ -327,7 +323,6 @@ func GenerateDefaultCassandraTestCase(
 			constants.ContextLogger:                core.GetLogger(true),
 			"contextResourceOwner":                 cassandraSupplService, //todo hardcode replace
 			constants.ContextServiceDeploymentInfo: map[string]string{},
-			constants.ContextVault:                 vaultImpl,
 			constants.ContextHashConfigMap:         "random",
 			utils.ContextClusterBuilder:            clusterBuilder,
 		}),
@@ -398,7 +393,6 @@ func GenerateDefaultCassandraWrapper(
 	)
 
 	return GenerateDefaultCassandraTestCase(
-		vaultImpl,
 		testName,
 		cassandraService,
 		runtimeObjects,
@@ -443,8 +437,6 @@ func TestExecutionCheck(t *testing.T) {
 				1,
 			)
 			msS := cs.ctx.Get(constants.ContextSpec).(*v1.CassandraSupplService)
-			msS.Spec.VaultRegistration.Enabled = true
-			msS.Spec.VaultRegistration.Path = "secret"
 			msS.Spec.Monitoring.Install = true
 			msS.Spec.Monitoring.MetricCollector = "influxDB"
 			msS.Spec.Dbaas.Install = true

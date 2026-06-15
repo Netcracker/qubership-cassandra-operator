@@ -200,7 +200,7 @@ func (s *CassandraServiceInstanceReconciler) GetDeploymentVersion() string {
 }
 
 func (s *CassandraServiceInstanceReconciler) GetVaultRegistration() *types.VaultRegistration {
-	return &s.Instance.Spec.VaultRegistration
+	return &types.VaultRegistration{}
 }
 
 func (s *CassandraServiceInstanceReconciler) UpdateDRStatus(status types.DisasterRecoveryStatus) {
