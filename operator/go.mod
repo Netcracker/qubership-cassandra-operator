@@ -5,7 +5,7 @@ go 1.25.8
 require (
 	github.com/Netcracker/qubership-cql-driver v0.0.2
 	github.com/Netcracker/qubership-credential-manager v0.0.11
-	github.com/Netcracker/qubership-nosqldb-operator-core v1.0.9-0.20260616054245-48c234190ad2
+	github.com/Netcracker/qubership-nosqldb-operator-core v1.0.9
 	github.com/gocql/gocql v1.6.0
 	github.com/gofiber/fiber/v2 v2.52.13
 	github.com/hashicorp/consul/api v1.32.1
