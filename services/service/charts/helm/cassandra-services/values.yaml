@@ -268,7 +268,6 @@ monitoringAgent:
   collectionJitter: 0s
   flushInterval: 20s
   flushJitter: 5s
-  jolokiaDebug: "false"
 
 robotTests:
   install: false

@@ -463,8 +463,6 @@ spec:
                     type: string
                   install:
                     type: boolean
-                  jolokiaDebug:
-                    type: string
                   metricCollector:
                     type: string
                   monitoringInterval:

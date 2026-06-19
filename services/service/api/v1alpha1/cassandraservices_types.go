@@ -195,7 +195,6 @@ type RobotTests struct {
 type Monitoring struct {
 	Install            bool                     `json:"install,omitempty"`
 	DockerImage        string                   `json:"dockerImage,omitempty"`
-	JolokiaDebug       string                   `json:"jolokiaDebug,omitempty"`
 	NodeLabels         map[string]string        `json:"nodeLabels,omitempty"`
 	PriorityClassName  string                   `json:"priorityClassName,omitempty"`
 	Resources          *v1.ResourceRequirements `json:"resources,omitempty"`
