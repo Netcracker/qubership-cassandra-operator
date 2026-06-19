@@ -311,7 +311,6 @@ spec:
     collectionJitter: {{ .Values.monitoringAgent.collectionJitter }}
     flushInterval: {{.Values.monitoringAgent.flushInterval }}
     flushJitter: {{ .Values.monitoringAgent.flushJitter }}
-    jolokiaDebug: {{ .Values.monitoringAgent.jolokiaDebug | quote }}
   
   robotTests:
     install: {{ .Values.robotTests.install }}

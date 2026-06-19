@@ -193,12 +193,16 @@ type RobotTests struct {
 }
 
 type Monitoring struct {
-	Install            bool   `json:"install,omitempty"`
-	MonitoringInterval string `json:"monitoringInterval,omitempty"`
-	CollectionJitter   string `json:"collectionJitter,omitempty"`
-	FlushInterval      string `json:"flushInterval,omitempty"`
-	FlushJitter        string `json:"flushJitter,omitempty"`
-	MetricCollector    string `json:"metricCollector,omitempty"`
+	Install            bool                     `json:"install,omitempty"`
+	DockerImage        string                   `json:"dockerImage,omitempty"`
+	NodeLabels         map[string]string        `json:"nodeLabels,omitempty"`
+	PriorityClassName  string                   `json:"priorityClassName,omitempty"`
+	Resources          *v1.ResourceRequirements `json:"resources,omitempty"`
+	MonitoringInterval string                   `json:"monitoringInterval,omitempty"`
+	CollectionJitter   string                   `json:"collectionJitter,omitempty"`
+	FlushInterval      string                   `json:"flushInterval,omitempty"`
+	FlushJitter        string                   `json:"flushJitter,omitempty"`
+	MetricCollector    string                   `json:"metricCollector,omitempty"`
 }
 
 //+kubebuilder:object:root=true

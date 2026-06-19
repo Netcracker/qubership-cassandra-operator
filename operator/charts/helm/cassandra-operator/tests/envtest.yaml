@@ -245,7 +245,6 @@ tests:
 
               # add the jamm javaagent
               JVM_OPTS="$JVM_OPTS -javaagent:$CASSANDRA_HOME/lib/jamm-0.3.0.jar"
-              JVM_OPTS="$JVM_OPTS -javaagent:/usr/share/java/jolokia-jvm-1.6.0-agent.jar=port=8778,host=0.0.0.0"
               JVM_OPTS="$JVM_OPTS -javaagent:/usr/share/java/cassandra-exporter-agent-0.9.10.jar"
 
               # enable thread priorities, primarily so we can give periodic tasks
