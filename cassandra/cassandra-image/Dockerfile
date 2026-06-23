@@ -50,6 +50,11 @@ RUN echo 'export PATH=$PATH:'"$CASSANDRA_HOME/bin:$CASSANDRA_HOME/tools/bin" > $
 
 RUN mkdir -p /usr/share/java/
 
+RUN wget https://azul.com \
+    && unzip jHiccup-2.0.10-dist.zip \
+    && cp jHiccup-2.0.10/jHiccup.jar /usr/share/java/jHiccup.jar \
+    && rm -rf jHiccup-2.0.10*
+
 RUN wget -O /usr/share/java/sjk-plus-0.17.jar https://repo1.maven.org/maven2/org/gridkit/jvmtool/sjk-plus/0.17/sjk-plus-0.17.jar
 RUN wget -O /usr/share/java/cassandra-exporter-agent.jar https://github.com/instaclustr/cassandra-exporter/releases/download/${EXPORTER_VERSION}
 RUN wget -O $CASSANDRA_HOME/lib/netty-codec-http-4.1.132.Final.jar https://repo1.maven.org/maven2/io/netty/netty-codec-http/4.1.132.Final/netty-codec-http-4.1.132.Final.jar
