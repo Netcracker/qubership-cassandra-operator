@@ -15,7 +15,7 @@ jobs:
     outputs:
       skip_tests: ${{ steps.check.outputs.skip_tests }}
     steps:
-      - name: Check if build.yml was triggered for this commit
+      - name: Check if build.yaml was triggered for this commit
         id: check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -25,7 +25,7 @@ jobs:
           else
             SHA="${{ github.sha }}"
           fi
-          RUNS=$(gh run list --workflow build.yml --repo ${{ github.repository }} --commit $SHA)
+          RUNS=$(gh run list --workflow build.yaml --repo ${{ github.repository }} --commit $SHA)
           SKIP_TESTS="false"
           if [ -z "$RUNS" ]; then
             SKIP_TESTS="true"
@@ -37,7 +37,7 @@ jobs:
         uses: netcracker/qubership-workflow-hub/actions/wait-for-workflow@3e428f45132119ce49d90f3770a45d4fe1d1078d  # v2.0.4
         id: wait
         with:
-          workflow: build.yml
+          workflow: build.yaml
           token: ${{ secrets.GITHUB_TOKEN }}
           poll-interval: 20
 
