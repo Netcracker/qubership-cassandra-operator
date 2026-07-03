@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "cassandra_4.1.11 values",
+  "title": "cassandra values",
   "type": "object",
   "additionalProperties": true,
   "properties": {
