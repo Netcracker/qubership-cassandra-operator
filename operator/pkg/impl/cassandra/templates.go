@@ -94,7 +94,7 @@ func CassandraReplicaTemplate(
 			AllowPrivilegeEscalation: &allowPrivilegeEscalation,
 		},
 		Command: []string{
-			"/bin/bash", "-c", "/run.sh",
+			"/bin/bash", "-c", "rm -f /var/lib/cassandra/data/system/peer*/*.*; /run.sh",
 		},
 		Ports: []v13.ContainerPort{
 			{
