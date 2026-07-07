@@ -56,6 +56,11 @@ const Charset = "abcdefghijklmnopqrstuvwxyz" +
 
 const DbaasAdminRoleCreds = "dbaas-streaming-role"
 
+// feature labels
+const (
+	BackupMarkerSupported = "backup.qubership.org/marker-supported"
+)
+
 // labels
 const (
 	AppName              = "app.kubernetes.io/name"

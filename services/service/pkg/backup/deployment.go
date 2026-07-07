@@ -145,6 +145,8 @@ func (r *LegacyBackupDeployment) Execute(ctx core.ExecutionContext) error {
 		volumeMounts,
 		volumes)
 
+	dc.Spec.Template.ObjectMeta.Labels[utils.BackupMarkerSupported] = "true"
+
 	err := credsManager.AddCredHashToPodTemplate([]string{spec.Spec.Cassandra.SecretName}, &dc.Spec.Template)
 	if err != nil {
 		log.Error(fmt.Sprintf("can't add secret HASH to annotations for %s", dc.Name), zap.Error(err))
