@@ -6,8 +6,8 @@
   "properties": {
     "tls": { "$ref": "#/$defs/tls" },
     "cassandra": { "$ref": "#/$defs/cassandra" },
-    "PART_OF": { "type": "string" },
-    "MANAGED_BY": { "type": "string" }
+    "PART_OF": { "type": "string", "default": "cassandra" },
+    "MANAGED_BY": { "type": "string", "default": "cassandra" }
   },
   "$defs": {
     "tls": {
