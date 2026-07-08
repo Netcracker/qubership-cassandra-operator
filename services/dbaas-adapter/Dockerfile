@@ -16,7 +16,7 @@ ARG TARGETOS TARGETARCH
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o ./build/_output/bin/dbaas-cassandra-adapter \
     -gcflags all=-trimpath=${GOPATH} -asmflags all=-trimpath=${GOPATH} ./main.go
 
-FROM alpine:3.23
+FROM alpine:3.24
 
 #ENV WORKDIR=/opt/operator/
 

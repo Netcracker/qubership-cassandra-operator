@@ -20,7 +20,7 @@ RUN mkdir -p deployments/charts/cassandra-services && \
     cp -R ./charts/helm/cassandra-services/* deployments/charts/cassandra-services/ && \
     cp ./charts/helm/cassandra-services/deployment-configuration.json deployments/deployment-configuration.json
 
-FROM alpine:3.23
+FROM alpine:3.24
 
 ENV OPERATOR=/usr/local/bin/cassandra-services \
     USER_UID=1001 \
