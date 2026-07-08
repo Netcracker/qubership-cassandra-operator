@@ -149,7 +149,6 @@ cassandra:
     dataCenters:
       - name: dc1
         replicas: 3
-        seeds: 2
         storage:
           size: 5Gi
 

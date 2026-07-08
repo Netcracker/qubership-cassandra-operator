@@ -134,7 +134,8 @@ spec:
         - name: {{ $dc.name }}
           clusterDomain: {{if $dc.clusterDomain }}{{ $dc.clusterDomain }}{{ else }}cluster.local{{ end }}
           deploy: {{if or ($dc.deploy) (eq ($dc.deploy | toString) "<nil>") }}true{{ else }}false{{ end }}
-          replicas: {{template "fromEnv" (dict "envName" $root.Values.INFRA_CASSANDRA_REPLICAS "default" $dc.replicas) }}
+          {{- $replicaCount := include "fromEnv" (dict "envName" $root.Values.INFRA_CASSANDRA_REPLICAS "default" $dc.replicas) | atoi }}
+          replicas: {{ $replicaCount }}
           {{- if le $replicaCount 2 }}
           seeds: 1
           {{- else }}
