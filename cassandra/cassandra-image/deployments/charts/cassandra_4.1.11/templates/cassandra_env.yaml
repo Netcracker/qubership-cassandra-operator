@@ -205,7 +205,6 @@ data:
     # add the jamm javaagent
     JVM_OPTS="$JVM_OPTS -javaagent:$CASSANDRA_HOME/lib/jamm-0.3.2.jar"
     JVM_OPTS="$JVM_OPTS -javaagent:/usr/share/java/cassandra-exporter-agent.jar"
-    JVM_OPTS="$JVM_OPTS -javaagent:/usr/share/java/jHiccup.jar=-l,/var/lib/cassandra/data/jhiccup.log"
 
     # set jvm HeapDumpPath with CASSANDRA_HEAPDUMP_DIR
     JVM_OPTS="$JVM_OPTS -XX:+HeapDumpOnOutOfMemoryError"
