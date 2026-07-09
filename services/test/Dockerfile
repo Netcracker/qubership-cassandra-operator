@@ -1,4 +1,4 @@
-FROM ghcr.io/netcracker/qubership-docker-integration-tests-debian:Vulnerability
+FROM ghcr.io/netcracker/qubership-docker-integration-tests-debian:0.5.6
 
 ENV ROBOT_OUTPUT=${ROBOT_HOME}/output \
     DISTR_DIR=/tmp/deps
