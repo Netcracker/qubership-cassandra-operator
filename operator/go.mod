@@ -1,6 +1,6 @@
 module github.com/Netcracker/qubership-cassandra-operator
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/Netcracker/qubership-cql-driver v0.0.2
