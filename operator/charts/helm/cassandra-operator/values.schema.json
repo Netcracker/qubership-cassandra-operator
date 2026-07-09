@@ -26,11 +26,9 @@
     "policies": { "$ref": "#/$defs/policies" },
     "awsKeyspaces": { "$ref": "#/$defs/awsKeyspaces" },
     "serviceAccount": { "$ref": "#/$defs/serviceAccount" },
-    "SERVICE_NAME": { "type": "string", "default": "cassandra" },
-    "PART_OF": { "type": "string", "default": "CASSANDRA" },
-    "DELIMITER": { "type": "string", "default": "-" },
-    "ARTIFACT_DESCRIPTOR_VERSION": { "type": "string", "default": "" },
-    "MANAGED_BY": { "type": "string", "default": "operator" }
+    "SERVICE_NAME": { "type": "string" },
+    "DELIMITER": { "type": "string" },
+    "ARTIFACT_DESCRIPTOR_VERSION": { "type": "string" }
   },
   "$defs": {
     "global": {
@@ -186,7 +184,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" }
+        "enabled": { "type": "boolean", "default": false }
       }
     },
     "deploymentSchema": {
