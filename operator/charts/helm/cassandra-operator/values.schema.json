@@ -27,10 +27,8 @@
     "awsKeyspaces": { "$ref": "#/$defs/awsKeyspaces" },
     "serviceAccount": { "$ref": "#/$defs/serviceAccount" },
     "SERVICE_NAME": { "type": "string" },
-    "PART_OF": { "type": "string", "default": "CASSANDRA" },
     "DELIMITER": { "type": "string" },
-    "ARTIFACT_DESCRIPTOR_VERSION": { "type": "string" },
-    "MANAGED_BY": { "type": "string", "default": "operator" }
+    "ARTIFACT_DESCRIPTOR_VERSION": { "type": "string" }
   },
   "$defs": {
     "global": {
