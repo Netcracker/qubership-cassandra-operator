@@ -56,7 +56,7 @@
         "jvm_options": { "type": ["string", "null"] },
         "cassandra_env": { "type": ["string", "null"] },
         "dockerImage": { "type": ["string", "null"] },
-        "hostNetwork": { "type": ["boolean", "null"] },
+        "hostNetwork": { "type": "boolean", "default": false },
         "priorityClassName": { "type": ["string", "null"] },
         "envs": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
         "smoketestKeyspace": { "type": ["string", "null"] },
