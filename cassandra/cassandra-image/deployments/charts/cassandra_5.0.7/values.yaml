@@ -9,7 +9,16 @@ tls:
   keystorePass: cassandra
 
 cassandra:
+  # Mandatory docker image link
+  dockerImage: ghcr.io/netcracker/cassandra_5.0:main
   install: true
+  deploymentSchema:
+    dataCenters:
+      - name: dc1
+        replicas: 3
+        seeds: 2
+        storage:
+          size: 5Gi
   auditLogEnabled: false
 
   commitlogArchiving:
