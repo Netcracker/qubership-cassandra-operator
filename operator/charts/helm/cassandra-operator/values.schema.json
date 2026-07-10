@@ -160,7 +160,7 @@
         "configuration": { "type": "string" },
         "jvm_options": { "type": "string" },
         "cassandra_env": { "type": "string" },
-        "hostNetwork": { "type": "boolean" },
+        "hostNetwork": { "type": "boolean", "default": false },
         "pdb": { "type": "boolean" },
         "priorityClassName": { "type": ["string", "null"] },
         "envs": {
