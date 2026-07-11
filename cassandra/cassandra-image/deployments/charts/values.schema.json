@@ -39,7 +39,7 @@
     },
     "cassandra": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "install": { "type": "boolean", "default": true },
         "username": { "type": "string", "default": "admin" },
@@ -55,11 +55,13 @@
         "configuration": { "type": "string", "default": "" },
         "jvm_options": { "type": "string", "default": "" },
         "cassandra_env": { "type": "string", "default": "" },
+        "dockerImage": { "type": "string" },
         "hostNetwork": { "type": "boolean", "default": false },
         "priorityClassName": { "type": ["string", "null"] },
         "envs": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
         "smoketestKeyspace": { "type": "string", "default": "smoke_test" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "deploymentSchema": { "$ref": "#/$defs/deploymentSchema" },
         "affinity": { "$ref": "#/$defs/affinity" }
       }
     },
