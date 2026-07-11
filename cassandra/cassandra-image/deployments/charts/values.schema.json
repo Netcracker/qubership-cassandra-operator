@@ -39,7 +39,7 @@
     },
     "cassandra": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "install": { "type": "boolean", "default": true },
         "username": { "type": "string", "default": "admin" },
@@ -55,13 +55,11 @@
         "configuration": { "type": "string", "default": "" },
         "jvm_options": { "type": "string", "default": "" },
         "cassandra_env": { "type": "string", "default": "" },
-        "dockerImage": { "type": "string", "default": "ghcr.io/netcracker/cassandra_5.0:main" },
         "hostNetwork": { "type": "boolean", "default": false },
         "priorityClassName": { "type": ["string", "null"] },
         "envs": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
         "smoketestKeyspace": { "type": "string", "default": "smoke_test" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "deploymentSchema": { "$ref": "#/$defs/deploymentSchema", "default": {"dataCenters": [{"name": "dc1", "replicas": 3, "seeds": 2, "storage": {"size": "5Gi"}}]} },
         "affinity": { "$ref": "#/$defs/affinity" }
       }
     },
