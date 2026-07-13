@@ -48,7 +48,10 @@ class CassandraClient(object):
         last_exc = None
         for attempt in range(retries):
             try:
-                rows = self.session.execute(query)
+                if parameters is None:
+                    rows = self.session.execute(query)
+                else:
+                    rows = self.session.execute(query, parameters)
                 return rows
             except (OperationTimedOut, NoHostAvailable, NoConnectionsAvailable) as e:
                 last_exc = e
