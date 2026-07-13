@@ -1,5 +1,6 @@
 import logging
-
+import re
+import json
 from src.cassandra_client import CassandraClient
 
 log = logging.getLogger(__name__)
@@ -14,11 +15,19 @@ MARKER_KEY = "cloud-backuper-marker"
 # VALUES (?, ?, toTimestamp(now()))
 # """
 
-import re
 
 def normalize_marker(value: str) -> str:
     value = value.strip()
 
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+        value = value[1:-1].strip()
+
+    try:
+        obj = json.loads(value)
+        if isinstance(obj, dict) and "marker" in obj:
+            return obj["marker"]
+    except Exception:
+        pass
     match = re.fullmatch(r"\{marker:\s*(.*)\}", value)
     if match:
         return match.group(1).strip()
@@ -40,6 +49,7 @@ def set_marker(client: CassandraClient, value: str):
     ensure_schema(client)
     value = normalize_marker(value)
     log.info("Setting marker")
+    log.info(f"Normalized marker: {repr(value)}")
     # client.execute_query(MARKER_INSERT_QUERY, (MARKER_KEY, value))
     client.execute_query(
         f"INSERT INTO {MARKER_KEYSPACE}.{MARKER_TABLE} "
