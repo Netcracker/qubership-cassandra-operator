@@ -1,6 +1,8 @@
 package backup
 
 import (
+	"strconv"
+
 	v1 "github.com/Netcracker/qubership-cassandra-supplementary/api/v1alpha1"
 	"github.com/Netcracker/qubership-cassandra-supplementary/pkg/utils"
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/constants"
@@ -35,11 +37,7 @@ func (r *BackupService) Execute(ctx core.ExecutionContext) error {
 		map[string]int32{"http": utils.GetHTTPPort(spec.Spec.TLS.Enabled)},
 		request.Namespace)
 
-	dataValidation := spec.Spec.Backup.DataValidationEnabled
-	if dataValidation == "" {
-		dataValidation = "true"
-	}
-	template.ObjectMeta.Labels["cloud-backuper.netcracker.com/data-validation-enabled"] = dataValidation
+	template.ObjectMeta.Labels["cloud-backuper.netcracker.com/data-validation-enabled"] = strconv.FormatBool(spec.Spec.Backup.DataValidationEnabled)
 
 	// Kubernetes api causes "invalid resourceVersion error" on update. So remove it.
 	core.DeleteRuntimeObject(client, &v12.Service{
