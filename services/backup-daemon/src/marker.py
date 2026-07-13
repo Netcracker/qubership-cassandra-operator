@@ -9,13 +9,6 @@ MARKER_KEYSPACE = "backup_markers"
 MARKER_TABLE = "markers"
 MARKER_KEY = "cloud-backuper-marker"
 
-# MARKER_INSERT_QUERY = f"""
-# INSERT INTO {MARKER_KEYSPACE}.{MARKER_TABLE}
-# (marker_key, marker_value, created_at)
-# VALUES (?, ?, toTimestamp(now()))
-# """
-
-
 def normalize_marker(value: str) -> str:
     value = value.strip()
 
@@ -50,14 +43,12 @@ def set_marker(client: CassandraClient, value: str):
     value = normalize_marker(value)
     log.info("Setting marker")
     log.info(f"Normalized marker: {repr(value)}")
-    # client.execute_query(MARKER_INSERT_QUERY, (MARKER_KEY, value))
     client.execute_query(
         f"INSERT INTO {MARKER_KEYSPACE}.{MARKER_TABLE} "
         f"(marker_key, marker_value, created_at) "
         f"VALUES ('{MARKER_KEY}', '{value}', toTimestamp(now()))"
     )
     log.info("Marker set successfully")
-
 
 def get_marker(client: CassandraClient) -> str:
     ensure_schema(client)

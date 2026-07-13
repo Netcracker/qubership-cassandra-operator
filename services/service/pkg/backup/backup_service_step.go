@@ -35,6 +35,12 @@ func (r *BackupService) Execute(ctx core.ExecutionContext) error {
 		map[string]int32{"http": utils.GetHTTPPort(spec.Spec.TLS.Enabled)},
 		request.Namespace)
 
+	dataValidation := spec.Spec.Backup.DataValidationEnabled
+	if dataValidation == "" {
+		dataValidation = "true"
+	}
+	template.ObjectMeta.Labels["cloud-backuper.netcracker.com/data-validation-enabled"] = dataValidation
+
 	// Kubernetes api causes "invalid resourceVersion error" on update. So remove it.
 	core.DeleteRuntimeObject(client, &v12.Service{
 		ObjectMeta: template.ObjectMeta,
