@@ -108,6 +108,7 @@ func (r *LegacyBackupDeployment) Execute(ctx core.ExecutionContext) error {
 				coreUtils.GetPlainTextEnvVar("S3_ENABLED", strconv.FormatBool(backup.S3.Enabled)),
 				coreUtils.GetPlainTextEnvVar("S3_BUCKET", backup.S3.BucketName),
 				coreUtils.GetPlainTextEnvVar("S3_URL", backup.S3.EndpointUrl),
+				coreUtils.GetPlainTextEnvVar("BACKUP_DAEMON_SECRETS_DIR", "/var/run/secrets/s3"),
 			)
 			if backup.S3.SslVerify {
 				envs = append(envs, coreUtils.GetPlainTextEnvVar("S3_CERTS_PATH", "/s3Certs"))
