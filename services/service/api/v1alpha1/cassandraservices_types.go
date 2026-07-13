@@ -132,6 +132,7 @@ type Backup struct {
 	PriorityClassName          string                     `json:"priorityClassName,omitempty"`
 	S3                         S3backup                   `json:"s3,omitempty"`
 	TLS                        BackupDaemonTLS            `json:"tls,omitempty"`
+	DataValidationEnabled      string                     `json:"dataValidationEnabled,omitempty"`
 }
 
 type S3backup struct {

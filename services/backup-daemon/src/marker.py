@@ -8,6 +8,12 @@ MARKER_KEYSPACE = "backup_markers"
 MARKER_TABLE = "markers"
 MARKER_KEY = "cloud-backuper-marker"
 
+MARKER_INSERT_QUERY = f"""
+INSERT INTO {MARKER_KEYSPACE}.{MARKER_TABLE}
+(marker_key, marker_value, created_at)
+VALUES (?, ?, toTimestamp(now()))
+"""
+
 
 def ensure_schema(client: CassandraClient):
     client.execute_query(
@@ -23,11 +29,7 @@ def ensure_schema(client: CassandraClient):
 def set_marker(client: CassandraClient, value: str):
     ensure_schema(client)
     log.info("Setting marker")
-    client.execute_query(
-        f"INSERT INTO {MARKER_KEYSPACE}.{MARKER_TABLE} "
-        f"(marker_key, marker_value, created_at) "
-        f"VALUES ('{MARKER_KEY}', '{value}', toTimestamp(now()))"
-    )
+    client.execute_query(MARKER_INSERT_QUERY, (MARKER_KEY, value))
     log.info("Marker set successfully")
 
 
