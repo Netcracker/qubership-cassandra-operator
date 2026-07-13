@@ -135,8 +135,11 @@ spec:
           clusterDomain: {{if $dc.clusterDomain }}{{ $dc.clusterDomain }}{{ else }}cluster.local{{ end }}
           deploy: {{if or ($dc.deploy) (eq ($dc.deploy | toString) "<nil>") }}true{{ else }}false{{ end }}
           replicas: {{template "fromEnv" (dict "envName" $root.Values.INFRA_CASSANDRA_REPLICAS "default" $dc.replicas) }}
-          {{- $calculatedReplicas := or $dc.replicas 1 | int }}
-          seeds: {{ if le $calculatedReplicas 2 }}1{{ else }}2{{ end }}
+          {{- $effectiveReplicas := or $dc.replicas 1 | int }}
+          {{- if and (ne ($root.Values.INFRA_CASSANDRA_REPLICAS | toString) "<nil>") (ne ($root.Values.INFRA_CASSANDRA_REPLICAS | toString) "") }}
+          {{- $effectiveReplicas = $root.Values.INFRA_CASSANDRA_REPLICAS | int }}
+          {{- end }}
+          seeds: {{ if le $effectiveReplicas 2 }}1{{ else }}2{{ end }}  
           {{- if $dc.seedList }}
           seedList:
             {{- range $key, $value := $dc.seedList }}
