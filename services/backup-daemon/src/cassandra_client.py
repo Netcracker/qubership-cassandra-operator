@@ -44,7 +44,7 @@ class CassandraClient(object):
             ssl_context=ssl_context, connect_timeout=self.connect_timeout, protocol_version=5)
         self.session = self.cluster.connect()
 
-    def execute_query(self, query, retries=3, retry_delay=5):
+    def execute_query(self, query, parameters=None, retries=3, retry_delay=5):
         last_exc = None
         for attempt in range(retries):
             try:
