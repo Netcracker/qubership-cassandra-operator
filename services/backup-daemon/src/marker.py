@@ -14,6 +14,16 @@ INSERT INTO {MARKER_KEYSPACE}.{MARKER_TABLE}
 VALUES (?, ?, toTimestamp(now()))
 """
 
+import re
+
+def normalize_marker(value: str) -> str:
+    value = value.strip()
+
+    match = re.fullmatch(r"\{marker:\s*(.*)\}", value)
+    if match:
+        return match.group(1).strip()
+
+    return value
 
 def ensure_schema(client: CassandraClient):
     client.execute_query(
@@ -28,6 +38,7 @@ def ensure_schema(client: CassandraClient):
 
 def set_marker(client: CassandraClient, value: str):
     ensure_schema(client)
+    value = normalize_marker(value)
     log.info("Setting marker")
     client.execute_query(MARKER_INSERT_QUERY, (MARKER_KEY, value))
     log.info("Marker set successfully")
