@@ -37,8 +37,6 @@ func (r *BackupService) Execute(ctx core.ExecutionContext) error {
 		map[string]int32{"http": utils.GetHTTPPort(spec.Spec.TLS.Enabled)},
 		request.Namespace)
 
-	template.ObjectMeta.Labels["cloud-backuper.netcracker.com/data-validation-enabled"] = strconv.FormatBool(spec.Spec.Backup.DataValidationEnabled)
-
 	// Kubernetes api causes "invalid resourceVersion error" on update. So remove it.
 	core.DeleteRuntimeObject(client, &v12.Service{
 		ObjectMeta: template.ObjectMeta,
@@ -52,6 +50,10 @@ func (r *BackupService) Execute(ctx core.ExecutionContext) error {
 		AppManagedBy:         "operator",
 		AppManagedByOperator: "cassandra-services-operator",
 	}
+	if template.ObjectMeta.Labels == nil {
+		template.ObjectMeta.Labels = map[string]string{}
+	}
+	template.ObjectMeta.Labels["cloud-backuper.netcracker.com/data-validation-enabled"] = strconv.FormatBool(spec.Spec.Backup.DataValidationEnabled)
 	err := utils.CreateRuntimeObjectContextWrapper(ctx, template, template.ObjectMeta, labels)
 	core.PanicError(err, log.Error, "Backup service creation failed")
 

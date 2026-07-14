@@ -68,6 +68,8 @@ spec:
                     type: array
                   granularEvictionPolicy:
                     type: string
+                  dataValidationEnabled:
+                    type: boolean
                   install:
                     type: boolean
                   legacyMode:
