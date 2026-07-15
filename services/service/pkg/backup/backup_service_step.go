@@ -23,6 +23,7 @@ func (r *BackupService) Execute(ctx core.ExecutionContext) error {
 	request := ctx.Get(constants.ContextRequest).(reconcile.Request)
 	log := ctx.Get(constants.ContextLogger).(*zap.Logger)
 	spec := ctx.Get(constants.ContextSpec).(*v1.CassandraSupplService)
+	
 
 	template := cUtils.SimpleServiceTemplate(
 		utils.BackupDaemon,
@@ -42,6 +43,7 @@ func (r *BackupService) Execute(ctx core.ExecutionContext) error {
 		ObjectMeta: template.ObjectMeta,
 	})
 
+	log.Info("Data validation enabled backup_service_step: ", strconv.FormatBool(spec.Spec.Backup.DataValidationEnabled))
 	labels := utils.BasicLabels{
 		AppName:              utils.BackupDaemon,
 		AppComponent:         "backend",
