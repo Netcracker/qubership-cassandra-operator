@@ -54,6 +54,8 @@ spec:
                 properties:
                   backupSchedule:
                     type: string
+                  dataValidationEnabled:
+                    type: boolean
                   dockerImage:
                     type: string
                   evictionPolicy:
@@ -68,8 +70,6 @@ spec:
                     type: array
                   granularEvictionPolicy:
                     type: string
-                  dataValidationEnabled:
-                    type: boolean
                   install:
                     type: boolean
                   legacyMode:
