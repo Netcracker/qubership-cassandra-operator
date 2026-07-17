@@ -2,6 +2,213 @@
 
 # Cassandra Operator
 
+## Installation Guide
+
+This guide covers the full installation sequence: Cassandra node configuration charts, the Cassandra Operator, and the Cassandra Services (supplementary services). Install them in the order shown below.
+
+### Prerequisites
+
+- Kubernetes 1.24+ or OpenShift 4.10+
+- Helm 3.10+
+- `kubectl` configured against the target cluster
+- A namespace created for the deployment
+- Container image access to `ghcr.io/netcracker` (ensure image pull credentials are configured if the cluster cannot reach ghcr.io anonymously)
+
+---
+
+### Step 1 — Install the Cassandra Configuration Chart (cassandra_4.1.11 or cassandra_5.0.8)
+
+These charts produce the Kubernetes ConfigMaps that the operator mounts into Cassandra pods. Install the chart matching your target Cassandra version **before** installing the operator.
+
+**Cassandra 4.1.11**
+
+```bash
+helm install cassandra-config \
+  cassandra/cassandra-image/deployments/charts/cassandra_4.1.11 \
+  --namespace <your-namespace> \
+  --create-namespace \
+  --set cassandra.install=true
+```
+
+**Cassandra 5.0.8**
+
+```bash
+helm install cassandra-config \
+  cassandra/cassandra-image/deployments/charts/cassandra_5.0.8 \
+  --namespace <your-namespace> \
+  --create-namespace \
+  --set cassandra.install=true
+```
+
+**Common overrides**
+
+| Parameter | Default | Description |
+|---|---|---|
+| `cassandra.install` | `true` | Render all ConfigMaps. Set to `false` to skip. |
+| `tls.enabled` | `false` | Enable TLS for Cassandra client and inter-node encryption. |
+| `tls.keystorePass` | `cassandra` | Keystore password used when TLS is enabled. |
+| `cassandra.auditLogEnabled` | `false` | Enable ecAudit logging via the `cassandra-audit` ConfigMap. |
+| `cassandra.commitlogArchiving.enabled` | `false` | Enable commit log archiving. |
+| `cassandra.configuration` | `""` | Additional `cassandra.yaml` overrides appended to the base config. |
+| `cassandra.jvm_options` | `""` | Additional JVM flags appended to `jvm-server.options`. |
+| `cassandra.cassandra_env` | `""` | Additional environment script lines appended to `cassandra-env.sh`. |
+
+**Verify**
+
+```bash
+kubectl get configmaps -n <your-namespace> | grep cassandra
+```
+
+Expected ConfigMaps: `cassandra-configuration`, `cassandra-env`, `cassandra-jvm`, `cassandra-logback`, `cassandra-audit`, `cassandra-major-version`.
+
+---
+
+### Step 2 — Install the Cassandra Operator Chart
+
+The operator chart deploys the `cassandra-operator` Deployment, installs the `CassandraDeployment` CRD, and creates the `CassandraDeployment` CR that drives the Cassandra `StatefulSet` provisioning.
+
+```bash
+helm install cassandra-operator \
+  operator/charts/helm/cassandra-operator \
+  --namespace <your-namespace> \
+  --create-namespace \
+  --set cassandra.dockerImage=ghcr.io/netcracker/cassandra_5.0:main \
+  --set cassandra.username=admin \
+  --set cassandra.password=<your-password> \
+  --set cassandra.deploymentSchema.dataCenters[0].name=dc1 \
+  --set cassandra.deploymentSchema.dataCenters[0].replicas=3 \
+  --set cassandra.deploymentSchema.dataCenters[0].seeds=2 \
+  --set cassandra.deploymentSchema.dataCenters[0].storage.size=5Gi
+```
+
+For **Cassandra 4.1.x** change the image:
+
+```bash
+  --set cassandra.dockerImage=ghcr.io/netcracker/docker-cassandra_4.1:main \
+```
+
+**Key parameters**
+
+| Parameter | Default | Description |
+|---|---|---|
+| `cassandra.dockerImage` | `ghcr.io/netcracker/cassandra_5.0:main` | Cassandra node container image. |
+| `cassandra.username` | `admin` | Cassandra superuser username. |
+| `cassandra.password` | `admin` | Cassandra superuser password. |
+| `cassandra.deploymentSchema.dataCenters` | `[{name: dc1, replicas: 3, seeds: 2, storage.size: 5Gi}]` | Data center topology — name, replica count, seed count, and storage size. |
+| `cassandra.resources.requests.memory` | `1Gi` | Memory request per Cassandra pod. |
+| `cassandra.resources.limits.memory` | `2Gi` | Memory limit per Cassandra pod. |
+| `operator.image` | `ghcr.io/netcracker/qubership-cassandra-operator:main` | Operator container image. |
+| `serviceAccountName` | `cassandra-operator` | `ServiceAccount` used by the operator pod. |
+| `tls.enabled` | `false` | Enable TLS for Cassandra. |
+| `reaper.install` | `false` | Install Cassandra Reaper alongside the operator. |
+| `waitTimeout` | `3600` | Timeout in seconds for resource operations. |
+
+**Verify the operator is running**
+
+```bash
+kubectl get pods -n <your-namespace> -l app=cassandra-operator
+kubectl get cassandras -n <your-namespace>
+```
+
+**Verify Cassandra StatefulSets and pods are ready**
+
+```bash
+kubectl get statefulsets -n <your-namespace>
+kubectl get pods -n <your-namespace> -l app=cassandra
+```
+
+All pods should reach `Running` status. Wait for all replicas to be ready before proceeding to the next step.
+
+---
+
+### Step 3 — Install the Cassandra Services Chart
+
+The services chart deploys the supplementary services: backup-daemon, dbaas-adapter, monitoring agent, and optionally Cassandra Reaper and robot framework tests. This chart requires a running Cassandra cluster from Step 2.
+
+```bash
+helm install cassandra-services \
+  services/service/charts/helm/cassandra-services \
+  --namespace <your-namespace> \
+  --set cassandra.secretName=cassandra-secret.v1 \
+  --set cassandra.deploymentSchema.dataCenters[0].name=dc1 \
+  --set cassandra.deploymentSchema.dataCenters[0].replicas=3 \
+  --set dbaas.install=true \
+  --set dbaas.dockerImage=ghcr.io/netcracker/qubership-cassandra-dbaas-adapter:main \
+  --set dbaas.adapter.username=dbaas-aggregator \
+  --set dbaas.adapter.password=<your-dbaas-adapter-password> \
+  --set dbaas.aggregator.dbaasAggregatorRegistrationAddress=http://dbaas-aggregator.dbaas:8080 \
+  --set backupDaemon.install=true \
+  --set backupDaemon.dockerImage=ghcr.io/netcracker/qubership-cassandra-backup-daemon:main \
+  --set backupDaemon.storage.size=5Gi \
+  --set monitoringAgent.install=true
+```
+
+**Key parameters**
+
+| Parameter | Default | Description |
+|---|---|---|
+| `cassandra.secretName` | `cassandra-secret.v1` | Name of the `Secret` holding Cassandra credentials; must match the secret created by the operator chart. |
+| `cassandra.port` | `9042` | Cassandra CQL port. |
+| `dbaas.install` | `true` | Deploy the dbaas-adapter. |
+| `dbaas.dockerImage` | `ghcr.io/netcracker/qubership-cassandra-dbaas-adapter:main` | DBaaS adapter image. |
+| `dbaas.adapter.username` | `dbaas-aggregator` | DBaaS adapter HTTP basic auth username. |
+| `dbaas.adapter.password` | `dbaas-aggregator` | DBaaS adapter HTTP basic auth password. |
+| `dbaas.aggregator.dbaasAggregatorRegistrationAddress` | `http://dbaas-aggregator.dbaas:8080` | URL of the DBaaS aggregator to register with. |
+| `backupDaemon.install` | `true` | Deploy the backup-daemon. |
+| `backupDaemon.dockerImage` | `ghcr.io/netcracker/qubership-cassandra-backup-daemon:main` | Backup daemon image. |
+| `backupDaemon.storage.size` | `5Gi` | PVC size for backup storage. |
+| `backupDaemon.backupSchedule` | `"0 0 * * *"` | Cron schedule for automatic full backups (daily at midnight). |
+| `monitoringAgent.install` | `true` | Enable Prometheus monitoring and alerts. |
+| `robotTests.install` | `false` | Run Robot Framework integration tests after deployment. |
+| `tls.enabled` | `false` | Enable TLS for all supplementary services. |
+
+**Verify all services are running**
+
+```bash
+kubectl get pods -n <your-namespace>
+kubectl get deployments -n <your-namespace>
+```
+
+Expected deployments: `cassandra-services` (operator), `dbaas-adapter`, `backup-daemon`.
+
+---
+
+### Upgrading
+
+To upgrade any chart after modifying values, use `helm upgrade`:
+
+```bash
+# Upgrade the operator chart
+helm upgrade cassandra-operator \
+  operator/charts/helm/cassandra-operator \
+  --namespace <your-namespace> \
+  --reuse-values \
+  --set cassandra.dockerImage=ghcr.io/netcracker/cassandra_5.0:<new-tag>
+
+# Upgrade the services chart
+helm upgrade cassandra-services \
+  services/service/charts/helm/cassandra-services \
+  --namespace <your-namespace> \
+  --reuse-values
+```
+
+---
+
+### Uninstalling
+
+```bash
+helm uninstall cassandra-services --namespace <your-namespace>
+helm uninstall cassandra-operator  --namespace <your-namespace>
+helm uninstall cassandra-config    --namespace <your-namespace>
+```
+
+> **Note:** PersistentVolumeClaims are not deleted automatically. To remove them:
+> ```bash
+> kubectl delete pvc -n <your-namespace> --all
+> ```
+
+---
+
 ## Repository structure
 
 * `./.github` - CI/CD workflow definitions, build configuration, and automation scripts for GitHub Actions.
