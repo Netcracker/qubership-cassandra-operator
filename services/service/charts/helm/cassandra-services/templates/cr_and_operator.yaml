@@ -290,6 +290,7 @@ spec:
         {{- end }}
      {{- end }}
 
+    dataValidationEnabled: {{ .Values.backupDaemon.dataValidationEnabled | default true }}
     granularBackupSchedule: {{ .Values.backupDaemon.granularBackupSchedule }}
     {{- if .Values.backupDaemon.granularBackupScheduledDbs}}
     granularBackupScheduledDbs:

@@ -7,7 +7,7 @@ global:
 
 operator:
   name: operator-service
-  image: ghcr.io/netcracker/qubership-cassandra-supplementary:main
+  image: ghcr.io/netcracker/qubership-cassandra-operator:main
   initImage: ghcr.io/netcracker/qubership-credential-manager:main
   podName: cassandra-operator
   priorityClassName:

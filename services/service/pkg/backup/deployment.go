@@ -102,6 +102,7 @@ func (r *LegacyBackupDeployment) Execute(ctx core.ExecutionContext) error {
 			coreUtils.GetPlainTextEnvVar("CASSANDRA_MAJOR_VERSION", cm.Data["majorVersion"]),
 			coreUtils.GetPlainTextEnvVar("CONNECT_TIMEOUT", fmt.Sprint(spec.Spec.GocqlConnectTimeout)),
 			coreUtils.GetPlainTextEnvVar("REQUEST_TIMEOUT", fmt.Sprint(spec.Spec.GocqlTimeout)),
+			coreUtils.GetPlainTextEnvVar("DATA_VALIDATION_ENABLED", strconv.FormatBool(backup.DataValidationEnabled)),
 		)
 		if backup.S3.Enabled {
 			envs = append(envs,
@@ -145,6 +146,8 @@ func (r *LegacyBackupDeployment) Execute(ctx core.ExecutionContext) error {
 		utils.GetUriScheme(spec.Spec.TLS.Enabled),
 		volumeMounts,
 		volumes)
+
+	dc.Spec.Template.ObjectMeta.Labels[utils.BackupMarkerSupported] = "true"
 
 	err := credsManager.AddCredHashToPodTemplate([]string{spec.Spec.Cassandra.SecretName}, &dc.Spec.Template)
 	if err != nil {

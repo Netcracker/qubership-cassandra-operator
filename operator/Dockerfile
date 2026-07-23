@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.25.8-alpine3.23 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26.5-alpine3.24 AS builder
 
 ENV GOSUMDB=off GOPRIVATE=github.com/Netcracker
 
@@ -16,7 +16,7 @@ ARG TARGETOS TARGETARCH
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o ./bin/cassandra-operator \
     -gcflags all=-trimpath=${GOPATH} -asmflags all=-trimpath=${GOPATH} ./main.go
 
-FROM alpine:3.23
+FROM alpine:3.24
 
 ENV OPERATOR=/usr/local/bin/cassandra-operator \
     USER_UID=1001 \

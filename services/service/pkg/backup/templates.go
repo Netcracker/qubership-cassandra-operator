@@ -69,13 +69,14 @@ func BackupDeploymentTemplate(spec *v1nc.CassandraSupplService, namespace string
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: namespace,
 					Labels: map[string]string{
-						utils.Name:          utils.BackupDaemon,
-						utils.AppName:       utils.BackupDaemon,
-						utils.AppInstance:   spec.Spec.Instance,
-						utils.AppVersion:    spec.Spec.ArtifactDescriptorVersion,
-						utils.AppComponent:  "backend",
-						utils.AppPartOf:     spec.Spec.PartOf,
-						utils.AppTechnology: "python",
+						utils.Name:                  utils.BackupDaemon,
+						utils.AppName:               utils.BackupDaemon,
+						utils.AppInstance:           spec.Spec.Instance,
+						utils.AppVersion:            spec.Spec.ArtifactDescriptorVersion,
+						utils.AppComponent:          "backend",
+						utils.AppPartOf:             spec.Spec.PartOf,
+						utils.AppTechnology:         "python",
+						utils.BackupMarkerSupported: "true",
 					},
 				},
 				Spec: v1.PodSpec{

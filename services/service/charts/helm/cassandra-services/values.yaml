@@ -238,6 +238,7 @@ backupDaemon:
   granularBackupSchedule: '"0 3 * * *"'
   evictionPolicy: "0/1h,3d/7d,1m/1m,1y/delete"
   granularEvictionPolicy: "7d/delete"
+  dataValidationEnabled: true
 
 monitoringAgent:
   metricCollector: prometheus
@@ -272,7 +273,7 @@ monitoringAgent:
 robotTests:
   install: false
   dockerImage: ghcr.io/netcracker/qubership-cassandra-tests:main
-  tags: smokeORdbaas backup
+  tags: smokeORdbaas backup marker
   args:
     - run-robot
   replicationFactor: 3

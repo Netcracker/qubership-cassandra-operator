@@ -17,7 +17,6 @@ class CassandraClient(object):
     def __init__(self, host: str, username="admin", password="admin", port=9042,
                  tls_enabled=False, consistency_level=ConsistencyLevel.ONE,
                  caPath: str = "", connect_timeout=20, request_timeout=20):
-        print(f"Debug: host={host}, port={port}, tls_enabled={tls_enabled}")
         self.host = host
         self.port = int(port)
         self.username = username
@@ -45,11 +44,14 @@ class CassandraClient(object):
             ssl_context=ssl_context, connect_timeout=self.connect_timeout, protocol_version=5)
         self.session = self.cluster.connect()
 
-    def execute_query(self, query, retries=3, retry_delay=5):
+    def execute_query(self, query, parameters=None, retries=3, retry_delay=5):
         last_exc = None
         for attempt in range(retries):
             try:
-                rows = self.session.execute(query)
+                if parameters is None:
+                    rows = self.session.execute(query)
+                else:
+                    rows = self.session.execute(query, parameters)
                 return rows
             except (OperationTimedOut, NoHostAvailable, NoConnectionsAvailable) as e:
                 last_exc = e

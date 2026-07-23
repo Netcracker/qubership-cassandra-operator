@@ -1,4 +1,4 @@
-FROM thelastpickle/cassandra-reaper:4.0.1
+FROM thelastpickle/cassandra-reaper:4.2.3
 
 ENV USER_ID=999
 

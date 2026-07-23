@@ -6,6 +6,8 @@ import argparse
 import src.aws_restore
 import logging
 import src.backup_and_restore
+import src.cassandra_client
+import src.marker
 import src.os_utils
 
 
@@ -37,7 +39,7 @@ aws_region = get_secret("/var/run/secrets/aws/region")
 def parse_args():
     parser = argparse.ArgumentParser(description="Backup and Restore")
 
-    parser.add_argument('action', choices=['backup', 'restore', 'list-dbs'],
+    parser.add_argument('action', choices=['backup', 'restore', 'list-dbs', 'set-marker', 'get-marker'],
                         help='Action to perform')
     parser.add_argument('-f', dest='vault', help='Vault option')
     parser.add_argument('-d','--dbs', dest='databases', help='Databases option')
@@ -50,6 +52,7 @@ def parse_args():
     parser.add_argument('-table', dest='table', help='Table option')
     parser.add_argument('-restored_table_name', dest='restored_table_name',
                         help='Restored table name option')
+    parser.add_argument('-value', '--marker-value', dest='marker_value', help='Marker value')
 
     return parser.parse_args()
 
@@ -89,6 +92,39 @@ def main():
             print("\n".join(src.backup_and_restore.list_databases(args.vault)))
         except Exception as e:
             logging.error(f"ListDB has failed: {e}")
+            exit(1)
+    elif args.action == 'set-marker':
+        try:
+            hosts = src.os_utils.reformat_hostnames(os.getenv('CASSANDRA_HOSTS'))
+            client = src.cassandra_client.CassandraClient(
+                hosts,
+                username=CASSANDRA_USERNAME,
+                password=CASSANDRA_PASSWORD,
+                tls_enabled=TLS_ENABLED,
+                connect_timeout=int(os.getenv('CONNECT_TIMEOUT', 20)),
+                request_timeout=int(os.getenv('REQUEST_TIMEOUT', 20))
+            )
+            src.marker.set_marker(client, args.marker_value)
+            client.close()
+        except Exception as e:
+            logging.error(f"Set marker has failed: {e}")
+            exit(1)
+    elif args.action == 'get-marker':
+        try:
+            hosts = src.os_utils.reformat_hostnames(os.getenv('CASSANDRA_HOSTS'))
+            client = src.cassandra_client.CassandraClient(
+                hosts,
+                username=CASSANDRA_USERNAME,
+                password=CASSANDRA_PASSWORD,
+                tls_enabled=TLS_ENABLED,
+                connect_timeout=int(os.getenv('CONNECT_TIMEOUT', 20)),
+                request_timeout=int(os.getenv('REQUEST_TIMEOUT', 20))
+            )
+            value = src.marker.get_marker(client)
+            print(value)
+            client.close()
+        except Exception as e:
+            logging.error(f"Get marker has failed: {e}")
             exit(1)
     else:
         logging.error("Invalid action:", args.action)

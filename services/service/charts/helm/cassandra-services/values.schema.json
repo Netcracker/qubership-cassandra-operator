@@ -358,6 +358,7 @@
         },
         "evictionPolicy": { "type": "string" },
         "granularEvictionPolicy": { "type": "string" },
+        "dataValidationEnabled": { "type": "boolean" },
         "username": { "type": "string" },
         "password": { "type": "string" },
         "secretName": { "type": "string" },
@@ -389,6 +390,7 @@
       "additionalProperties": false,
       "properties": {
         "backupDaemonCASecretName": { "type": "string" },
+        "dataValidationEnabled": { "type": "boolean" },
         "duration": { "type": "integer" },
         "subjectAlternativeName": {
           "type": "object",
