@@ -224,6 +224,12 @@ Dictionary with:
   {{- end }}
 {{- end }}
 {{- end }}
+{{- if .storage.annotations }}
+  annotations:
+  {{- range $k, $v := .storage.annotations }}
+    {{ $k | quote }}: {{ $v | quote }}
+  {{- end }}
+{{- end }}
 {{- end -}}
 
 

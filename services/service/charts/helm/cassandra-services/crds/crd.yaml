@@ -254,6 +254,10 @@ spec:
                         type: array
                       waitPvcBound:
                         type: boolean
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
                     type: object
                   storageDirectory:
                     type: string

@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/Netcracker/qubership-cql-driver v0.0.2
 	github.com/Netcracker/qubership-credential-manager v0.0.11
-	github.com/Netcracker/qubership-nosqldb-operator-core v1.0.9
+	github.com/Netcracker/qubership-nosqldb-operator-core v1.0.9-0.20260806084632-dcbcaa2a2f28
 	github.com/gocql/gocql v1.6.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
@@ -111,3 +111,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+// replace github.com/Netcracker/qubership-nosqldb-operator-core => ../../qubership-nosqldb-operator-core

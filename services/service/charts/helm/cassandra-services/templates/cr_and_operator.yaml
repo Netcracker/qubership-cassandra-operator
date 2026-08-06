@@ -289,6 +289,12 @@ spec:
         {{- end }}
         {{- end }}
      {{- end }}
+      {{- if .Values.backupDaemon.storage.annotations }}
+      annotations:
+        {{- range $k, $v := .Values.backupDaemon.storage.annotations }}
+        {{ $k | quote }}: {{ $v | quote }}
+        {{- end }}
+      {{- end }}
 
     dataValidationEnabled: {{ .Values.backupDaemon.dataValidationEnabled | default true }}
     granularBackupSchedule: {{ .Values.backupDaemon.granularBackupSchedule }}
