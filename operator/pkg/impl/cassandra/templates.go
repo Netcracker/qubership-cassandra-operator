@@ -282,6 +282,18 @@ func CassandraReplicaTemplate(
 			ReadOnly:  false,
 		}
 		reaperContainer.VolumeMounts = append(reaperContainer.VolumeMounts, vm)
+
+		reaperContainer.VolumeMounts = append(reaperContainer.VolumeMounts, v13.VolumeMount{
+			Name:      "reaper-config",
+			MountPath: "/etc/cassandra-reaper/config",
+		})
+		volumes = append(volumes, v13.Volume{
+			Name: "reaper-config",
+			VolumeSource: v13.VolumeSource{
+				EmptyDir: &v13.EmptyDirVolumeSource{},
+			},
+		})
+
 		volumeProjection := v13.VolumeProjection{
 			ConfigMap: &v13.ConfigMapProjection{
 				LocalObjectReference: v13.LocalObjectReference{

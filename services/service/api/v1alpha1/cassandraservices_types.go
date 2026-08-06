@@ -61,7 +61,6 @@ type CassandraServiceSpec struct {
 	Dbaas                      `json:"dbaas"`
 	Monitoring                 `json:"monitoringAgent"`
 	RobotTests                 `json:"robotTests"`
-	VaultRegistration          types.VaultRegistration                    `json:"vaultRegistration" common:"true"`
 	ServiceAccountName         string                                     `json:"serviceAccountName"`
 	IpV6                       bool                                       `json:"ipV6,omitempty"`
 	StopOnFailedResourceUpdate bool                                       `json:"stopOnFailedResourceUpdate,omitempty"`
@@ -133,6 +132,7 @@ type Backup struct {
 	PriorityClassName          string                     `json:"priorityClassName,omitempty"`
 	S3                         S3backup                   `json:"s3,omitempty"`
 	TLS                        BackupDaemonTLS            `json:"tls,omitempty"`
+	DataValidationEnabled      bool                       `json:"dataValidationEnabled,omitempty"`
 }
 
 type S3backup struct {
@@ -194,12 +194,16 @@ type RobotTests struct {
 }
 
 type Monitoring struct {
-	Install            bool   `json:"install,omitempty"`
-	MonitoringInterval string `json:"monitoringInterval,omitempty"`
-	CollectionJitter   string `json:"collectionJitter,omitempty"`
-	FlushInterval      string `json:"flushInterval,omitempty"`
-	FlushJitter        string `json:"flushJitter,omitempty"`
-	MetricCollector    string `json:"metricCollector,omitempty"`
+	Install            bool                     `json:"install,omitempty"`
+	DockerImage        string                   `json:"dockerImage,omitempty"`
+	NodeLabels         map[string]string        `json:"nodeLabels,omitempty"`
+	PriorityClassName  string                   `json:"priorityClassName,omitempty"`
+	Resources          *v1.ResourceRequirements `json:"resources,omitempty"`
+	MonitoringInterval string                   `json:"monitoringInterval,omitempty"`
+	CollectionJitter   string                   `json:"collectionJitter,omitempty"`
+	FlushInterval      string                   `json:"flushInterval,omitempty"`
+	FlushJitter        string                   `json:"flushJitter,omitempty"`
+	MetricCollector    string                   `json:"metricCollector,omitempty"`
 }
 
 //+kubebuilder:object:root=true

@@ -102,12 +102,14 @@ func (r *LegacyBackupDeployment) Execute(ctx core.ExecutionContext) error {
 			coreUtils.GetPlainTextEnvVar("CASSANDRA_MAJOR_VERSION", cm.Data["majorVersion"]),
 			coreUtils.GetPlainTextEnvVar("CONNECT_TIMEOUT", fmt.Sprint(spec.Spec.GocqlConnectTimeout)),
 			coreUtils.GetPlainTextEnvVar("REQUEST_TIMEOUT", fmt.Sprint(spec.Spec.GocqlTimeout)),
+			coreUtils.GetPlainTextEnvVar("DATA_VALIDATION_ENABLED", strconv.FormatBool(backup.DataValidationEnabled)),
 		)
 		if backup.S3.Enabled {
 			envs = append(envs,
 				coreUtils.GetPlainTextEnvVar("S3_ENABLED", strconv.FormatBool(backup.S3.Enabled)),
 				coreUtils.GetPlainTextEnvVar("S3_BUCKET", backup.S3.BucketName),
 				coreUtils.GetPlainTextEnvVar("S3_URL", backup.S3.EndpointUrl),
+				coreUtils.GetPlainTextEnvVar("BACKUP_DAEMON_SECRETS_DIR", "/var/run/secrets/s3"),
 			)
 			if backup.S3.SslVerify {
 				envs = append(envs, coreUtils.GetPlainTextEnvVar("S3_CERTS_PATH", "/s3Certs"))
@@ -145,6 +147,8 @@ func (r *LegacyBackupDeployment) Execute(ctx core.ExecutionContext) error {
 		volumeMounts,
 		volumes)
 
+	dc.Spec.Template.ObjectMeta.Labels[utils.BackupMarkerSupported] = "true"
+
 	err := credsManager.AddCredHashToPodTemplate([]string{spec.Spec.Cassandra.SecretName}, &dc.Spec.Template)
 	if err != nil {
 		log.Error(fmt.Sprintf("can't add secret HASH to annotations for %s", dc.Name), zap.Error(err))
@@ -173,7 +177,6 @@ func (r *LegacyBackupDeployment) Execute(ctx core.ExecutionContext) error {
 		)
 	}
 
-	coreUtils.VaultPodSpec(&dc.Spec.Template.Spec, utils.BackupEntrypoint, spec.Spec.VaultRegistration)
 	utils.TLSClientSpecUpdate(&dc.Spec.Template.Spec, utils.RootCertPath, spec.Spec.TLS)
 	utils.TLSServerSpecUpdate(&dc.Spec.Template.Spec, spec.Spec.TLS, spec.Spec.Backup.TLS.BackupDaemonCASecretName, utils.ServerCertsPath)
 

@@ -1,6 +1,8 @@
 package backup
 
 import (
+	"strconv"
+
 	v1 "github.com/Netcracker/qubership-cassandra-supplementary/api/v1alpha1"
 	"github.com/Netcracker/qubership-cassandra-supplementary/pkg/utils"
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/constants"
@@ -40,6 +42,7 @@ func (r *BackupService) Execute(ctx core.ExecutionContext) error {
 		ObjectMeta: template.ObjectMeta,
 	})
 
+	log.Info("Data validation enabled backup_service_step", zap.Bool("dataValidationEnabled", spec.Spec.Backup.DataValidationEnabled))
 	labels := utils.BasicLabels{
 		AppName:              utils.BackupDaemon,
 		AppComponent:         "backend",
@@ -48,6 +51,10 @@ func (r *BackupService) Execute(ctx core.ExecutionContext) error {
 		AppManagedBy:         "operator",
 		AppManagedByOperator: "cassandra-services-operator",
 	}
+	if template.ObjectMeta.Labels == nil {
+		template.ObjectMeta.Labels = map[string]string{}
+	}
+	template.ObjectMeta.Labels["cloud-backuper.netcracker.com/data-validation-enabled"] = strconv.FormatBool(spec.Spec.Backup.DataValidationEnabled)
 	err := utils.CreateRuntimeObjectContextWrapper(ctx, template, template.ObjectMeta, labels)
 	core.PanicError(err, log.Error, "Backup service creation failed")
 

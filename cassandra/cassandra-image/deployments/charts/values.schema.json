@@ -1,0 +1,332 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "cassandra values",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "tls": { "$ref": "#/$defs/tls" },
+    "cassandra": { "$ref": "#/$defs/cassandra" },
+    "backupDaemon": { "$ref": "#/$defs/backupDaemon" },
+    "dbaas": { "$ref": "#/$defs/dbaas" },
+    "monitoringAgent": { "$ref": "#/$defs/monitoringAgent" },
+    "reaper": { "$ref": "#/$defs/reaper" },
+    "robotTests": { "$ref": "#/$defs/robotTests" },
+    "waitTimeout": { "type": "integer", "default": 3600 },
+    "ipV6": { "type": "boolean", "default": false }
+  },
+  "$defs": {
+    "tls": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "optional": { "type": "boolean", "default": false },
+        "keystorePass": { "type": "string", "default": "cassandra" },
+        "rootCASecretName": { "type": "string", "default": "root-ca" },
+        "rootCAFileName": { "type": "string", "default": "ca.crt" },
+        "signedCRTFileName": { "type": "string", "default": "tls.crt" },
+        "privateKeyFileName": { "type": "string", "default": "tls.key" },
+        "generateCerts": { "$ref": "#/$defs/generateCerts" }
+      }
+    },
+    "generateCerts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "clusterIssuerName": { "type": "string", "default": "" }
+      }
+    },
+    "cassandra": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "install": { "type": "boolean", "default": true },
+        "username": { "type": "string", "default": "admin" },
+        "password": { "type": "string", "default": "admin" },
+        "secretName": { "type": "string", "default": "cassandra-secret.v1" },
+        "host": { "type": "string" },
+        "defaultKeyspace": { "type": "string" },
+        "consistency": { "type": "string" },
+        "tls": { "type": "boolean" },
+        "port": { "type": "integer" },
+        "auditLogEnabled": { "type": "boolean", "default": false },
+        "commitlogArchiving": { "$ref": "#/$defs/commitlogArchiving" },
+        "configuration": { "type": "string", "default": "" },
+        "jvm_options": { "type": "string", "default": "" },
+        "cassandra_env": { "type": "string", "default": "" },
+        "hostNetwork": { "type": "boolean", "default": false },
+        "priorityClassName": { "type": "string" },
+        "envs": { "type": "object", "additionalProperties": { "type": "string" } },
+        "smoketestKeyspace": { "type": "string", "default": "smoke_test" },
+        "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "affinity": { "$ref": "#/$defs/affinity" }
+      }
+    },
+    "commitlogArchiving": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "archive_command": { "type": "string" },
+        "restore_command": { "type": "string" },
+        "restore_directories": { "type": "string" }
+      }
+    },
+    "deploymentSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dataCenters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dataCenter" }
+        }
+      }
+    },
+    "dataCenter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "replicas": { "type": "integer" },
+        "seeds": { "type": "integer" },
+        "deploy": { "type": "boolean" },
+        "clusterDomain": { "type": "string" },
+        "seedList": { "type": "array", "items": { "type": "string" } },
+        "racks": { "type": "array", "items": { "type": "string" } },
+        "broadcastAddress": { "type": "array", "items": { "type": "string" } },
+        "listenAddress": { "type": "array", "items": { "type": "string" } },
+        "rpcBroadcastAddress": { "type": "array", "items": { "type": "string" } },
+        "rpcListenAddress": { "type": "array", "items": { "type": "string" } },
+        "removeNodes": { "type": "array", "items": { "type": "object", "additionalProperties": { "type": "string" } } },
+        "storage": {
+          "oneOf": [
+            { "$ref": "#/$defs/storageRequirements" },
+            { "type": "array", "items": { "$ref": "#/$defs/storageRequirements" } },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "storageRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "emptyDir": { "type": "boolean" },
+        "waitPvcBound": { "type": "boolean" },
+        "size": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        },
+        "volumes": { "type": "array", "items": { "type": "string" } },
+        "storageClasses": { "type": "array", "items": { "type": "string" } },
+        "nodeLabels": { "type": "array", "items": { "type": "object", "additionalProperties": { "type": "string" } } },
+        "matchLabelSelectors": { "type": "array", "items": { "type": "object", "additionalProperties": { "type": "string" } } },
+        "mountSettings": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "resourceRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requests": { "type": "object", "additionalProperties": { "type": "string" } },
+        "limits": { "type": "object", "additionalProperties": { "type": "string" } },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "request": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "affinity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nodeAffinity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "preferredDuringSchedulingIgnoredDuringExecution": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+            "requiredDuringSchedulingIgnoredDuringExecution": { "type": "object", "additionalProperties": true }
+          }
+        },
+        "podAffinity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "preferredDuringSchedulingIgnoredDuringExecution": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+            "requiredDuringSchedulingIgnoredDuringExecution": { "type": "array", "items": { "type": "object", "additionalProperties": true } }
+          }
+        },
+        "podAntiAffinity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "preferredDuringSchedulingIgnoredDuringExecution": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+            "requiredDuringSchedulingIgnoredDuringExecution": { "type": "array", "items": { "type": "object", "additionalProperties": true } }
+          }
+        }
+      }
+    },
+    "toleration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string" },
+        "operator": { "type": "string", "enum": ["Equal", "Exists"] },
+        "value": { "type": "string" },
+        "effect": { "type": "string", "enum": ["NoSchedule", "PreferNoSchedule", "NoExecute"] },
+        "tolerationSeconds": { "type": "integer" }
+      }
+    },
+    "backupDaemon": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "install": { "type": "boolean" },
+        "legacyMode": { "type": "boolean" },
+        "storageDirectory": { "type": "string" },
+        "dockerImage": { "type": "string" },
+        "nodeLabels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "backupSchedule": { "type": "string" },
+        "granularBackupSchedule": { "type": "string" },
+        "granularBackupScheduledDbs": { "type": "array", "items": { "type": "string" } },
+        "evictionPolicy": { "type": "string" },
+        "granularEvictionPolicy": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "secretName": { "type": "string" },
+        "storage": { "$ref": "#/$defs/storageRequirements" },
+        "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "priorityClassName": { "type": "string" },
+        "s3": { "$ref": "#/$defs/s3backup" },
+        "tls": { "$ref": "#/$defs/backupDaemonTLS" }
+      }
+    },
+    "s3backup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "secretName": { "type": "string" },
+        "bucketName": { "type": "string" },
+        "accessKeyId": { "type": "string" },
+        "accessKeySecret": { "type": "string" },
+        "endpointUrl": { "type": "string" },
+        "sslVerify": { "type": "boolean" },
+        "sslSecretName": { "type": "string" },
+        "sslCert": { "type": "string" }
+      }
+    },
+    "backupDaemonTLS": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "backupDaemonCASecretName": { "type": "string" }
+      }
+    },
+    "dbaas": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "install": { "type": "boolean" },
+        "dockerImage": { "type": "string" },
+        "nodeLabels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "adapter": { "$ref": "#/$defs/dbaasAdapterCredentials" },
+        "aggregator": { "$ref": "#/$defs/dbaasAggregatorCredentials" },
+        "priorityClassName": { "type": "string" },
+        "apiVersion": { "type": "string" },
+        "multiUsers": { "type": "boolean" },
+        "topologyStrategy": { "type": "string" },
+        "tls": { "$ref": "#/$defs/dbaasAdapterTLS" }
+      }
+    },
+    "dbaasAdapterCredentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "secretName": { "type": "string" }
+      }
+    },
+    "dbaasAggregatorCredentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "physicalDatabaseIdentifier": { "type": "string" },
+        "dbaasAggregatorRegistrationAddress": { "type": "string" },
+        "secretName": { "type": "string" }
+      }
+    },
+    "dbaasAdapterTLS": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dbaasAdapterCASecretName": { "type": "string" }
+      }
+    },
+    "monitoringAgent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "install": { "type": "boolean" },
+        "dockerImage": { "type": "string" },
+        "nodeLabels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "priorityClassName": { "type": "string" },
+        "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "monitoringInterval": { "type": "string" },
+        "collectionJitter": { "type": "string" },
+        "flushInterval": { "type": "string" },
+        "flushJitter": { "type": "string" },
+        "metricCollector": { "type": "string" }
+      }
+    },
+    "reaper": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "install": { "type": "boolean" },
+        "dockerImage": { "type": "string" },
+        "ingressHost": { "type": "string" },
+        "port": { "type": "integer" },
+        "type": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "secretName": { "type": "string" },
+        "envs": { "type": "object", "additionalProperties": { "type": "string" } },
+        "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "truststoreSecretName": { "type": "string" }
+      }
+    },
+    "robotTests": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "install": { "type": "boolean" },
+        "dockerImage": { "type": "string" },
+        "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "tags": { "type": "string" },
+        "iteration": { "type": "string" },
+        "prometheusUrl": { "type": "string" },
+        "args": { "type": "array", "items": { "type": "string" } },
+        "replicationFactor": { "type": "integer" },
+        "attemptsNumber": { "type": "integer" },
+        "nodeLabels": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    }
+  }
+}
