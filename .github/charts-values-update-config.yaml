@@ -7,8 +7,8 @@
 
 charts:
   - name: cassandra
-    chart_file: cassandra/cassandra-image/deployments/charts/cassandra_5.0.7/Chart.yaml
-    values_file: cassandra/cassandra-image/deployments/charts/cassandra_5.0.7/values.yaml
+    chart_file: cassandra/cassandra-image/deployments/charts/cassandra_5.0.8/Chart.yaml
+    values_file: cassandra/cassandra-image/deployments/charts/cassandra_5.0.8/values.yaml
     image:
       - ghcr.io/netcracker/docker-cassandra_5.0:${release}
   - name: cassandra-operator
