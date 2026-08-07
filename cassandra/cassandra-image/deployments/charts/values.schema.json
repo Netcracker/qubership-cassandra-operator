@@ -297,19 +297,13 @@
     },
     "reaper": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
-        "install": { "type": "boolean" },
-        "dockerImage": { "type": "string" },
         "ingressHost": { "type": "string" },
         "port": { "type": "integer" },
         "type": { "type": "string" },
-        "username": { "type": "string" },
-        "password": { "type": "string" },
-        "secretName": { "type": "string" },
         "envs": { "type": "object", "additionalProperties": { "type": "string" } },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "truststoreSecretName": { "type": "string" }
       }
     },
     "robotTests": {
