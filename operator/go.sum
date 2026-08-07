@@ -3,8 +3,8 @@ github.com/Netcracker/qubership-cql-driver v0.0.2 h1:IZEj1sEw9Rbaf9nef+ka+ECrFUt
 github.com/Netcracker/qubership-cql-driver v0.0.2/go.mod h1:s1hLTD1Lsd4AG/v5wef12/idR8GwVU+cEHA3WAPTVmk=
 github.com/Netcracker/qubership-credential-manager v0.0.11 h1:6ZTvgid2F07ZIXpitgGpcKM/E9ksl2E3ppzgEwF2yqY=
 github.com/Netcracker/qubership-credential-manager v0.0.11/go.mod h1:+L+rqzKzm/otrXb29M6bUo9z9yb70XNs+DUEGZSSzAc=
-github.com/Netcracker/qubership-nosqldb-operator-core v1.0.9-0.20260806084632-dcbcaa2a2f28 h1:sFUXOqXCeIoBzFppvk/45IU4zBUJyHdEU4YWJwqRwlU=
-github.com/Netcracker/qubership-nosqldb-operator-core v1.0.9-0.20260806084632-dcbcaa2a2f28/go.mod h1:uSoUX8yaoZy8/FJXIR4fXfTtaAhWPnLPEmehfK28hZ8=
+github.com/Netcracker/qubership-nosqldb-operator-core v1.0.10 h1:0f6UBsf9maOoUkCfpn6kO9842oIh/z+B34H1e3NWINQ=
+github.com/Netcracker/qubership-nosqldb-operator-core v1.0.10/go.mod h1:uSoUX8yaoZy8/FJXIR4fXfTtaAhWPnLPEmehfK28hZ8=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
