@@ -303,7 +303,7 @@
         "port": { "type": "integer" },
         "type": { "type": "string" },
         "envs": { "type": "object", "additionalProperties": { "type": "string" } },
-        "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "resources": { "$ref": "#/$defs/resourceRequirements" }
       }
     },
     "robotTests": {
