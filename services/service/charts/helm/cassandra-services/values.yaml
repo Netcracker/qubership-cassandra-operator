@@ -100,7 +100,7 @@ consulRegistration:
   Enabled: false
   #Host: consul-server.consul.svc
 # Host:
-  Port: 8500
+  Port: "8500"
 
 consulDiscoverySettings:
   cassandra:
@@ -283,7 +283,7 @@ robotTests:
   args:
     - run-robot
   replicationFactor: 3
-  iteration: 1
+  iteration: "1"
   attemptsNumber: 100
   prometheusUrl: ""
 # nodeLabels:
