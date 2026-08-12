@@ -1109,6 +1109,10 @@ spec:
                                     type: array
                                   waitPvcBound:
                                     type: boolean
+                                  annotations:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
                                 type: object
                               type: array
                           type: object
@@ -1216,16 +1220,6 @@ spec:
                     type: string
                   Port:
                     type: string
-                type: object
-              pvc:
-                properties:
-                  metadata:
-                    properties:
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        type: object
-                    type: object
                 type: object
               deletePVConUninstall:
                 type: boolean
