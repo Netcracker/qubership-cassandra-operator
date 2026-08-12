@@ -1,0 +1,14 @@
+{{- if and (.Values.cassandra.install) (.Values.cassandra.pdb) }}
+{{- $nameAndSelector := "cassandra-cluster" }}
+{{- $totalReplicas := 0 }}
+{{- range $dcKey, $dc := .Values.cassandra.deploymentSchema.dataCenters }}
+  {{if or ($dc.deploy) (eq ($dc.deploy | toString) "<nil>") }}
+  {{- $totalReplicas = add $totalReplicas $dc.replicas }}
+  {{- end }}
+{{- end }}
+{{- if gt $totalReplicas 0 }}
+{{- $minAvailable := add1 (div $totalReplicas 2) }}
+{{template "nosql.core.pdb" (dict "name" $nameAndSelector "labels" (dict "service" $nameAndSelector) "minAvailable" $minAvailable)}}
+{{- end }}
+---
+{{- end }}
