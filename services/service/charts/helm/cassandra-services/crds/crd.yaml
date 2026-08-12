@@ -254,10 +254,6 @@ spec:
                         type: array
                       waitPvcBound:
                         type: boolean
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        type: object
                     type: object
                   storageDirectory:
                     type: string
@@ -447,6 +443,16 @@ spec:
                 type: integer
               gocqlTimeout:
                 type: integer
+              pvc:
+                properties:
+                  metadata:
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
               imagePullPolicy:
                 description: PullPolicy describes a policy for if/when to pull a container
                   image

@@ -289,9 +289,9 @@ spec:
         {{- end }}
         {{- end }}
      {{- end }}
-      {{- if .Values.backupDaemon.storage.annotations }}
+      {{- if .Values.pvc.metadata.annotations }}
       annotations:
-        {{- range $k, $v := .Values.backupDaemon.storage.annotations }}
+        {{- range $k, $v := .Values.pvc.metadata.annotations }}
         {{ $k | quote }}: {{ $v | quote }}
         {{- end }}
       {{- end }}

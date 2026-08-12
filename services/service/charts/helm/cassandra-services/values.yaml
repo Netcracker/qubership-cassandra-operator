@@ -46,6 +46,17 @@ waitTimeout: 3600
 gocqlConnectTimeout: 20
 gocqlTimeout: 20
 
+# Optional annotations to apply to PVCs created for Cassandra storage.
+# Use this to protect PVCs from ArgoCD pruning or add custom metadata.
+# Example: Prevent ArgoCD from deleting PVCs during sync:
+# pvc:
+#   metadata:
+#     annotations:
+#       argocd.argoproj.io/sync-options: Prune=false
+pvc:
+  metadata:
+    annotations:
+
 ipV6: false
 stopOnFailedResourceUpdate: false
 # Specifies log level of operator pod
@@ -232,18 +243,6 @@ backupDaemon:
     #   - first-selector: first-value
     #     first-additional-selector: first-additional-value
   # matchLabelSelectors:
-
-    # Optional annotations to apply to PVCs created for backup storage.
-    # Use this to protect PVCs from ArgoCD pruning or add custom metadata.
-    # Example: Prevent ArgoCD from deleting PVCs during sync:
-    # annotations:
-    #   argocd.argoproj.io/sync-options: Prune=false
-
-    # Optional annotations to apply to PVCs created for backup storage.
-    # Use this to protect PVCs from ArgoCD pruning or add custom metadata.
-    # Example: Prevent ArgoCD from deleting PVCs during sync:
-    # annotations:
-    #   argocd.argoproj.io/sync-options: Prune=false
 
   backupSchedule: '"0 0 * * *"'
   granularBackupScheduledDbs: ""

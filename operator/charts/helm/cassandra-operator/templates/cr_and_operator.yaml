@@ -161,10 +161,10 @@ spec:
           storage:
           {{- if kindIs "slice" $dc.storage -}}
             {{- range $key, $storage := $dc.storage -}}
-            {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS ) | indent 12 }}
+            {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS "pvcAnnotations" $root.Values.pvc.metadata.annotations) | indent 12 }}
             {{- end -}}
           {{- else -}}
-            {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $dc.storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS ) | indent 12 }}
+            {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $dc.storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS "pvcAnnotations" $root.Values.pvc.metadata.annotations) | indent 12 }}
           {{- end -}}
           {{- end }}
           {{- if and ($dc.externalAddress) (not $dc.broadcastAddress) (not $dc.rpcBroadcastAddress) }}

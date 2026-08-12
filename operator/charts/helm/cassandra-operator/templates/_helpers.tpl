@@ -224,9 +224,9 @@ Dictionary with:
   {{- end }}
 {{- end }}
 {{- end }}
-{{- if .storage.annotations }}
+{{- if .pvcAnnotations }}
   annotations:
-  {{- range $k, $v := .storage.annotations }}
+  {{- range $k, $v := .pvcAnnotations }}
     {{ $k | quote }}: {{ $v | quote }}
   {{- end }}
 {{- end }}
