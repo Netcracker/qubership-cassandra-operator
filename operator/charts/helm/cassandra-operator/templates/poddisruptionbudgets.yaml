@@ -8,7 +8,7 @@
 {{- end }}
 {{- if gt $totalReplicas 0 }}
 {{- $minAvailable := add1 (div $totalReplicas 2) }}
-{{template "nosql.core.pdb" (dict "name" $nameAndSelector "labels" (dict "service" $nameAndSelector) "minAvailable" $minAvailable)}}
+{{template "nosql.core.pdb" (dict "name" $nameAndSelector "labels" (dict "service" $nameAndSelector) "minAvailable" $minAvailable "values" $)}}
 {{- end }}
 ---
 {{- end }}

@@ -1,10 +1,10 @@
 {{- if and (.Values.backupDaemon.install) (.Values.backupDaemon.pdb) }}
 {{- $nameAndSelector := "cassandra-backup-daemon" }}
-{{template "nosql.core.pdb" (dict "name" $nameAndSelector "labels" (dict "name" $nameAndSelector) "minAvailable" 1)}}
+{{template "nosql.core.pdb" (dict "name" $nameAndSelector "labels" (dict "name" $nameAndSelector) "minAvailable" 1 "values" $)}}
 ---
 {{- end }}
 {{- if and (.Values.dbaas.install) (.Values.dbaas.pdb) }}
 {{- $nameAndSelector := "dbaas-cassandra-adapter" }}
-{{template "nosql.core.pdb" (dict "name" $nameAndSelector "labels" (dict "name" $nameAndSelector) "minAvailable" 1)}}
+{{template "nosql.core.pdb" (dict "name" $nameAndSelector "labels" (dict "name" $nameAndSelector) "minAvailable" 1 "values" $)}}
 ---
 {{- end }}
