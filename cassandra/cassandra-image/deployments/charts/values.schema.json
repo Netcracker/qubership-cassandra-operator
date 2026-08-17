@@ -56,8 +56,8 @@
         "jvm_options": { "type": "string", "default": "" },
         "cassandra_env": { "type": "string", "default": "" },
         "hostNetwork": { "type": "boolean", "default": false },
-        "priorityClassName": { "type": ["string", "null"] },
-        "envs": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
+        "priorityClassName": { "type": "string" },
+        "envs": { "type": "object", "additionalProperties": { "type": "string" } },
         "smoketestKeyspace": { "type": "string", "default": "smoke_test" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
         "affinity": { "$ref": "#/$defs/affinity" }
@@ -68,13 +68,13 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean", "default": false },
-        "archive_command": { "type": ["string", "null"] },
-        "restore_command": { "type": ["string", "null"] },
-        "restore_directories": { "type": ["string", "null"] }
+        "archive_command": { "type": "string" },
+        "restore_command": { "type": "string" },
+        "restore_directories": { "type": "string" }
       }
     },
     "deploymentSchema": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "dataCenters": {
@@ -87,18 +87,18 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "name": { "type": ["string", "null"] },
-        "replicas": { "type": ["integer", "null"] },
-        "seeds": { "type": ["integer", "null"] },
-        "deploy": { "type": ["boolean", "null"] },
-        "clusterDomain": { "type": ["string", "null"] },
-        "seedList": { "type": ["array", "null"], "items": { "type": "string" } },
-        "racks": { "type": ["array", "null"], "items": { "type": "string" } },
-        "broadcastAddress": { "type": ["array", "null"], "items": { "type": "string" } },
-        "listenAddress": { "type": ["array", "null"], "items": { "type": "string" } },
-        "rpcBroadcastAddress": { "type": ["array", "null"], "items": { "type": "string" } },
-        "rpcListenAddress": { "type": ["array", "null"], "items": { "type": "string" } },
-        "removeNodes": { "type": ["array", "null"], "items": { "type": "object", "additionalProperties": { "type": "string" } } },
+        "name": { "type": "string" },
+        "replicas": { "type": "integer" },
+        "seeds": { "type": "integer" },
+        "deploy": { "type": "boolean" },
+        "clusterDomain": { "type": "string" },
+        "seedList": { "type": "array", "items": { "type": "string" } },
+        "racks": { "type": "array", "items": { "type": "string" } },
+        "broadcastAddress": { "type": "array", "items": { "type": "string" } },
+        "listenAddress": { "type": "array", "items": { "type": "string" } },
+        "rpcBroadcastAddress": { "type": "array", "items": { "type": "string" } },
+        "rpcListenAddress": { "type": "array", "items": { "type": "string" } },
+        "removeNodes": { "type": "array", "items": { "type": "object", "additionalProperties": { "type": "string" } } },
         "storage": {
           "oneOf": [
             { "$ref": "#/$defs/storageRequirements" },
@@ -112,8 +112,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "emptyDir": { "type": ["boolean", "null"] },
-        "waitPvcBound": { "type": ["boolean", "null"] },
+        "emptyDir": { "type": "boolean" },
+        "waitPvcBound": { "type": "boolean" },
         "size": {
           "oneOf": [
             { "type": "string" },
@@ -121,15 +121,15 @@
             { "type": "null" }
           ]
         },
-        "volumes": { "type": ["array", "null"], "items": { "type": "string" } },
-        "storageClasses": { "type": ["array", "null"], "items": { "type": "string" } },
-        "nodeLabels": { "type": ["array", "null"], "items": { "type": "object", "additionalProperties": { "type": "string" } } },
-        "matchLabelSelectors": { "type": ["array", "null"], "items": { "type": "object", "additionalProperties": { "type": "string" } } },
-        "mountSettings": { "type": ["object", "null"], "additionalProperties": true }
+        "volumes": { "type": "array", "items": { "type": "string" } },
+        "storageClasses": { "type": "array", "items": { "type": "string" } },
+        "nodeLabels": { "type": "array", "items": { "type": "object", "additionalProperties": { "type": "string" } } },
+        "matchLabelSelectors": { "type": "array", "items": { "type": "object", "additionalProperties": { "type": "string" } } },
+        "mountSettings": { "type": "object", "additionalProperties": true }
       }
     },
     "resourceRequirements": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "requests": { "type": "object", "additionalProperties": { "type": "string" } },
@@ -149,7 +149,7 @@
       }
     },
     "affinity": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "nodeAffinity": {
@@ -190,142 +190,136 @@
       }
     },
     "backupDaemon": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "install": { "type": ["boolean", "null"] },
-        "legacyMode": { "type": ["boolean", "null"] },
-        "storageDirectory": { "type": ["string", "null"] },
-        "dockerImage": { "type": ["string", "null"] },
-        "nodeLabels": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
-        "backupSchedule": { "type": ["string", "null"] },
-        "granularBackupSchedule": { "type": ["string", "null"] },
-        "granularBackupScheduledDbs": { "type": ["array", "null"], "items": { "type": "string" } },
-        "evictionPolicy": { "type": ["string", "null"] },
-        "granularEvictionPolicy": { "type": ["string", "null"] },
-        "username": { "type": ["string", "null"] },
-        "password": { "type": ["string", "null"] },
-        "secretName": { "type": ["string", "null"] },
+        "install": { "type": "boolean" },
+        "legacyMode": { "type": "boolean" },
+        "storageDirectory": { "type": "string" },
+        "dockerImage": { "type": "string" },
+        "nodeLabels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "backupSchedule": { "type": "string" },
+        "granularBackupSchedule": { "type": "string" },
+        "granularBackupScheduledDbs": { "type": "array", "items": { "type": "string" } },
+        "evictionPolicy": { "type": "string" },
+        "granularEvictionPolicy": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "secretName": { "type": "string" },
         "storage": { "$ref": "#/$defs/storageRequirements" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "priorityClassName": { "type": ["string", "null"] },
+        "priorityClassName": { "type": "string" },
         "s3": { "$ref": "#/$defs/s3backup" },
         "tls": { "$ref": "#/$defs/backupDaemonTLS" }
       }
     },
     "s3backup": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": ["boolean", "null"] },
-        "secretName": { "type": ["string", "null"] },
-        "bucketName": { "type": ["string", "null"] },
-        "accessKeyId": { "type": ["string", "null"] },
-        "accessKeySecret": { "type": ["string", "null"] },
-        "endpointUrl": { "type": ["string", "null"] },
-        "sslVerify": { "type": ["boolean", "null"] },
-        "sslSecretName": { "type": ["string", "null"] },
-        "sslCert": { "type": ["string", "null"] }
+        "enabled": { "type": "boolean" },
+        "secretName": { "type": "string" },
+        "bucketName": { "type": "string" },
+        "accessKeyId": { "type": "string" },
+        "accessKeySecret": { "type": "string" },
+        "endpointUrl": { "type": "string" },
+        "sslVerify": { "type": "boolean" },
+        "sslSecretName": { "type": "string" },
+        "sslCert": { "type": "string" }
       }
     },
     "backupDaemonTLS": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "backupDaemonCASecretName": { "type": ["string", "null"] }
+        "backupDaemonCASecretName": { "type": "string" }
       }
     },
     "dbaas": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "install": { "type": ["boolean", "null"] },
-        "dockerImage": { "type": ["string", "null"] },
-        "nodeLabels": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
+        "install": { "type": "boolean" },
+        "dockerImage": { "type": "string" },
+        "nodeLabels": { "type": "object", "additionalProperties": { "type": "string" } },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
         "adapter": { "$ref": "#/$defs/dbaasAdapterCredentials" },
         "aggregator": { "$ref": "#/$defs/dbaasAggregatorCredentials" },
-        "priorityClassName": { "type": ["string", "null"] },
-        "apiVersion": { "type": ["string", "null"] },
-        "multiUsers": { "type": ["boolean", "null"] },
-        "topologyStrategy": { "type": ["string", "null"] },
+        "priorityClassName": { "type": "string" },
+        "apiVersion": { "type": "string" },
+        "multiUsers": { "type": "boolean" },
+        "topologyStrategy": { "type": "string" },
         "tls": { "$ref": "#/$defs/dbaasAdapterTLS" }
       }
     },
     "dbaasAdapterCredentials": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "username": { "type": ["string", "null"] },
-        "password": { "type": ["string", "null"] },
-        "secretName": { "type": ["string", "null"] }
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "secretName": { "type": "string" }
       }
     },
     "dbaasAggregatorCredentials": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "username": { "type": ["string", "null"] },
-        "password": { "type": ["string", "null"] },
-        "physicalDatabaseIdentifier": { "type": ["string", "null"] },
-        "dbaasAggregatorRegistrationAddress": { "type": ["string", "null"] },
-        "secretName": { "type": ["string", "null"] }
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "physicalDatabaseIdentifier": { "type": "string" },
+        "dbaasAggregatorRegistrationAddress": { "type": "string" },
+        "secretName": { "type": "string" }
       }
     },
     "dbaasAdapterTLS": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "dbaasAdapterCASecretName": { "type": ["string", "null"] }
+        "dbaasAdapterCASecretName": { "type": "string" }
       }
     },
     "monitoringAgent": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "install": { "type": ["boolean", "null"] },
-        "dockerImage": { "type": ["string", "null"] },
-        "nodeLabels": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
-        "priorityClassName": { "type": ["string", "null"] },
+        "install": { "type": "boolean" },
+        "dockerImage": { "type": "string" },
+        "nodeLabels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "priorityClassName": { "type": "string" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "monitoringInterval": { "type": ["string", "null"] },
-        "collectionJitter": { "type": ["string", "null"] },
-        "flushInterval": { "type": ["string", "null"] },
-        "flushJitter": { "type": ["string", "null"] },
-        "metricCollector": { "type": ["string", "null"] }
+        "monitoringInterval": { "type": "string" },
+        "collectionJitter": { "type": "string" },
+        "flushInterval": { "type": "string" },
+        "flushJitter": { "type": "string" },
+        "metricCollector": { "type": "string" }
       }
     },
     "reaper": {
-      "type": ["object", "null"],
-      "additionalProperties": false,
+      "type": "object",
+      "additionalProperties": true,
       "properties": {
-        "install": { "type": ["boolean", "null"] },
-        "dockerImage": { "type": ["string", "null"] },
-        "ingressHost": { "type": ["string", "null"] },
-        "port": { "type": ["integer", "null"] },
-        "type": { "type": ["string", "null"] },
-        "username": { "type": ["string", "null"] },
-        "password": { "type": ["string", "null"] },
-        "secretName": { "type": ["string", "null"] },
-        "envs": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
-        "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "truststoreSecretName": { "type": ["string", "null"] }
+        "ingressHost": { "type": "string" },
+        "port": { "type": "integer" },
+        "type": { "type": "string" },
+        "envs": { "type": "object", "additionalProperties": { "type": "string" } },
+        "resources": { "$ref": "#/$defs/resourceRequirements" }
       }
     },
     "robotTests": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "install": { "type": ["boolean", "null"] },
-        "dockerImage": { "type": ["string", "null"] },
+        "install": { "type": "boolean" },
+        "dockerImage": { "type": "string" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "tags": { "type": ["string", "null"] },
-        "iteration": { "type": ["string", "null"] },
-        "prometheusUrl": { "type": ["string", "null"] },
-        "args": { "type": ["array", "null"], "items": { "type": "string" } },
-        "replicationFactor": { "type": ["integer", "null"] },
-        "attemptsNumber": { "type": ["integer", "null"] },
-        "nodeLabels": { "type": ["object", "null"], "additionalProperties": { "type": "string" } }
+        "tags": { "type": "string" },
+        "iteration": { "type": "string" },
+        "prometheusUrl": { "type": "string" },
+        "args": { "type": "array", "items": { "type": "string" } },
+        "replicationFactor": { "type": "integer" },
+        "attemptsNumber": { "type": "integer" },
+        "nodeLabels": { "type": "object", "additionalProperties": { "type": "string" } }
       }
     }
   }

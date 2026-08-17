@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 244,
+  "id": 463,
   "links": [],
   "panels": [
     {
@@ -188,7 +188,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg by (statefulset, label_app_kubernetes_io_version) (kube_statefulset_labels{namespace=\"$namespace\",  label_app_kubernetes_io_part_of=\"cassandra\"})",
+          "expr": "avg by (statefulset, label_app_kubernetes_io_version) (kube_statefulset_labels{namespace=\"$namespace\",  label_app_kubernetes_io_part_of=\"CASSANDRA\"})",
           "format": "table",
           "instant": true,
           "interval": "5m",
@@ -880,7 +880,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 63
+            "y": 215
           },
           "id": 23763572005,
           "options": {
@@ -987,7 +987,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 63
+            "y": 215
           },
           "id": 23763572007,
           "options": {
@@ -1117,7 +1117,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 70
+            "y": 222
           },
           "id": 23763572009,
           "options": {
@@ -1687,7 +1687,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 64
+            "y": 216
           },
           "id": 23763572019,
           "options": {
@@ -1817,7 +1817,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 64
+            "y": 216
           },
           "id": 23763572021,
           "options": {
@@ -1971,7 +1971,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 71
+            "y": 223
           },
           "id": 23763572023,
           "options": {
@@ -2442,7 +2442,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 60
+            "y": 212
           },
           "id": 225,
           "options": {
@@ -3132,7 +3132,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 61
+            "y": 213
           },
           "id": 162,
           "options": {
@@ -3550,7 +3550,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 62
+            "y": 214
           },
           "id": 74,
           "options": {
@@ -3972,7 +3972,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 63
+            "y": 215
           },
           "id": 54,
           "options": {
@@ -4398,7 +4398,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 64
+            "y": 216
           },
           "id": 132,
           "options": {
@@ -4535,7 +4535,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 64
+            "y": 216
           },
           "id": 131,
           "options": {
@@ -4672,7 +4672,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 72
+            "y": 224
           },
           "id": 133,
           "options": {
@@ -4809,7 +4809,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 81
+            "y": 233
           },
           "id": 134,
           "options": {
@@ -4976,7 +4976,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 89
+            "y": 241
           },
           "id": 136,
           "options": {
@@ -5143,7 +5143,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 89
+            "y": 241
           },
           "id": 145,
           "options": {
@@ -5310,7 +5310,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 89
+            "y": 241
           },
           "id": 146,
           "options": {
@@ -5447,7 +5447,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 98
+            "y": 250
           },
           "id": 139,
           "options": {
@@ -5584,7 +5584,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 98
+            "y": 250
           },
           "id": 140,
           "options": {
@@ -5721,7 +5721,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 106
+            "y": 258
           },
           "id": 141,
           "options": {
@@ -5858,7 +5858,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 106
+            "y": 258
           },
           "id": 142,
           "options": {
@@ -5995,7 +5995,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 114
+            "y": 266
           },
           "id": 143,
           "options": {
@@ -6132,7 +6132,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 123
+            "y": 275
           },
           "id": 144,
           "options": {
@@ -6299,7 +6299,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 131
+            "y": 283
           },
           "id": 147,
           "options": {
@@ -6466,7 +6466,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 131
+            "y": 283
           },
           "id": 137,
           "options": {
@@ -6633,7 +6633,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 131
+            "y": 283
           },
           "id": 138,
           "options": {
@@ -7346,7 +7346,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 66
+            "y": 218
           },
           "id": 157,
           "options": {
@@ -7483,7 +7483,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 72
+            "y": 224
           },
           "id": 158,
           "options": {
@@ -7620,7 +7620,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 72
+            "y": 224
           },
           "id": 160,
           "options": {
@@ -7757,7 +7757,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 78
+            "y": 230
           },
           "id": 159,
           "options": {
@@ -8179,7 +8179,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 67
+            "y": 219
           },
           "id": 20,
           "options": {
@@ -8315,7 +8315,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 67
+            "y": 219
           },
           "id": 22,
           "options": {
@@ -8802,7 +8802,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 38
+            "y": 167
           },
           "id": 23763572025,
           "options": {
@@ -8966,7 +8966,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 61
+            "y": 213
           },
           "id": 163,
           "options": {
@@ -9103,7 +9103,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 61
+            "y": 213
           },
           "id": 94,
           "options": {
@@ -9239,7 +9239,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 71
+            "y": 223
           },
           "id": 28,
           "options": {
@@ -9375,7 +9375,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 71
+            "y": 223
           },
           "id": 84,
           "options": {
@@ -9526,7 +9526,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 62
+            "y": 214
           },
           "id": 167,
           "options": {
@@ -9663,7 +9663,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 62
+            "y": 214
           },
           "id": 168,
           "options": {
@@ -9800,7 +9800,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 72
+            "y": 224
           },
           "id": 170,
           "options": {
@@ -9946,7 +9946,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 72
+            "y": 224
           },
           "id": 169,
           "options": {
@@ -10097,7 +10097,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 63
+            "y": 215
           },
           "id": 174,
           "options": {
@@ -10234,7 +10234,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 63
+            "y": 215
           },
           "id": 175,
           "options": {
@@ -10371,7 +10371,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 73
+            "y": 225
           },
           "id": 176,
           "options": {
@@ -10508,7 +10508,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 73
+            "y": 225
           },
           "id": 177,
           "options": {
@@ -10659,7 +10659,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 64
+            "y": 216
           },
           "id": 181,
           "options": {
@@ -10796,7 +10796,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 64
+            "y": 216
           },
           "id": 182,
           "options": {
@@ -10933,7 +10933,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 74
+            "y": 226
           },
           "id": 183,
           "options": {
@@ -11084,7 +11084,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 65
+            "y": 217
           },
           "id": 185,
           "options": {
@@ -11235,7 +11235,7 @@
             "h": 10,
             "w": 11,
             "x": 0,
-            "y": 66
+            "y": 218
           },
           "id": 120,
           "options": {
@@ -11371,7 +11371,7 @@
             "h": 10,
             "w": 13,
             "x": 11,
-            "y": 66
+            "y": 218
           },
           "id": 122,
           "options": {
@@ -11507,7 +11507,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 76
+            "y": 228
           },
           "id": 116,
           "options": {
@@ -11657,7 +11657,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 67
+            "y": 219
           },
           "id": 104,
           "options": {
@@ -11793,7 +11793,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 77
+            "y": 229
           },
           "id": 108,
           "options": {
@@ -11943,7 +11943,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 68
+            "y": 220
           },
           "id": 191,
           "options": {
@@ -12102,7 +12102,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 69
+            "y": 221
           },
           "id": 4,
           "options": {
@@ -12261,7 +12261,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 70
+            "y": 222
           },
           "id": 58,
           "options": {
@@ -12395,7 +12395,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 70
+            "y": 222
           },
           "id": 60,
           "options": {
@@ -12475,6 +12475,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -12563,7 +12564,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 71
+            "y": 33
           },
           "id": 24,
           "options": {
@@ -12574,11 +12575,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -12618,6 +12620,7 @@
                 "mode": "continuous-GrYlRd"
               },
               "custom": {
+                "axisPlacement": "auto",
                 "fillOpacity": 100,
                 "hideFrom": {
                   "legend": false,
@@ -12685,7 +12688,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 72
+            "y": 34
           },
           "id": 212,
           "options": {
@@ -12699,11 +12702,12 @@
             "rowHeight": 0.9,
             "showValue": "auto",
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "8.1.1",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -12748,6 +12752,7 @@
                 "axisLabel": "Cores",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 30,
                 "gradientMode": "none",
@@ -12877,7 +12882,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 76
+            "y": 38
           },
           "id": 213,
           "options": {
@@ -12892,11 +12897,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -12961,6 +12967,7 @@
                 "axisLabel": "Bytes",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -13090,7 +13097,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 76
+            "y": 38
           },
           "id": 214,
           "options": {
@@ -13105,11 +13112,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -13164,6 +13172,7 @@
                 "mode": "continuous-GrYlRd"
               },
               "custom": {
+                "axisPlacement": "auto",
                 "fillOpacity": 100,
                 "hideFrom": {
                   "legend": false,
@@ -13235,7 +13244,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 84
+            "y": 46
           },
           "id": 220,
           "options": {
@@ -13249,11 +13258,12 @@
             "rowHeight": 0.9,
             "showValue": "auto",
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "8.1.1",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -13300,6 +13310,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -13347,7 +13358,7 @@
             "h": 7,
             "w": 6,
             "x": 0,
-            "y": 88
+            "y": 50
           },
           "id": 221,
           "options": {
@@ -13360,20 +13371,23 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "backup_storage_last_successful_size{namespace=\"$namespace\",job=~\"cassandra-backup-daemon\"}",
+              "editorMode": "code",
+              "expr": "backup_storage_last_size{namespace=\"$namespace\",job=~\"cassandra-backup-daemon\"}",
               "interval": "",
               "intervalFactor": 1,
               "legendFormat": "ID: {{id}}",
+              "range": true,
               "refId": "A"
             }
           ],
@@ -13397,6 +13411,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -13444,7 +13459,7 @@
             "h": 7,
             "w": 6,
             "x": 6,
-            "y": 88
+            "y": 50
           },
           "id": 216,
           "options": {
@@ -13457,11 +13472,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -13494,6 +13510,7 @@
                 "axisLabel": "Bytes",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -13623,7 +13640,7 @@
             "h": 7,
             "w": 6,
             "x": 12,
-            "y": 88
+            "y": 50
           },
           "id": 218,
           "options": {
@@ -13636,11 +13653,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -13688,6 +13706,7 @@
                 "axisLabel": "Bytes",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -13817,7 +13836,7 @@
             "h": 7,
             "w": 6,
             "x": 18,
-            "y": 88
+            "y": 50
           },
           "id": 219,
           "options": {
@@ -13830,11 +13849,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -13890,6 +13910,7 @@
                 "mode": "continuous-GrYlRd"
               },
               "custom": {
+                "axisPlacement": "auto",
                 "fillOpacity": 100,
                 "hideFrom": {
                   "legend": false,
@@ -13957,7 +13978,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 73
+            "y": 115
           },
           "id": 199,
           "options": {
@@ -13971,11 +13992,12 @@
             "rowHeight": 0.9,
             "showValue": "auto",
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "8.1.1",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -14020,6 +14042,7 @@
                 "axisLabel": "Cores",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 30,
                 "gradientMode": "none",
@@ -14149,7 +14172,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 77
+            "y": 119
           },
           "id": 195,
           "options": {
@@ -14164,11 +14187,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -14233,6 +14257,7 @@
                 "axisLabel": "Bytes",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -14362,7 +14387,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 77
+            "y": 119
           },
           "id": 201,
           "options": {
@@ -14377,11 +14402,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -14442,6 +14468,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -14488,7 +14515,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 85
+            "y": 127
           },
           "id": 203,
           "options": {
@@ -14503,11 +14530,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -14539,6 +14567,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -14585,7 +14614,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 85
+            "y": 127
           },
           "id": 206,
           "options": {
@@ -14600,11 +14629,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -14637,6 +14667,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -14684,7 +14715,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 92
+            "y": 134
           },
           "id": 207,
           "options": {
@@ -14697,11 +14728,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -14736,6 +14768,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -14782,7 +14815,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 92
+            "y": 134
           },
           "id": 208,
           "options": {
@@ -14795,11 +14828,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.4.5",
+          "pluginVersion": "11.6.5",
           "targets": [
             {
               "datasource": {
@@ -15025,5 +15059,5 @@
   "timezone": "",
   "title": "Cassandra Monitoring",
   "uid": "c34e342a7aa35c6741a0920ece237a6324a23f61",
-  "version": 5
+  "version": 6
 }

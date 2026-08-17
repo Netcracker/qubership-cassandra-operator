@@ -137,7 +137,7 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ .name | quote }}
   labels:
-    {{ include "cassandra.defaultLabels" . | nindent 4 }}
+    {{ include "cassandra.defaultLabels" .values | nindent 4 }}
 spec:
   minAvailable: {{ .minAvailable }}
   selector:
@@ -223,6 +223,12 @@ Dictionary with:
   {{- $arraystart = " " }}
   {{- end }}
 {{- end }}
+{{- end }}
+{{- if .pvcAnnotations }}
+  annotations:
+  {{- range $k, $v := .pvcAnnotations }}
+    {{ $k | quote }}: {{ $v | quote }}
+  {{- end }}
 {{- end }}
 {{- end -}}
 

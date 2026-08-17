@@ -14,7 +14,6 @@ import (
 	"go.uber.org/zap"
 	v1 "k8s.io/api/apps/v1"
 	v13 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -282,6 +281,18 @@ func CassandraReplicaTemplate(
 			ReadOnly:  false,
 		}
 		reaperContainer.VolumeMounts = append(reaperContainer.VolumeMounts, vm)
+
+		reaperContainer.VolumeMounts = append(reaperContainer.VolumeMounts, v13.VolumeMount{
+			Name:      "reaper-config",
+			MountPath: "/etc/cassandra-reaper/config",
+		})
+		volumes = append(volumes, v13.Volume{
+			Name: "reaper-config",
+			VolumeSource: v13.VolumeSource{
+				EmptyDir: &v13.EmptyDirVolumeSource{},
+			},
+		})
+
 		volumeProjection := v13.VolumeProjection{
 			ConfigMap: &v13.ConfigMapProjection{
 				LocalObjectReference: v13.LocalObjectReference{
@@ -402,9 +413,7 @@ func CassandraReplicaTemplate(
 						{
 							Name: "tmp",
 							VolumeSource: v13.VolumeSource{
-								EmptyDir: &v13.EmptyDirVolumeSource{
-									SizeLimit: resource.NewScaledQuantity(32, resource.Mega),
-								},
+								EmptyDir: &v13.EmptyDirVolumeSource{},
 							},
 						},
 						{

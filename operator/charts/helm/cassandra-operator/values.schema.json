@@ -19,7 +19,7 @@
     "securityContext": { "$ref": "#/$defs/podSecurityContext" },
     "imagePullPolicy": { "type": "string", "enum": ["Always", "Never", "IfNotPresent"] },
     "createIngress": { "type": "boolean", "default": false },
-    "publicCloud": { "type": ["string", "null"] },
+    "publicCloud": { "type": "string" },
     "reaper": { "$ref": "#/$defs/reaper" },
     "tls": { "$ref": "#/$defs/tls" },
     "cassandra": { "$ref": "#/$defs/cassandra" },
@@ -50,10 +50,10 @@
         "image": { "type": "string" },
         "initImage": { "type": "string" },
         "podName": { "type": "string" },
-        "priorityClassName": { "type": ["string", "null"] },
+        "priorityClassName": { "type": "string" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
         "nodeLabels": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         },
         "affinity": { "$ref": "#/$defs/affinity" },
@@ -89,14 +89,14 @@
       "properties": {
         "install": { "type": "boolean" },
         "dockerImage": { "type": "string" },
-        "ingressHost": { "type": ["string", "null"] },
+        "ingressHost": { "type": "string" },
         "port": { "type": "integer" },
         "type": { "type": "string" },
         "username": { "type": "string" },
         "password": { "type": "string" },
         "secretName": { "type": "string" },
         "envs": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
@@ -141,9 +141,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "tls_key": { "type": ["string", "null"] },
-        "tls_crt": { "type": ["string", "null"] },
-        "ca_crt": { "type": ["string", "null"] }
+        "tls_key": { "type": "string" },
+        "tls_crt": { "type": "string" },
+        "ca_crt": { "type": "string" }
       }
     },
     "cassandra": {
@@ -162,9 +162,9 @@
         "cassandra_env": { "type": "string", "default": "" },
         "hostNetwork": { "type": "boolean", "default": false },
         "pdb": { "type": "boolean" },
-        "priorityClassName": { "type": ["string", "null"] },
+        "priorityClassName": { "type": "string" },
         "envs": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         },
         "auditLogEnabled": { "type": "boolean", "default": false },
@@ -188,7 +188,7 @@
       }
     },
     "deploymentSchema": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "dataCenters": {
@@ -286,7 +286,7 @@
       "additionalProperties": false,
       "properties": {
         "create": { "type": "boolean" },
-        "name": { "type": ["string", "null"] }
+        "name": { "type": "string" }
       }
     },
     "resourceRequirements": {
@@ -310,7 +310,7 @@
       }
     },
     "affinity": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "nodeAffinity": {

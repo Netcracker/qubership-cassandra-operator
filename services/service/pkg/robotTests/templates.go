@@ -4,7 +4,6 @@ import (
 	"github.com/Netcracker/qubership-cassandra-supplementary/pkg/utils"
 	v12 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -31,9 +30,7 @@ func RobotTemplate(namespace string,
 		v1.Volume{
 			Name: "tmp",
 			VolumeSource: v1.VolumeSource{
-				EmptyDir: &v1.EmptyDirVolumeSource{
-					SizeLimit: resource.NewScaledQuantity(32, resource.Mega),
-				},
+				EmptyDir: &v1.EmptyDirVolumeSource{},
 			},
 		},
 	}

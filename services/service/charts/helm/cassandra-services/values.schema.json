@@ -19,7 +19,7 @@
     "securityContext": { "$ref": "#/$defs/podSecurityContext" },
     "imagePullPolicy": { "type": "string", "enum": ["Always", "Never", "IfNotPresent"] },
     "createIngress": { "type": "boolean", "default": false },
-    "publicCloud": { "type": ["string", "null"] },
+    "publicCloud": { "type": "string" },
     "tls": { "$ref": "#/$defs/tls" },
     "awsKeyspaces": { "$ref": "#/$defs/awsKeyspaces" },
     "consulRegistration": { "$ref": "#/$defs/consulRegistration" },
@@ -56,10 +56,10 @@
         "image": { "type": "string" },
         "initImage": { "type": "string" },
         "podName": { "type": "string" },
-        "priorityClassName": { "type": ["string", "null"] },
+        "priorityClassName": { "type": "string" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
         "nodeLabels": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         },
         "dockerImage": { "type": "string" }
@@ -107,9 +107,9 @@
         "deploymentSchema": { "$ref": "#/$defs/deploymentSchema" },
         "configuration": { "type": "string" },
         "hostNetwork": { "type": "boolean" },
-        "priorityClassName": { "type": ["string", "null"] },
+        "priorityClassName": { "type": "string" },
         "envs": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         },
         "auditLogEnabled": { "type": "boolean" },
@@ -126,7 +126,7 @@
       }
     },
     "deploymentSchema": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "dataCenters": {
@@ -228,9 +228,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "tls_key": { "type": ["string", "null"] },
-        "tls_crt": { "type": ["string", "null"] },
-        "ca_crt": { "type": ["string", "null"] }
+        "tls_key": { "type": "string" },
+        "tls_crt": { "type": "string" },
+        "ca_crt": { "type": "string" }
       }
     },
     "awsKeyspaces": {
@@ -250,8 +250,8 @@
       "additionalProperties": false,
       "properties": {
         "Enabled": { "type": "boolean" },
-        "Host": { "type": ["string", "null"] },
-        "Port": { "type": ["string", "integer"] },
+        "Host": { "type": "string" },
+        "Port": { "type": "string" },
         "AclEnabled": { "type": "boolean" },
         "AuthMethod": { "type": "string" }
       }
@@ -268,9 +268,9 @@
       "additionalProperties": true,
       "properties": {
         "Enabled": { "type": "boolean" },
-        "Name": { "type": ["string", "null"] },
-        "Tags": { "type": ["array", "null"], "items": { "type": "string" } },
-        "Meta": { "type": ["object", "null"], "additionalProperties": { "type": "string" } },
+        "Name": { "type": "string" },
+        "Tags": { "type": "array", "items": { "type": "string" } },
+        "Meta": { "type": "object", "additionalProperties": { "type": "string" } },
         "Check": { "type": "object", "additionalProperties": true }
       }
     },
@@ -282,13 +282,13 @@
         "pdb": { "type": "boolean" },
         "dockerImage": { "type": "string" },
         "nodeLabels": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
         "adapter": { "$ref": "#/$defs/dbaasAdapterCredentials" },
         "aggregator": { "$ref": "#/$defs/dbaasAggregatorCredentials" },
-        "priorityClassName": { "type": ["string", "null"] },
+        "priorityClassName": { "type": "string" },
         "apiVersion": { "type": "string" },
         "multiUsers": { "type": "boolean" },
         "allDCTopologyStrategy": { "type": "boolean" },
@@ -345,7 +345,7 @@
         "storageDirectory": { "type": "string" },
         "dockerImage": { "type": "string" },
         "nodeLabels": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         },
         "backupSchedule": { "type": "string" },
@@ -364,7 +364,7 @@
         "secretName": { "type": "string" },
         "storage": { "$ref": "#/$defs/storageRequirements" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "priorityClassName": { "type": ["string", "null"] },
+        "priorityClassName": { "type": "string" },
         "pdb": { "type": "boolean" },
         "s3": { "$ref": "#/$defs/s3backup" },
         "tls": { "$ref": "#/$defs/backupDaemonTLS" }
@@ -376,10 +376,10 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "secretName": { "type": "string" },
-        "bucketName": { "type": ["string", "null"] },
-        "accessKeyId": { "type": ["string", "null"] },
-        "accessKeySecret": { "type": ["string", "null"] },
-        "endpointUrl": { "type": ["string", "null"] },
+        "bucketName": { "type": "string" },
+        "accessKeyId": { "type": "string" },
+        "accessKeySecret": { "type": "string" },
+        "endpointUrl": { "type": "string" },
         "sslVerify": { "type": "boolean" },
         "sslSecretName": { "type": "string" },
         "sslCert": { "type": "string" }
@@ -410,7 +410,7 @@
         "install": { "type": "boolean" },
         "dockerImage": { "type": "string" },
         "nodeLabels": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         },
         "priorityClassName": { "type": "string" },
@@ -482,14 +482,14 @@
         "install": { "type": "boolean" },
         "dockerImage": { "type": "string" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "tags": { "type": ["string", "null"] },
-        "iteration": { "type": ["string", "integer"] },
+        "tags": { "type": "string" },
+        "iteration": { "type": "string" },
         "prometheusUrl": { "type": "string" },
         "args": { "type": "array", "items": { "type": "string" } },
         "replicationFactor": { "type": "integer" },
         "attemptsNumber": { "type": "integer" },
         "nodeLabels": {
-          "type": ["object", "null"],
+          "type": "object",
           "additionalProperties": { "type": "string" }
         }
       }
@@ -520,7 +520,7 @@
       "additionalProperties": false,
       "properties": {
         "create": { "type": "boolean" },
-        "name": { "type": ["string", "null"] }
+        "name": { "type": "string" }
       }
     },
     "resourceRequirements": {
@@ -544,7 +544,7 @@
       }
     },
     "affinity": {
-      "type": ["object", "null"],
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "nodeAffinity": {

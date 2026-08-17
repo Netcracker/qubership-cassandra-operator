@@ -7,7 +7,7 @@ operator:
   image: ghcr.io/netcracker/qubership-cassandra-supplementary:main
   initImage: ghcr.io/netcracker/qubership-credential-manager:main
   podName: cassandra-services
-  priorityClassName:
+# priorityClassName:
   resources:
     requests:
       cpu: 50m
@@ -15,7 +15,7 @@ operator:
     limits:
       cpu: 100m
       memory: 128Mi
-  nodeLabels:
+# nodeLabels:
 # PV recycler settings
 recycler:
   install: false
@@ -46,6 +46,17 @@ waitTimeout: 3600
 gocqlConnectTimeout: 20
 gocqlTimeout: 20
 
+# Optional annotations to apply to PVCs created for Cassandra storage.
+# Use this to protect PVCs from ArgoCD pruning or add custom metadata.
+# Example: Prevent ArgoCD from deleting PVCs during sync:
+# pvc:
+#   metadata:
+#     annotations:
+#       argocd.argoproj.io/sync-options: Prune=false
+pvc:
+  metadata:
+    annotations:
+
 ipV6: false
 stopOnFailedResourceUpdate: false
 # Specifies log level of operator pod
@@ -55,7 +66,7 @@ securityContext:
   fsGroup: 999
   runAsUser: 999
   runAsGroup: 1001
-  supplementalGroups:
+# supplementalGroups:
 
 # Specifies image pull policy
 imagePullPolicy: IfNotPresent
@@ -67,7 +78,7 @@ awsKeyspaces:
   secretName: aws-keyspaces-credentials
   host: cassandra.us-east-1.amazonaws.com
 
-publicCloud:
+# publicCloud:
 
 # tolerations Example
 # policies:
@@ -99,8 +110,8 @@ consulRegistration:
   AuthMethod: consul-k8s-auth-method
   Enabled: false
   #Host: consul-server.consul.svc
-  Host:
-  Port: 8500
+# Host:
+  Port: "8500"
 
 consulDiscoverySettings:
   cassandra:
@@ -108,10 +119,10 @@ consulDiscoverySettings:
       DeregisterCriticalServiceAfter: 100s
       Interval: 10s
       Timeout: 1s
-    Tags:
-    Meta:
+  # Tags:
+  # Meta:
     Enabled: false
-    Name:
+  # Name:
 
 dbaas:
   install: true
@@ -145,7 +156,7 @@ dbaas:
   # Mandatory docker image link
   dockerImage: ghcr.io/netcracker/qubership-cassandra-dbaas-adapter:main
 
-  priorityClassName:
+# priorityClassName:
 
   # Credentials
   adapter:
@@ -163,7 +174,7 @@ dbaas:
   # nodeLabels:
   #   label-name: value
   #   second-label: another-value
-  nodeLabels:
+# nodeLabels:
 
 backupDaemon:
   install: true
@@ -175,10 +186,10 @@ backupDaemon:
     sslVerify: false
     sslSecretName: "backup-daemon-s3-tls-secret"
     sslCert: ""
-    bucketName:
-    accessKeyId:
-    accessKeySecret:
-    endpointUrl:
+  # bucketName:
+  # accessKeyId:
+  # accessKeySecret:
+  # endpointUrl:
 
   pdb: false
 
@@ -192,7 +203,7 @@ backupDaemon:
   # Mandatory docker image link
   dockerImage: ghcr.io/netcracker/qubership-cassandra-backup-daemon:main
 
-  priorityClassName:
+# priorityClassName:
 
   username: backup
   password: backup
@@ -203,7 +214,7 @@ backupDaemon:
   # nodeLabels:
   #   label-name: value
   #   second-label: another-value
-  nodeLabels:
+# nodeLabels:
 
   resources:
     requests:
@@ -231,7 +242,7 @@ backupDaemon:
     # matchLabelSelectors:
     #   - first-selector: first-value
     #     first-additional-selector: first-additional-value
-    matchLabelSelectors:
+  # matchLabelSelectors:
 
   backupSchedule: '"0 0 * * *"'
   granularBackupScheduledDbs: ""
@@ -263,7 +274,7 @@ monitoringAgent:
   # nodeLabels:
   #   label-name: value
   #   second-label: another-value
-  nodeLabels:
+# nodeLabels:
 
   monitoringInterval: 20s
   collectionJitter: 0s
@@ -277,10 +288,10 @@ robotTests:
   args:
     - run-robot
   replicationFactor: 3
-  iteration: 1
+  iteration: "1"
   attemptsNumber: 100
   prometheusUrl: ""
-  nodeLabels:
+# nodeLabels:
   resources:
     requests:
       cpu: 200m

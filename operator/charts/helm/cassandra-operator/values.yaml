@@ -10,7 +10,7 @@ operator:
   image: ghcr.io/netcracker/qubership-cassandra-operator:main
   initImage: ghcr.io/netcracker/qubership-credential-manager:main
   podName: cassandra-operator
-  priorityClassName:
+# priorityClassName:
   resources:
     requests:
       cpu: 50m
@@ -18,8 +18,8 @@ operator:
     limits:
       cpu: 100m
       memory: 128Mi
-  nodeLabels:
-  affinity:
+# nodeLabels:
+# affinity:
 # PV recycler settings
 recycler:
   install: false
@@ -40,6 +40,17 @@ gocqlConnectTimeout: 20
 deletePVConUninstall: false
 gocqlTimeout: 20
 
+# Optional annotations to apply to PVCs created for Cassandra storage.
+# Use this to protect PVCs from ArgoCD pruning or add custom metadata.
+# Example: Prevent ArgoCD from deleting PVCs during sync:
+# pvc:
+#   metadata:
+#     annotations:
+#       argocd.argoproj.io/sync-options: Prune=false
+pvc:
+  metadata:
+    annotations:
+
 ipV6: false
 stopOnFailedResourceUpdate: false
 # Specifies log level of operator pod
@@ -49,14 +60,14 @@ securityContext:
   fsGroup: 999
   runAsUser: 999
   runAsGroup: 1001
-  supplementalGroups:
+# supplementalGroups:
 
 # Specifies image pull policy
 imagePullPolicy: IfNotPresent
 
 createIngress: false
 
-publicCloud:
+# publicCloud:
 
 # tolerations Example
 # policies:
@@ -75,8 +86,8 @@ reaper:
   truststoreSecretName: cassandra-truststore-reaper-secret
   truststorePassword: reaper_password
   dockerImage: ghcr.io/netcracker/netcracker/qubership-cassandra-reaper:main
-  ingressHost:
-  envs:
+# ingressHost:
+# envs:
   # Additional Env variables for docker container from https://hub.docker.com/r/thelastpickle/cassandra-reaper/
   # for example
   #  envs:
@@ -105,10 +116,10 @@ tls:
     subjectAlternativeName:
       additionalDnsNames: []
       additionalIpAddresses: []
-  certificates:
-    tls_key:
-    tls_crt:
-    ca_crt:
+# certificates:
+#   tls_key:
+#   tls_crt:
+#   ca_crt:
 
 cassandra:
   install: true
@@ -118,15 +129,15 @@ cassandra:
   # Mandatory docker image link
   dockerImage: ghcr.io/netcracker/cassandra_5.0:main
 
-  priorityClassName:
+# priorityClassName:
   # Keyspace Name
   smoketestKeyspace: smoke_test
   # Credentials
   username: admin
   password: admin
   secretName: cassandra-secret.v1
-  envs:
-  affinity:
+# envs:
+# affinity:
   # Additional Env variables for docker container
   # for example
   #  envs:
@@ -208,6 +219,7 @@ cassandra:
     #     Example:
     #     matchLabelSelectors:
     #       - common-selector: common-value
+
     #   broadcastAddress:
     #     -
     #     -
