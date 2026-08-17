@@ -1019,6 +1019,10 @@ spec:
                             storage:
                               items:
                                 properties:
+                                  annotations:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
                                   emptyDir:
                                     type: boolean
                                   matchLabelSelectors:
@@ -1109,10 +1113,6 @@ spec:
                                     type: array
                                   waitPvcBound:
                                     type: boolean
-                                  annotations:
-                                    additionalProperties:
-                                      type: string
-                                    type: object
                                 type: object
                               type: array
                           type: object
@@ -1196,6 +1196,9 @@ spec:
                     type: string
                   smoketestKeyspace:
                     type: string
+                  terminationGracePeriodSeconds:
+                    format: int64
+                    type: integer
                   username:
                     type: string
                 type: object
