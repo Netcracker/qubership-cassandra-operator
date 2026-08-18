@@ -135,9 +135,8 @@ spec:
           clusterDomain: {{if $dc.clusterDomain }}{{ $dc.clusterDomain }}{{ else }}cluster.local{{ end }}
           deploy: {{if or ($dc.deploy) (eq ($dc.deploy | toString) "<nil>") }}true{{ else }}false{{ end }}
           replicas: {{template "fromEnv" (dict "envName" $root.Values.INFRA_CASSANDRA_REPLICAS "default" $dc.replicas) }}
-          {{- if $dc.seeds }}
-          seeds: {{ $dc.seeds }}
-          {{- end }}
+          {{- $calculatedReplicas := or $dc.replicas 1 | int }}
+          seeds: {{ if le $calculatedReplicas 2 }}1{{ else }}2{{ end }}
           {{- if $dc.seedList }}
           seedList:
             {{- range $key, $value := $dc.seedList }}
@@ -162,10 +161,10 @@ spec:
           storage:
           {{- if kindIs "slice" $dc.storage -}}
             {{- range $key, $storage := $dc.storage -}}
-            {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS ) | indent 12 }}
+            {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS "pvcAnnotations" $root.Values.pvc.metadata.annotations) | indent 12 }}
             {{- end -}}
           {{- else -}}
-            {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $dc.storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS ) | indent 12 }}
+            {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $dc.storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS "pvcAnnotations" $root.Values.pvc.metadata.annotations) | indent 12 }}
           {{- end -}}
           {{- end }}
           {{- if and ($dc.externalAddress) (not $dc.broadcastAddress) (not $dc.rpcBroadcastAddress) }}

@@ -289,6 +289,12 @@ spec:
         {{- end }}
         {{- end }}
      {{- end }}
+      {{- if .Values.pvc.metadata.annotations }}
+      annotations:
+        {{- range $k, $v := .Values.pvc.metadata.annotations }}
+        {{ $k | quote }}: {{ $v | quote }}
+        {{- end }}
+      {{- end }}
 
     dataValidationEnabled: {{ .Values.backupDaemon.dataValidationEnabled | default true }}
     granularBackupSchedule: {{ .Values.backupDaemon.granularBackupSchedule }}

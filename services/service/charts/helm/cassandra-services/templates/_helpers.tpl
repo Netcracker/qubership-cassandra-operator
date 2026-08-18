@@ -139,7 +139,7 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ .name | quote }}
   labels:
-    {{ include "cassandra.defaultLabels" . | nindent 4 }}
+    {{ include "cassandra.defaultLabels" .values | nindent 4 }}
 spec:
   minAvailable: {{ .minAvailable }}
   selector:
