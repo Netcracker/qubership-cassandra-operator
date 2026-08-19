@@ -23,6 +23,7 @@
     "reaper": { "$ref": "#/$defs/reaper" },
     "tls": { "$ref": "#/$defs/tls" },
     "cassandra": { "$ref": "#/$defs/cassandra" },
+    "pvc": { "$ref": "#/$defs/pvc" },
     "policies": { "$ref": "#/$defs/policies" },
     "awsKeyspaces": { "$ref": "#/$defs/awsKeyspaces" },
     "serviceAccount": { "$ref": "#/$defs/serviceAccount" },
@@ -171,6 +172,7 @@
         "smoketestKeyspace": { "type": "string", "default": "smoke_test" },
         "commitlogArchiving": { "$ref": "#/$defs/commitlogArchiving" },
         "affinity": { "$ref": "#/$defs/affinity" },
+        "terminationGracePeriodSeconds": { "type": "integer", "default": 10 },
         "consistency": { "type": "string" },
         "defaultKeyspace": { "type": "string" },
         "host": { "type": "string" },
@@ -304,6 +306,22 @@
             "properties": {
               "name": { "type": "string" },
               "request": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "pvc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "annotations": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
             }
           }
         }

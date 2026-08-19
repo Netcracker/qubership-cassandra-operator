@@ -75,7 +75,6 @@ func CassandraReplicaTemplate(
 	podLabels[utils.Name] = name
 
 	var replicas int32 = 1
-	var tgps int64 = 10
 
 	var containers []v13.Container
 	allowPrivilegeEscalation := false
@@ -400,7 +399,7 @@ func CassandraReplicaTemplate(
 					Labels: podLabels,
 				},
 				Spec: v13.PodSpec{
-					TerminationGracePeriodSeconds: &tgps,
+					TerminationGracePeriodSeconds: spec.Spec.Cassandra.TerminationGracePeriodSeconds,
 					Affinity:                      affinity,
 					HostNetwork:                   hostNework,
 					PriorityClassName:             spec.Spec.PriorityClassName,

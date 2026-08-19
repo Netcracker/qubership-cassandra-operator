@@ -143,8 +143,9 @@ type Cassandra struct {
 	AuditLogEnabled   bool                     `json:"auditLogEnabled,omitempty"`
 	SmoketestKeyspace string                   `json:"smoketestKeyspace,omitempty"`
 	// enables audit log in cassandra 3
-	CommitlogArchiving CommitlogArchiving `json:"commitlogArchiving,omitempty"`
-	Affinity           *v1.Affinity       `json:"affinity,omitempty"`
+	CommitlogArchiving             CommitlogArchiving `json:"commitlogArchiving,omitempty"`
+	Affinity                       *v1.Affinity       `json:"affinity,omitempty"`
+	TerminationGracePeriodSeconds  *int64             `json:"terminationGracePeriodSeconds,omitempty"`
 }
 
 type CommitlogArchiving struct {

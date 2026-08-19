@@ -124,6 +124,7 @@ tls:
 cassandra:
   install: true
   hostNetwork: false
+  terminationGracePeriodSeconds: 10
   pdb: false
   auditLogEnabled: false
   # Mandatory docker image link

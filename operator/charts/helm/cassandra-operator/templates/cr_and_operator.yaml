@@ -117,6 +117,9 @@ spec:
     affinity:
       {{- toYaml .Values.cassandra.affinity | nindent 6 }}
     {{- end }}
+    {{- if .Values.cassandra.terminationGracePeriodSeconds }}
+    terminationGracePeriodSeconds: {{ .Values.cassandra.terminationGracePeriodSeconds }}
+    {{- end }}
     username: {{template "fromEnv" (dict "envName" .Values.INFRA_CASSANDRA_USERNAME "default" .Values.cassandra.username) }}
     secretName: {{ .Values.cassandra.secretName }}
     {{ template "getCassandraResourcesForProfile" (dict "envVar" .Values.CASSANDRA_PROFILE "dotVar" .Values.global.profile "values" .Values) }}
