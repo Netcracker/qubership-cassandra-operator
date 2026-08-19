@@ -1,0 +1,28 @@
+---
+
+# Charts release configuration file
+# This file is used to update the version of the helm charts and images in the values.yaml file
+# It is used in the helm-charts-release action
+# ${release} is replaced with the release version provided in the workflow
+
+charts:
+  - name: cassandra
+    chart_file: cassandra/cassandra-image/deployments/charts/cassandra_5.0.8/Chart.yaml
+    values_file: cassandra/cassandra-image/deployments/charts/cassandra_5.0.8/values.yaml
+    image:
+      - ghcr.io/netcracker/docker-cassandra_5.0:${release}
+  - name: cassandra-operator
+    chart_file: operator/charts/helm/cassandra-operator/Chart.yaml
+    values_file: operator/charts/helm/cassandra-operator/values.yaml
+    image:
+      - ghcr.io/netcracker/qubership-cassandra-operator:${release}
+      - ghcr.io/netcracker/qubership-cassandra-operator-transfer:${release}
+      - ghcr.io/netcracker/cassandra-docker-reaper:${release}
+  - name: cassandra-services
+    chart_file: services/service/charts/helm/cassandra-services/Chart.yaml
+    values_file: services/service/charts/helm/cassandra-services/values.yaml
+    image:
+      - ghcr.io/netcracker/cassandra-docker-dbaas-adapter:${release}
+      - ghcr.io/netcracker/cassandra-docker-backup-daemon:${release}
+      - ghcr.io/netcracker/cassandra-docker-tests:${release}
+      - ghcr.io/netcracker/cassandra-supplementary:${release}
