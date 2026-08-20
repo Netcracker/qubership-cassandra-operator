@@ -968,6 +968,42 @@ spec:
                     properties:
                       enabled:
                         type: boolean
+                      storage:
+                        description: Storage requirements for the dedicated commitlog archives PVC
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          emptyDir:
+                            type: boolean
+                          matchLabelSelectors:
+                            items:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            type: array
+                          nodeLabels:
+                            items:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            type: array
+                          size:
+                            items:
+                              type: string
+                            type: array
+                          storageClasses:
+                            items:
+                              type: string
+                            type: array
+                          volumes:
+                            items:
+                              type: string
+                            type: array
+                          waitPvcBound:
+                            type: boolean
+                        type: object
                     type: object
                   configuration:
                     type: string

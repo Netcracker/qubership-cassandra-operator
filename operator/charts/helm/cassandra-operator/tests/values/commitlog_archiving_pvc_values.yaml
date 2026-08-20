@@ -1,0 +1,32 @@
+cassandra:
+  install: true
+  username: cassandra
+  password: cassandra
+  commitlogArchiving:
+    enabled: true
+    storage:
+      size: 5Gi
+      storageClasses:
+        - standard
+  deploymentSchema:
+    dataCenters:
+      - name: dc1
+        deploy: true
+        replicas: 3
+        storage:
+          - nodeLabels:
+              - kubernetes.io/hostname: node-1
+              - kubernetes.io/hostname: node-2
+              - kubernetes.io/hostname: node-3
+            size: 10Gi
+            volumes:
+              - cassandra-data-0
+              - cassandra-data-1
+              - cassandra-data-2
+      - name: dc2
+        deploy: true
+        replicas: 2
+        storage:
+          - size: 10Gi
+            storageClasses:
+              - standard

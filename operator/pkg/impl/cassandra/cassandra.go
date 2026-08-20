@@ -132,6 +132,48 @@ func (r *CassandraBuilder) Build(ctx core.ExecutionContext) core.Executable {
 			}
 		}
 
+		// When commitlog archiving is enabled with a dedicated PVC, create one
+		// archive PVC per replica so archived commit logs never share space with
+		// the main data volume.
+		commitlogArchiving := spec.Spec.Cassandra.CommitlogArchiving
+		if commitlogArchiving.Enabled && commitlogArchiving.Storage != nil {
+			archivePvcStorage := commitlogArchiving.Storage
+
+			// Ensure the fixed mount settings are applied regardless of what is
+			// specified in the storage field (mountSettings is not user-configurable
+			// for the archive PVC — the path is fixed by design).
+			archiveMountSettings := &v13.VolumeMount{
+				Name:      utils.CassandraCommitlogArchivesMountName,
+				MountPath: utils.CassandraCommitlogArchivesMountPath,
+			}
+			archivePvcStorage.MountSettings = archiveMountSettings
+
+			archivePvcContext := fmt.Sprintf(utils.CassandraCommitlogArchivesPvcContext, index)
+			archivePvcNameFormat := fmt.Sprintf(utils.CassandraDCCommitlogArchivesPvcNameFormat, index) + "-%v"
+
+			for _, replica := range replicas {
+				archivePvcStep := &steps.CreatePVCStep{
+					Storage:           archivePvcStorage,
+					NameFormat:        archivePvcNameFormat,
+					LabelSelector:     pvcSelector,
+					ContextVarToStore: archivePvcContext,
+					PVCCount: func(ctx core.ExecutionContext) int {
+						return 1
+					},
+					WaitTimeout:  spec.Spec.WaitTimeout,
+					Owner:        nil,
+					WaitPVCBound: archivePvcStorage.WaitPVCBound,
+					StartIndex:   replica,
+				}
+
+				if spec.Spec.DeletePVConUninstall {
+					archivePvcStep.Owner = spec
+				}
+
+				cassandra.AddStep(archivePvcStep)
+			}
+		}
+
 	}
 
 	cassandra.AddStep(&CassandraServicesStep{})

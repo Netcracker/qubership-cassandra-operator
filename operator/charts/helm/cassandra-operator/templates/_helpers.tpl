@@ -232,6 +232,72 @@ Dictionary with:
 {{- end }}
 {{- end -}}
 
+{{/*
+[Cassandra Operator] Renders the commitlog-archives storage entry for a DC.
+Produces a storageRequirements block with fixed mountSettings so the archive
+PVC is always mounted at /var/lib/cassandra/commitlog_archives.
+Dictionary with:
+1. "pvc"            - commitlogArchiving.pvc values section
+2. "dotEnvSc"       - default StorageClass from environment
+3. "pvcAnnotations" - PVC annotations from pvc.metadata.annotations
+*/}}
+{{- define "nosql.cassandra.commitlogArchivingStorage" -}}
+{{- if eq "string" (printf "%T" .storage.size) }}
+- size:
+    - {{ .storage.size }}
+{{- else }}
+- size:
+{{- range $key, $value := .storage.size }}
+    - {{ $value | quote }}
+ {{- end }}
+{{- end }}
+  waitPvcBound: {{if or (not .storage.waitPvcBound) (eq (.storage.waitPvcBound | toString) "<nil>") }}false{{ else }}true{{ end }}
+  mountSettings:
+    name: "commitlog-archives"
+    mountPath: "/var/lib/cassandra/commitlog_archives"
+{{- if .storage.volumes }}
+  volumes:
+  {{- range $key, $value := .storage.volumes }}
+    - {{ $value | quote }}
+{{- end }}
+{{- end }}
+{{- if .storage.nodeLabels }}
+  nodeLabels:
+  {{- range $key, $value := .storage.nodeLabels }}
+  {{- $arraystart := "-" -}}
+  {{- range $k, $v := $value }}
+    {{ $arraystart }} {{ $k | quote }}: {{ $v | quote }}
+  {{- $arraystart = " " }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+{{- if .storage.storageClasses }}
+  storageClasses:
+  {{- range $key, $value := .storage.storageClasses }}
+    - {{ $value | quote }}
+  {{- end }}
+{{- else if .dotEnvSc }}
+  storageClasses:
+    - {{ .dotEnvSc | quote }}
+{{- end }}
+{{- if .storage.matchLabelSelectors }}
+  matchLabelSelectors:
+  {{- range $key, $value := .storage.matchLabelSelectors }}
+  {{- $arraystart := "-" -}}
+  {{- range $k, $v := $value }}
+    {{ $arraystart }} {{ $k | quote }}: {{ $v | quote }}
+  {{- $arraystart = " " }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- if .pvcAnnotations }}
+  annotations:
+  {{- range $k, $v := .pvcAnnotations }}
+    {{ $k | quote }}: {{ $v | quote }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
 
 {{- define "deployment.apiVersion" -}}
   {{- if semverCompare "<1.9-0" .Capabilities.KubeVersion.GitVersion -}}

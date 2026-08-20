@@ -169,6 +169,9 @@ spec:
           {{- else -}}
             {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $dc.storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS "pvcAnnotations" $root.Values.pvc.metadata.annotations) | indent 12 }}
           {{- end -}}
+          {{- if and $root.Values.cassandra.commitlogArchiving $root.Values.cassandra.commitlogArchiving.enabled $root.Values.cassandra.commitlogArchiving.storage -}}
+            {{include "nosql.cassandra.commitlogArchivingStorage" (dict "storage" $root.Values.cassandra.commitlogArchiving.storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS "pvcAnnotations" $root.Values.pvc.metadata.annotations) | indent 12 }}
+          {{- end -}}
           {{- end }}
           {{- if and ($dc.externalAddress) (not $dc.broadcastAddress) (not $dc.rpcBroadcastAddress) }}
           broadcastAddress:

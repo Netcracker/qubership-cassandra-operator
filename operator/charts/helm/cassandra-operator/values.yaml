@@ -245,6 +245,17 @@ cassandra:
     #     - int1
     #     - int2
     #     - int3
+  # commitlogArchiving enables Cassandra commit log archiving and, when storage is
+  # provided, creates a dedicated PVC per replica to store archived commit logs
+  # separately from the main data volume.
+  # commitlogArchiving:
+  #   enabled: true
+  #   storage:
+  #     size: 10Gi
+  #     storageClasses:
+  #       - standard
+  #     # nodeLabels, volumes, matchLabelSelectors, waitPvcBound are also supported
+
   # Custom Cassandra configuration
   configuration: |-
 

@@ -220,6 +220,16 @@ func (r *CassandraStatefulSetStep) Execute(ctx core.ExecutionContext) error {
 				pvcWithMountSettings[pvcNames[i%len(pvcNames)]] = storage.MountSettings
 			}
 
+			commitlogArchiving := spec.Spec.Cassandra.CommitlogArchiving
+			if commitlogArchiving.Enabled && commitlogArchiving.Storage != nil {
+				archivePvcContext := fmt.Sprintf(utils.CassandraCommitlogArchivesPvcContext, dc)
+				archivePvcNames := ctx.Get(archivePvcContext).([]string)
+				pvcWithMountSettings[archivePvcNames[i%len(archivePvcNames)]] = &v12.VolumeMount{
+					Name:      utils.CassandraCommitlogArchivesMountName,
+					MountPath: utils.CassandraCommitlogArchivesMountPath,
+				}
+			}
+
 			var tolerations []v12.Toleration
 			if spec.Spec.Policies != nil {
 				tolerations = spec.Spec.Policies.Tolerations

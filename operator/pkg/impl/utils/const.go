@@ -52,6 +52,10 @@ const TriesCount = "triesCount"
 const RetryTimeoutSec = "retryTimeout"
 
 const CassandraDCPvcNameFormat = "cassandra-data-dc%v"
+const CassandraDCCommitlogArchivesPvcNameFormat = "cassandra-commitlog-archives-dc%v"
+const CassandraCommitlogArchivesPvcContext = "commitlogArchivesPvc%v"
+const CassandraCommitlogArchivesMountName = "commitlog-archives"
+const CassandraCommitlogArchivesMountPath = "/var/lib/cassandra/commitlog_archives"
 
 const RootCertPath = "/usr/ssl/"
 
