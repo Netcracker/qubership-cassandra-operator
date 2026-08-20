@@ -55,7 +55,7 @@ gocqlTimeout: 20
 #       argocd.argoproj.io/sync-options: Prune=false
 pvc:
   metadata:
-    annotations:
+    annotations: {}
 
 ipV6: false
 stopOnFailedResourceUpdate: false
