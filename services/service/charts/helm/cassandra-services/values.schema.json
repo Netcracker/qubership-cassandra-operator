@@ -34,7 +34,8 @@
     "PART_OF": { "type": "string" },
     "DELIMITER": { "type": "string" },
     "ARTIFACT_DESCRIPTOR_VERSION": { "type": "string" },
-    "MANAGED_BY": { "type": "string" }
+    "MANAGED_BY": { "type": "string" },
+    "pvc": { "$ref": "#/$defs/pvc" }
   },
   "$defs": {
     "global": {
@@ -586,6 +587,22 @@
             "requiredDuringSchedulingIgnoredDuringExecution": {
               "type": "array",
               "items": { "type": "object", "additionalProperties": true }
+            }
+          }
+        }
+      }
+    },
+    "pvc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "annotations": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
             }
           }
         }
