@@ -5,7 +5,7 @@ cassandra:
   commitlogArchiving:
     enabled: true
     storage:
-      size: 5Gi
+      size: 1Gi
       storageClasses:
         - standard
   deploymentSchema:

@@ -251,7 +251,7 @@ cassandra:
   # commitlogArchiving:
   #   enabled: true
   #   storage:
-  #     size: 10Gi
+  #     size: 1Gi
   #     storageClasses:
   #       - standard
   #     # nodeLabels, volumes, matchLabelSelectors, waitPvcBound are also supported

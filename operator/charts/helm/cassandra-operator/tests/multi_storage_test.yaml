@@ -2,33 +2,26 @@ suite: Test Custom Resource Templating
 templates:
   - cr_and_operator.yaml
 tests:
-  - it: should inject commitlog-archives PVC storage entry when commitlogArchiving is enabled
+  - it: should set commitlogArchiving storage in CR when commitlogArchiving is enabled
     documentIndex: 0
     values:
       - ./values/commitlog_archiving_pvc_values.yaml
     asserts:
       - equal:
-          path: spec.cassandra.deploymentSchema.dataCenters[0].storage[1].size
-          value:
-            - 5Gi
+          path: spec.cassandra.commitlogArchiving.enabled
+          value: true
       - equal:
-          path: spec.cassandra.deploymentSchema.dataCenters[0].storage[1].mountSettings
+          path: spec.cassandra.commitlogArchiving.storage.size
           value:
-            name: commitlog-archives
-            mountPath: /var/lib/cassandra/commitlog_archives
+            - 1Gi
       - equal:
-          path: spec.cassandra.deploymentSchema.dataCenters[0].storage[1].storageClasses
+          path: spec.cassandra.commitlogArchiving.storage.storageClasses
           value:
             - standard
-      - equal:
-          path: spec.cassandra.deploymentSchema.dataCenters[1].storage[1].size
-          value:
-            - 5Gi
-      - equal:
-          path: spec.cassandra.deploymentSchema.dataCenters[1].storage[1].mountSettings
-          value:
-            name: commitlog-archives
-            mountPath: /var/lib/cassandra/commitlog_archives
+      - notExists:
+          path: spec.cassandra.deploymentSchema.dataCenters[0].storage[1]
+      - notExists:
+          path: spec.cassandra.deploymentSchema.dataCenters[1].storage[1]
 
   - it: should render CR for Multiple Storage scheme
     documentIndex: 0

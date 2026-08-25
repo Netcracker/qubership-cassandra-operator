@@ -169,9 +169,6 @@ spec:
           {{- else -}}
             {{include "nosql.cassandra.storage" (dict "dc" $dc "storage" $dc.storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS "pvcAnnotations" $root.Values.pvc.metadata.annotations) | indent 12 }}
           {{- end -}}
-          {{- if and $root.Values.cassandra.commitlogArchiving $root.Values.cassandra.commitlogArchiving.enabled $root.Values.cassandra.commitlogArchiving.storage -}}
-            {{include "nosql.cassandra.commitlogArchivingStorage" (dict "storage" $root.Values.cassandra.commitlogArchiving.storage "dotEnvSc" $root.Values.STORAGE_RWO_CLASS "pvcAnnotations" $root.Values.pvc.metadata.annotations) | indent 12 }}
-          {{- end -}}
           {{- end }}
           {{- if and ($dc.externalAddress) (not $dc.broadcastAddress) (not $dc.rpcBroadcastAddress) }}
           broadcastAddress:
@@ -221,6 +218,41 @@ spec:
 {{- if .Values.cassandra.commitlogArchiving }}
     commitlogArchiving:
       enabled: {{ .Values.cassandra.commitlogArchiving.enabled }}
+      {{- if .Values.cassandra.commitlogArchiving.storage }}
+      storage:
+        {{- with .Values.cassandra.commitlogArchiving.storage }}
+        size:
+          {{- $size := .size | default "1Gi" }}
+          {{- if kindIs "slice" $size }}
+          {{- range $size }}
+          - {{ . | quote }}
+          {{- end }}
+          {{- else }}
+          - {{ $size | quote }}
+          {{- end }}
+        {{- if .storageClasses }}
+        storageClasses:
+          {{- range .storageClasses }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+        {{- if .volumes }}
+        volumes:
+          {{- range .volumes }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+        {{- if .matchLabelSelectors }}
+        matchLabelSelectors:
+          {{- range .matchLabelSelectors }}
+          - {{ toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
+        {{- if .waitPvcBound }}
+        waitPvcBound: {{ .waitPvcBound }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
 {{- end }}
     configuration: |-
 {{- if .Values.ipV6 }}
