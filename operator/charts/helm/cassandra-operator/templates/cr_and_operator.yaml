@@ -242,6 +242,12 @@ spec:
           - {{ . | quote }}
           {{- end }}
         {{- end }}
+        {{- if .nodeLabels }}
+        nodeLabels:
+          {{- range .nodeLabels }}
+          - {{ toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
         {{- if .matchLabelSelectors }}
         matchLabelSelectors:
           {{- range .matchLabelSelectors }}
