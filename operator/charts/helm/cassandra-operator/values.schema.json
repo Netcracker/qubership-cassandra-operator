@@ -186,7 +186,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean", "default": false }
+        "enabled": { "type": "boolean", "default": false },
+        "storage": { "$ref": "#/$defs/storageRequirements" }
       }
     },
     "deploymentSchema": {
@@ -250,7 +251,8 @@
           "items": { "type": "object", "additionalProperties": { "type": "string" } }
         },
         "waitPvcBound": { "type": "boolean" },
-        "mountSettings": { "type": "object", "additionalProperties": true }
+        "mountSettings": { "type": "object", "additionalProperties": true },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } }
       }
     },
     "policies": {

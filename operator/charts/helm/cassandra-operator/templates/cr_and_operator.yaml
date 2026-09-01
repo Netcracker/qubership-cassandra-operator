@@ -218,6 +218,53 @@ spec:
 {{- if .Values.cassandra.commitlogArchiving }}
     commitlogArchiving:
       enabled: {{ .Values.cassandra.commitlogArchiving.enabled }}
+      {{- if .Values.cassandra.commitlogArchiving.storage }}
+      storage:
+        {{- with .Values.cassandra.commitlogArchiving.storage }}
+        size:
+          {{- $size := .size | default "1Gi" }}
+          {{- if kindIs "slice" $size }}
+          {{- range $size }}
+          - {{ . | quote }}
+          {{- end }}
+          {{- else }}
+          - {{ $size | quote }}
+          {{- end }}
+        {{- if .storageClasses }}
+        storageClasses:
+          {{- range .storageClasses }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+        {{- if .volumes }}
+        volumes:
+          {{- range .volumes }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+        {{- if .nodeLabels }}
+        nodeLabels:
+          {{- range .nodeLabels }}
+          - {{ toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
+        {{- if .matchLabelSelectors }}
+        matchLabelSelectors:
+          {{- range .matchLabelSelectors }}
+          - {{ toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
+        {{- if .waitPvcBound }}
+        waitPvcBound: {{ .waitPvcBound }}
+        {{- end }}
+        {{- end }}
+        {{- if $.Values.pvc.metadata.annotations }}
+        annotations:
+          {{- range $k, $v := $.Values.pvc.metadata.annotations }}
+          {{ $k | quote }}: {{ $v | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
 {{- end }}
     configuration: |-
 {{- if .Values.ipV6 }}

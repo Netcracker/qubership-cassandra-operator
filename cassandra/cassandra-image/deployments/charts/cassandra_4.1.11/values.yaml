@@ -14,9 +14,9 @@ cassandra:
 
   commitlogArchiving:
     enabled: false
-    archive_command: /bin/cp -f %path /var/lib/cassandra/data/cl_archives/%name
+    archive_command: /bin/cp -f %path /var/lib/cassandra/commitlog_archives/%name
     restore_command: /bin/cp -f %from %to
-    restore_directories: /var/lib/cassandra/data/cl_archives/
+    restore_directories: /var/lib/cassandra/commitlog_archives/
 
    # Custom Cassandra configuration
   configuration: |-

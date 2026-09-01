@@ -149,7 +149,8 @@ type Cassandra struct {
 }
 
 type CommitlogArchiving struct {
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool                       `json:"enabled,omitempty"`
+	Storage *types.StorageRequirements `json:"storage,omitempty"`
 }
 
 type Reaper struct {
