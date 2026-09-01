@@ -282,7 +282,7 @@ monitoringAgent:
   flushJitter: 5s
 
 robotTests:
-  install: false
+  install: true  # TODO: revert to false after adapter-S3 verification
   dockerImage: ghcr.io/netcracker/qubership-cassandra-tests:main
   tags: smokeORdbaas backup marker
   args:
@@ -300,7 +300,7 @@ robotTests:
       cpu: 200m
       memory: 256Mi
   atpReport:
-    enabled: false
+    enabled: true  # TODO: revert to false after adapter-S3 verification
     atpStorage:
       provider: "aws"
       serverUrl: "https://s3.amazonaws.com"
