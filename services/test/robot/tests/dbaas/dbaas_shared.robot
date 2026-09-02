@@ -33,7 +33,8 @@ Preparation dbaas shared
     Set Suite Variable  ${meta_value}
 
     @{connection_settings}=  Prepare Configuration For Dbaas Connection
-    Create Session    dbaassession    ${connection_settings[0]}://${DBAAS_ADAPTER_USERNAME}:${DBAAS_ADAPTER_PASSWORD}@${DBAAS_HOST}:${connection_settings[1]}    verify=${connection_settings[2]}
+    ${dbaas_auth}=    Create List    ${DBAAS_ADAPTER_USERNAME}    ${DBAAS_ADAPTER_PASSWORD}
+    Create Session    dbaassession    ${connection_settings[0]}://${DBAAS_HOST}:${connection_settings[1]}    auth=${dbaas_auth}    verify=${connection_settings[2]}
 
     Import Library  ${CURDIR}/../lib/CassandraLibrary.py  ${CASSANDRA_HOST}  ${CASSANDRA_USERNAME}  ${CASSANDRA_PASSWORD}  ${WAIT_TIMEOUT}
 
@@ -117,7 +118,8 @@ Check ${col} In ${keyspace} ${table}
     Log  ${table}
     ${result}=  Select From Table  ${keyspace}  ${table}
     Log  ${result}
-    Should Contain  ${result}  ${col}
+    ${result_str}=  Convert To String  ${result}
+    Should Contain  ${result_str}  ${col}
 
 Wait For ${job} Job Completion With ${attempts} Attempts
     ${last_index}    Evaluate    ${attempts} - 1

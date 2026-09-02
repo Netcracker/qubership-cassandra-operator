@@ -129,7 +129,8 @@ Test Wrong Credentials
     ${wronguser}=  Generate Random String  10
     ${wrongpass}=  Generate Random String  10
     @{connection_settings}=  Prepare Configuration For Dbaas Connection
-    Create Session    wrongcredssession    ${connection_settings[0]}://${wronguser}:${wrongpass}@${DBAAS_HOST}:${connection_settings[1]}  verify=${connection_settings[2]}
+    ${wrong_auth}=    Create List    ${wronguser}    ${wrongpass}
+    Create Session    wrongcredssession    ${connection_settings[0]}://${DBAAS_HOST}:${connection_settings[1]}    auth=${wrong_auth}    verify=${connection_settings[2]}
     ${response}=  GET On Session  wrongcredssession  /api/${dbaas_api_version}/dbaas/adapter/cassandra/databases  expected_status=401
     Should Be Equal As Strings  ${response.status_code}  401
 

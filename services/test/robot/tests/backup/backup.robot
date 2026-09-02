@@ -33,7 +33,8 @@ Preparation
     ...  http
     Set Suite Variable  ${PROTOCOL}
 
-    Create Session    backupsession    ${PROTOCOL}://${BACKUP_DAEMON_API_CREDENTIALS_USERNAME}:${BACKUP_DAEMON_API_CREDENTIALS_PASSWORD}@${BACKUP_HOST}:${port}   verify=${verify}
+    ${backup_auth}=    Create List    ${BACKUP_DAEMON_API_CREDENTIALS_USERNAME}    ${BACKUP_DAEMON_API_CREDENTIALS_PASSWORD}
+    Create Session    backupsession    ${PROTOCOL}://${BACKUP_HOST}:${port}    auth=${backup_auth}    verify=${verify}
 
 Cleanup
     DELETE KEYSPACE  ${CASSANDRA_KEYSPACE}
@@ -96,7 +97,8 @@ Test Wrong Backup Credentials
     [Tags]  backup  cassandra
     ${wronguser}=  Generate Random String  10
     ${wrongpass}=  Generate Random String  10
-    Create Session    wrongsess    ${PROTOCOL}://${wronguser}:${wrongpass}@${BACKUP_HOST}:${port}    verify=${verify}
+    ${wrong_auth}=    Create List    ${wronguser}    ${wrongpass}
+    Create Session    wrongsess    ${PROTOCOL}://${BACKUP_HOST}:${port}    auth=${wrong_auth}    verify=${verify}
     ${document}=  Set Variable  {"dbs":["${CASSANDRA_KEYSPACE}"]}
     ${resp}=  POST On Session  wrongsess  /backup  data=${document}  headers=${headers}  expected_status=401
     Log  ${resp}
