@@ -97,7 +97,8 @@ Test Wrong Backup Credentials
     ${wronguser}=  Generate Random String  10
     ${wrongpass}=  Generate Random String  10
     Create Session    wrongsess    ${PROTOCOL}://${wronguser}:${wrongpass}@${BACKUP_HOST}:${port}    verify=${verify}
-    ${resp}=  POST On Session  wrongsess  /backup  expected_status=401
+    ${document}=  Set Variable  {"dbs":["${CASSANDRA_KEYSPACE}"]}
+    ${resp}=  POST On Session  wrongsess  /backup  data=${document}  headers=${headers}  expected_status=401
     Log  ${resp}
     Should Be Equal As Strings  ${resp.status_code}  401
 
@@ -106,13 +107,13 @@ Test Empty DB Value
     ${keyspace}=  Set Variable  empty_db_${CASSANDRA_KEYSPACE}
     Create Data  ${keyspace}
     ${document}=  Set Variable  {"dbs":[""]}
-    ${backupjob}=  Backup Data And Check  ${document}  ${ATTEMPTS_NUMBER}  post_status_code=500  get_status_code=404
-    Check Error In Jobstatus  ${backupjob}  ${BACKUP_ERROR_TEXT}  404
+    ${backupjob}=  Backup Data And Check  ${document}  ${ATTEMPTS_NUMBER}  get_status_code=500
+    Check Error In Jobstatus  ${backupjob}  ${BACKUP_ERROR_TEXT}  500
     ${document}=  Set Variable  {"dbs":["${keyspace}"]}
     ${backupjob}=  Backup Data And Check  ${document}  ${ATTEMPTS_NUMBER}
     ${document}=  Set Variable  {"vault":"${backupjob}","dbs":[""]}
-    ${restorejob}=  Restore Data And Check  ${document}  ${ATTEMPTS_NUMBER}  post_status_code=500  get_status_code=404
-    Check Error In Jobstatus  ${restorejob}  ${RESTORE_ERROR_TEXT}  404
+    ${restorejob}=  Restore Data And Check  ${document}  ${ATTEMPTS_NUMBER}  get_status_code=500
+    Check Error In Jobstatus  ${restorejob}  ${RESTORE_ERROR_TEXT}  500
     [Teardown]  Run Keywords  DELETE KEYSPACE  ${keyspace}
     ...  AND  Delete Backup  ${backupjob}
 

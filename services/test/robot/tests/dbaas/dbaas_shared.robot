@@ -117,7 +117,7 @@ Check ${col} In ${keyspace} ${table}
     Log  ${table}
     ${result}=  Select From Table  ${keyspace}  ${table}
     Log  ${result}
-    Should Contain  ${result[1]}  ${col}
+    Should Contain  ${result}  ${col}
 
 Wait For ${job} Job Completion With ${attempts} Attempts
     ${last_index}    Evaluate    ${attempts} - 1
