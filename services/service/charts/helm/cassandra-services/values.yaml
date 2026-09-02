@@ -284,7 +284,7 @@ monitoringAgent:
 robotTests:
   install: false
   dockerImage: ghcr.io/netcracker/qubership-cassandra-tests:main
-  tags: smokeORdbaas backup marker
+  tags: smokeORdbaas_backupORmarker
   args:
     - run-robot
   replicationFactor: 3
