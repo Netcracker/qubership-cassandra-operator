@@ -117,6 +117,9 @@ spec:
     affinity:
       {{- toYaml .Values.cassandra.affinity | nindent 6 }}
     {{- end }}
+    {{- if .Values.cassandra.terminationGracePeriodSeconds }}
+    terminationGracePeriodSeconds: {{ .Values.cassandra.terminationGracePeriodSeconds }}
+    {{- end }}
     username: {{template "fromEnv" (dict "envName" .Values.INFRA_CASSANDRA_USERNAME "default" .Values.cassandra.username) }}
     secretName: {{ .Values.cassandra.secretName }}
     {{ template "getCassandraResourcesForProfile" (dict "envVar" .Values.CASSANDRA_PROFILE "dotVar" .Values.global.profile "values" .Values) }}
@@ -215,6 +218,53 @@ spec:
 {{- if .Values.cassandra.commitlogArchiving }}
     commitlogArchiving:
       enabled: {{ .Values.cassandra.commitlogArchiving.enabled }}
+      {{- if .Values.cassandra.commitlogArchiving.storage }}
+      storage:
+        {{- with .Values.cassandra.commitlogArchiving.storage }}
+        size:
+          {{- $size := .size | default "1Gi" }}
+          {{- if kindIs "slice" $size }}
+          {{- range $size }}
+          - {{ . | quote }}
+          {{- end }}
+          {{- else }}
+          - {{ $size | quote }}
+          {{- end }}
+        {{- if .storageClasses }}
+        storageClasses:
+          {{- range .storageClasses }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+        {{- if .volumes }}
+        volumes:
+          {{- range .volumes }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+        {{- if .nodeLabels }}
+        nodeLabels:
+          {{- range .nodeLabels }}
+          - {{ toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
+        {{- if .matchLabelSelectors }}
+        matchLabelSelectors:
+          {{- range .matchLabelSelectors }}
+          - {{ toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
+        {{- if .waitPvcBound }}
+        waitPvcBound: {{ .waitPvcBound }}
+        {{- end }}
+        {{- end }}
+        {{- if $.Values.pvc.metadata.annotations }}
+        annotations:
+          {{- range $k, $v := $.Values.pvc.metadata.annotations }}
+          {{ $k | quote }}: {{ $v | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
 {{- end }}
     configuration: |-
 {{- if .Values.ipV6 }}

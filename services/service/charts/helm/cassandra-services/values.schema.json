@@ -34,7 +34,8 @@
     "PART_OF": { "type": "string" },
     "DELIMITER": { "type": "string" },
     "ARTIFACT_DESCRIPTOR_VERSION": { "type": "string" },
-    "MANAGED_BY": { "type": "string" }
+    "MANAGED_BY": { "type": "string" },
+    "pvc": { "$ref": "#/$defs/pvc" }
   },
   "$defs": {
     "global": {
@@ -115,14 +116,35 @@
         "auditLogEnabled": { "type": "boolean" },
         "smoketestKeyspace": { "type": "string" },
         "commitlogArchiving": { "$ref": "#/$defs/commitlogArchiving" },
-        "affinity": { "$ref": "#/$defs/affinity" }
+        "affinity": { "$ref": "#/$defs/affinity" },
+        "adapter": { "$ref": "#/$defs/cassandraAdapterCredentials" },
+        "aggregator": { "$ref": "#/$defs/cassandraAggregatorCredentials" }
+      }
+    },
+    "cassandraAdapterCredentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "cassandraAggregatorCredentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": { "type": "string" },
+        "physicalDatabaseIdentifier": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
       }
     },
     "commitlogArchiving": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" }
+        "enabled": { "type": "boolean", "default": false },
+        "storage": { "$ref": "#/$defs/storageRequirements" }
       }
     },
     "deploymentSchema": {
@@ -586,6 +608,22 @@
             "requiredDuringSchedulingIgnoredDuringExecution": {
               "type": "array",
               "items": { "type": "object", "additionalProperties": true }
+            }
+          }
+        }
+      }
+    },
+    "pvc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "annotations": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
             }
           }
         }
