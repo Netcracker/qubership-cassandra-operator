@@ -143,7 +143,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" }
+        "enabled": { "type": "boolean", "default": false },
+        "storage": { "$ref": "#/$defs/storageRequirements" }
       }
     },
     "deploymentSchema": {
