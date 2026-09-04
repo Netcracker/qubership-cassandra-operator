@@ -181,16 +181,35 @@ type AWSKeyspaces struct {
 }
 
 type RobotTests struct {
-	Install           bool                     `json:"install,omitempty"`
-	DockerImage       string                   `json:"dockerImage,omitempty"`
-	Resources         *v1.ResourceRequirements `json:"resources,omitempty"`
-	Tags              string                   `json:"tags,omitempty"`
-	Iteration         string                   `json:"iteration,omitempty"`
-	PrometheusUrl     string                   `json:"prometheusUrl,omitempty"`
-	Args              []string                 `json:"args,omitempty"`
-	ReplicationFactor int                      `json:"replicationFactor,omitempty"`
-	AttemptsNumber    int                      `json:"attemptsNumber,omitempty"`
-	NodeLabels        map[string]string        `json:"nodeLabels,omitempty"`
+	Install               bool                     `json:"install,omitempty"`
+	DockerImage           string                   `json:"dockerImage,omitempty"`
+	Resources             *v1.ResourceRequirements `json:"resources,omitempty"`
+	Tags                  string                   `json:"tags,omitempty"`
+	Iteration             string                   `json:"iteration,omitempty"`
+	PrometheusUrl         string                   `json:"prometheusUrl,omitempty"`
+	Args                  []string                 `json:"args,omitempty"`
+	ReplicationFactor     int                      `json:"replicationFactor,omitempty"`
+	AttemptsNumber        int                      `json:"attemptsNumber,omitempty"`
+	NodeLabels            map[string]string        `json:"nodeLabels,omitempty"`
+	AtpReport             AtpReport                `json:"atpReport,omitempty"`
+	EnvironmentName       string                   `json:"environmentName,omitempty"`
+	EnableJiraIntegration bool                     `json:"enableJiraIntegration,omitempty"`
+	AtpReportViewUiUrl    string                   `json:"atpReportViewUiUrl,omitempty"`
+}
+
+type AtpReport struct {
+	Enabled    bool       `json:"enabled,omitempty"`
+	AtpStorage AtpStorage `json:"atpStorage,omitempty"`
+}
+
+type AtpStorage struct {
+	Provider    string `json:"provider,omitempty"`
+	ServerUrl   string `json:"serverUrl,omitempty"`
+	ServerUiUrl string `json:"serverUiUrl,omitempty"`
+	Bucket      string `json:"bucket,omitempty"`
+	Region      string `json:"region,omitempty"`
+	Username    string `json:"username,omitempty"`
+	Password    string `json:"password,omitempty"`
 }
 
 type Monitoring struct {

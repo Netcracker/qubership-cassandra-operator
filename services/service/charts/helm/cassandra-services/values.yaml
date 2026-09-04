@@ -282,7 +282,7 @@ monitoringAgent:
   flushJitter: 5s
 
 robotTests:
-  install: false
+  install: true  # TODO: revert to false after adapter-S3 verification
   dockerImage: ghcr.io/netcracker/qubership-cassandra-tests:main
   tags: smokeORdbaas_backupORmarker
   args:
@@ -299,5 +299,18 @@ robotTests:
     limits:
       cpu: 200m
       memory: 256Mi
+  atpReport:
+    enabled: true  # TODO: revert to false after adapter-S3 verification
+    atpStorage:
+      provider: "aws"
+      serverUrl: "https://s3.amazonaws.com"
+      serverUiUrl: ""
+      bucket: ""
+      region: "us-east-1"
+      username: ""
+      password: ""
+  atpReportViewUiUrl: "https://test.com"
+  environmentName: "cassandra"
+  enableJiraIntegration: false
 
 # STORAGE_RWO_CLASS: test-storage-class
