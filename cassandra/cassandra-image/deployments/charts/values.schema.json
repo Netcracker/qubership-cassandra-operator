@@ -60,7 +60,27 @@
         "envs": { "type": "object", "additionalProperties": { "type": "string" } },
         "smoketestKeyspace": { "type": "string", "default": "smoke_test" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
-        "affinity": { "$ref": "#/$defs/affinity" }
+        "affinity": { "$ref": "#/$defs/affinity" },
+        "adapter": { "$ref": "#/$defs/cassandraAdapterCredentials" },
+        "aggregator": { "$ref": "#/$defs/cassandraAggregatorCredentials" }
+      }
+    },
+    "cassandraAdapterCredentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "cassandraAggregatorCredentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": { "type": "string" },
+        "physicalDatabaseIdentifier": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
       }
     },
     "commitlogArchiving": {
