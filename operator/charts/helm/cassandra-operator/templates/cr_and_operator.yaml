@@ -50,14 +50,7 @@ spec:
   {{- if .Values.policies }}
   policies:
     {{- if .Values.policies.tolerations }}
-    tolerations:
-      {{- range $tKey, $t := .Values.policies.tolerations }}
-      - key: {{ $t.key }}
-        effect: {{ $t.effect }}
-        operator: {{ $t.operator }}
-        tolerationSeconds: {{ $t.tolerationSeconds }}
-        value: {{ $t.value }}
-      {{- end }}
+    tolerations: {{ toYaml .Values.policies.tolerations | nindent 6 }}
     {{- end }}
   {{- end }}
   ipV6: {{ .Values.ipV6 }}
@@ -399,13 +392,6 @@ spec:
                   - key: {{ .Values.tls.privateKeyFileName }}
                     path: {{ .Values.tls.privateKeyFileName }}
       {{- end }}
-      {{- if .Values.policies }}
-      tolerations:
-        {{- range $tKey, $t := .Values.policies.tolerations }}
-        - key: {{ $t.key }}
-          operator: {{ $t.operator }}
-          value: {{ $t.value }}
-          effect: {{ $t.effect }}
-          tolerationSeconds: {{ $t.tolerationSeconds }}
-      {{- end }}
+      {{- if and .Values.policies .Values.policies.tolerations }}
+      tolerations: {{ toYaml .Values.policies.tolerations | nindent 8 }}
   {{- end }}
