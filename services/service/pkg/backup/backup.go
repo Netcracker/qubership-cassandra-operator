@@ -85,6 +85,11 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 		backup.AddStep(&steps.WaitForPVCExpansionStep{
 			WaitTimeout: spec.Spec.WaitTimeout,
 			PVCNamesVar: pvcContext,
+			OnNeedsRestart: func(ctx core.ExecutionContext) error {
+				request := ctx.Get(constants.ContextRequest).(reconcile.Request)
+				helperImpl := ctx.Get(utils.KubernetesHelperImpl).(core.KubernetesHelper)
+				return helperImpl.DeleteDeploymentAndPods(utils.BackupDaemon, request.Namespace, spec.Spec.WaitTimeout)
+			},
 		})
 	}
 
