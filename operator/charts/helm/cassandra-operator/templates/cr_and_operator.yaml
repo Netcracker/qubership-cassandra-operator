@@ -392,6 +392,6 @@ spec:
                   - key: {{ .Values.tls.privateKeyFileName }}
                     path: {{ .Values.tls.privateKeyFileName }}
       {{- end }}
-      {{- if .Values.policies }}
+      {{- if .Values.policies.tolerations }}
       tolerations: {{ toYaml .Values.policies.tolerations | nindent 8 }}
   {{- end }}
