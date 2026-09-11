@@ -82,6 +82,10 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 			Storage:           storage,
 			ContextVarToStore: nodesContext,
 		})
+		backup.AddStep(&steps.WaitForPVCExpansionStep{
+			WaitTimeout: spec.Spec.WaitTimeout,
+			PVCNamesVar: pvcContext,
+		})
 	}
 
 	backup.AddStep(&BackupService{})

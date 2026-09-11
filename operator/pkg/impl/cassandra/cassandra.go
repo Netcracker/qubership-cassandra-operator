@@ -179,6 +179,15 @@ func (r *CassandraBuilder) Build(ctx core.ExecutionContext) core.Executable {
 	cassandra.AddStep(&CassandraServicesStep{})
 	cassandra.AddStep(&CassandraLoadbalancerService{})
 
+	cassandra.AddStep(&CollectCassandraPVCsStep{})
+	cassandra.AddStep(&steps.WaitForPVCExpansionStep{
+		WaitTimeout: spec.Spec.WaitTimeout,
+		PVCNamesVar: utils.CassandraAllPVCsContext,
+		OnNeedsRestart: func(ctx core.ExecutionContext) error {
+			return restartCassandraStatefulSets(ctx, spec)
+		},
+	})
+
 	cassandra.AddStep(&CassandraStatefulSetStep{})
 
 	cassandra.AddStep(&CreateSuperUser{
@@ -218,4 +227,26 @@ func (r *Cassandra) Condition(ctx core.ExecutionContext) (bool, error) {
 	} else {
 		return microServiceCheck || commonCheck, nil
 	}
+}
+
+// restartCassandraStatefulSets scales each Cassandra StatefulSet down then back up so the
+// OS can complete a filesystem resize that was left in FileSystemResizePending state.
+func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.CassandraDeployment) error {
+	helperImpl := ctx.Get(utils.KubernetesHelperImpl).(core.KubernetesHelper)
+	request := ctx.Get(constants.ContextRequest).(reconcile.Request)
+
+	dcReplicas := utils.FilterDC(spec.Spec.Cassandra.DeploymentSchema.DataCenters, func(dc *v1alpha1.DataCenter) bool { return dc.Deploy })
+
+	for dcIndex, dc := range dcReplicas {
+		for _, replicaIndex := range dc.GetActiveReplicas() {
+			ssName := fmt.Sprintf(utils.CassandraReplicaNameFormat, utils.CalcReplicaIndex(dcReplicas, dcIndex, replicaIndex))
+			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 0, spec.Spec.WaitTimeout); err != nil {
+				return err
+			}
+			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 1, spec.Spec.WaitTimeout); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
