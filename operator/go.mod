@@ -51,7 +51,7 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 )
 
-// replace github.com/Netcracker/qubership-nosqldb-operator-core => ../qubership-nosqldb-operator-core
+replace github.com/Netcracker/qubership-nosqldb-operator-core => ../../qubership-nosqldb-operator-core
 
 // replace github.com/Netcracker/qubership-cql-driver => ./cql
 // replace github.com/Netcracker/qubership-credential-manager => ../credential-manager
