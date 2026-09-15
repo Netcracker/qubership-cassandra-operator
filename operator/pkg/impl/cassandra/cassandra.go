@@ -231,57 +231,53 @@ func (r *Cassandra) Condition(ctx core.ExecutionContext) (bool, error) {
 	}
 }
 
-// restartCassandraStatefulSets scales each StatefulSet down then back up so the OS can
-// complete a filesystem resize left in FileSystemResizePending state. It waits 60s after
-// all pods are gone to allow Cinder to detach the volume and complete the block resize,
-// then waits for CQL login to confirm the cluster is healthy before returning.
+// restartCassandraStatefulSets cycles each StatefulSet one at a time to keep the cluster
+// available during PVC expansion. For each pod: scale down, wait 60s for Cinder to detach
+// and complete the block resize, scale back up, then wait for CQL login before moving to
+// the next pod.
 func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.CassandraDeployment) error {
 	helperImpl := ctx.Get(utils.KubernetesHelperImpl).(core.KubernetesHelper)
 	cassandraHelperImpl := ctx.Get(utils.CassandraHelperImpl).(utils.CassandraUtils)
 	request := ctx.Get(constants.ContextRequest).(reconcile.Request)
 	log := ctx.Get(constants.ContextLogger).(*zap.Logger)
 
-	dcReplicas := utils.FilterDC(spec.Spec.Cassandra.DeploymentSchema.DataCenters, func(dc *v1alpha1.DataCenter) bool { return dc.Deploy })
-
-	// Collect all StatefulSet names first so we can scale them all down before scaling up.
-	var ssNames []string
-	for dcIndex, dc := range dcReplicas {
-		for _, replicaIndex := range dc.GetActiveReplicas() {
-			ssNames = append(ssNames, fmt.Sprintf(utils.CassandraReplicaNameFormat, utils.CalcReplicaIndex(dcReplicas, dcIndex, replicaIndex)))
-		}
-	}
-
-	// Scale all down.
-	for _, ssName := range ssNames {
-		log.Info(fmt.Sprintf("Scaling down %s for PVC filesystem resize", ssName))
-		if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 0, spec.Spec.WaitTimeout); err != nil {
-			return err
-		}
-	}
-
-	// Wait for Cinder to detach volumes and complete block-level resize.
-	log.Info("All Cassandra pods down, waiting 60s for volume detach and block resize")
-	time.Sleep(60 * time.Second)
-
-	// Scale all back up.
-	for _, ssName := range ssNames {
-		log.Info(fmt.Sprintf("Scaling up %s", ssName))
-		if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 1, spec.Spec.WaitTimeout); err != nil {
-			return err
-		}
-	}
-
-	// Wait until Cassandra accepts CQL connections on every node before proceeding.
-	log.Info("Waiting for Cassandra cluster to become healthy after PVC expansion restart")
 	username := spec.Spec.User
 	password := ctx.Get(utils.ContextPasswordKey).(string)
-	return wait.PollImmediate(10*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second,
-		func() (bool, error) {
-			if !cassandraHelperImpl.CheckLogin(ctx, username, password) {
-				log.Info("Cassandra not yet accepting connections, retrying")
-				return false, nil
+
+	dcReplicas := utils.FilterDC(spec.Spec.Cassandra.DeploymentSchema.DataCenters, func(dc *v1alpha1.DataCenter) bool { return dc.Deploy })
+
+	for dcIndex, dc := range dcReplicas {
+		for _, replicaIndex := range dc.GetActiveReplicas() {
+			ssName := fmt.Sprintf(utils.CassandraReplicaNameFormat, utils.CalcReplicaIndex(dcReplicas, dcIndex, replicaIndex))
+
+			log.Info(fmt.Sprintf("Scaling down %s for PVC filesystem resize", ssName))
+			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 0, spec.Spec.WaitTimeout); err != nil {
+				return err
 			}
-			return true, nil
-		},
-	)
+
+			// Wait for Cinder to detach the volume and complete the block-level resize.
+			log.Info(fmt.Sprintf("%s down, waiting 60s for volume detach and block resize", ssName))
+			time.Sleep(60 * time.Second)
+
+			log.Info(fmt.Sprintf("Scaling up %s", ssName))
+			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 1, spec.Spec.WaitTimeout); err != nil {
+				return err
+			}
+
+			// Wait for this node to rejoin the cluster before cycling the next one.
+			log.Info(fmt.Sprintf("Waiting for Cassandra to become healthy after %s restart", ssName))
+			if err := wait.PollImmediate(10*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second,
+				func() (bool, error) {
+					if !cassandraHelperImpl.CheckLogin(ctx, username, password) {
+						log.Info("Cassandra not yet accepting connections, retrying")
+						return false, nil
+					}
+					return true, nil
+				},
+			); err != nil {
+				return fmt.Errorf("cassandra not healthy after restarting %s: %w", ssName, err)
+			}
+		}
+	}
+	return nil
 }
