@@ -255,9 +255,28 @@ func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.Cass
 				return err
 			}
 
-			// Wait for Cinder to detach the volume and complete the block-level resize.
-			log.Info(fmt.Sprintf("%s down, waiting 60s for volume detach and block resize", ssName))
-			time.Sleep(60 * time.Second)
+			// Poll each PVC for this replica until the block-level resize completes,
+			pvcContextFormat := fmt.Sprintf(utils.CassandraDCPvcNameFormat, dcIndex)
+			for storageIndex := range dc.Storage {
+				var pvcName string
+				if storageIndex == 0 {
+					pvcName = fmt.Sprintf("%s-%v", pvcContextFormat, replicaIndex)
+				} else {
+					pvcName = fmt.Sprintf("%s-%v-%v", pvcContextFormat, replicaIndex, storageIndex)
+				}
+				log.Info(fmt.Sprintf("%s down, waiting for PVC %s block-level resize to complete", ssName, pvcName))
+				if _, err := helperImpl.WaitForPVCExpansion(pvcName, request.Namespace, spec.Spec.WaitTimeout); err != nil {
+					return fmt.Errorf("PVC %s did not complete block resize before restarting %s: %w", pvcName, ssName, err)
+				}
+			}
+			commitlogArchiving := spec.Spec.Cassandra.CommitlogArchiving
+			if commitlogArchiving.Enabled && commitlogArchiving.Storage != nil {
+				archivePvcName := fmt.Sprintf(utils.CassandraDCCommitlogArchivesPvcNameFormat+"-%v", dcIndex, replicaIndex)
+				log.Info(fmt.Sprintf("%s down, waiting for PVC %s block-level resize to complete", ssName, archivePvcName))
+				if _, err := helperImpl.WaitForPVCExpansion(archivePvcName, request.Namespace, spec.Spec.WaitTimeout); err != nil {
+					return fmt.Errorf("PVC %s did not complete block resize before restarting %s: %w", archivePvcName, ssName, err)
+				}
+			}
 
 			log.Info(fmt.Sprintf("Scaling up %s", ssName))
 			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 1, spec.Spec.WaitTimeout); err != nil {

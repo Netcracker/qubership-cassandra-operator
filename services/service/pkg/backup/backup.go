@@ -101,10 +101,6 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 					return fmt.Errorf("scaling down %s: %w", utils.BackupDaemon, err)
 				}
 
-				// Wait for Cinder to detach the volume and complete block-level resize.
-				log.Info(fmt.Sprintf("Deployment %s down, waiting 60s for volume detach and block resize", utils.BackupDaemon))
-				time.Sleep(60 * time.Second)
-
 				// Scale back up with retry.
 				const maxAttempts = 5
 				for attempt := 1; attempt <= maxAttempts; attempt++ {
