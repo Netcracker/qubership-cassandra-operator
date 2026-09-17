@@ -1,6 +1,7 @@
 package cassandra
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"time"
@@ -12,7 +13,9 @@ import (
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/steps"
 	"go.uber.org/zap"
 	v13 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -255,32 +258,50 @@ func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.Cass
 				return err
 			}
 
-			// Poll each PVC for this replica until the block-level resize completes,
+			// Collect PVC names for this replica to verify capacity after scale-up.
 			pvcContextFormat := fmt.Sprintf(utils.CassandraDCPvcNameFormat, dcIndex)
+			var replicaPVCs []string
 			for storageIndex := range dc.Storage {
-				var pvcName string
 				if storageIndex == 0 {
-					pvcName = fmt.Sprintf("%s-%v", pvcContextFormat, replicaIndex)
+					replicaPVCs = append(replicaPVCs, fmt.Sprintf("%s-%v", pvcContextFormat, replicaIndex))
 				} else {
-					pvcName = fmt.Sprintf("%s-%v-%v", pvcContextFormat, replicaIndex, storageIndex)
-				}
-				log.Info(fmt.Sprintf("%s down, waiting for PVC %s block-level resize to complete", ssName, pvcName))
-				if _, err := helperImpl.WaitForPVCExpansion(pvcName, request.Namespace, spec.Spec.WaitTimeout); err != nil {
-					return fmt.Errorf("PVC %s did not complete block resize before restarting %s: %w", pvcName, ssName, err)
+					replicaPVCs = append(replicaPVCs, fmt.Sprintf("%s-%v-%v", pvcContextFormat, replicaIndex, storageIndex))
 				}
 			}
 			commitlogArchiving := spec.Spec.Cassandra.CommitlogArchiving
 			if commitlogArchiving.Enabled && commitlogArchiving.Storage != nil {
-				archivePvcName := fmt.Sprintf(utils.CassandraDCCommitlogArchivesPvcNameFormat+"-%v", dcIndex, replicaIndex)
-				log.Info(fmt.Sprintf("%s down, waiting for PVC %s block-level resize to complete", ssName, archivePvcName))
-				if _, err := helperImpl.WaitForPVCExpansion(archivePvcName, request.Namespace, spec.Spec.WaitTimeout); err != nil {
-					return fmt.Errorf("PVC %s did not complete block resize before restarting %s: %w", archivePvcName, ssName, err)
-				}
+				replicaPVCs = append(replicaPVCs, fmt.Sprintf(utils.CassandraDCCommitlogArchivesPvcNameFormat+"-%v", dcIndex, replicaIndex))
 			}
 
 			log.Info(fmt.Sprintf("Scaling up %s", ssName))
 			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 1, spec.Spec.WaitTimeout); err != nil {
 				return err
+			}
+
+			// Wait until kubelet completes NodeExpandVolume for each PVC, confirmed by
+			// Status.Capacity reaching the requested size. FileSystemResizePending=true only
+			// means the Cinder control-plane accepted the request — the block device on the
+			// node is not resized until the pod mounts the volume.
+			k8sClient := ctx.Get(constants.ContextClient).(client.Client)
+			for _, pvcName := range replicaPVCs {
+				log.Info(fmt.Sprintf("Waiting for PVC %s capacity to reflect new size after %s restart", pvcName, ssName))
+				if err := wait.PollImmediate(5*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second,
+					func() (bool, error) {
+						pvc := &v13.PersistentVolumeClaim{}
+						if err := k8sClient.Get(context.TODO(), types.NamespacedName{Name: pvcName, Namespace: request.Namespace}, pvc); err != nil {
+							return false, err
+						}
+						requested := pvc.Spec.Resources.Requests[v13.ResourceStorage]
+						capacity := pvc.Status.Capacity[v13.ResourceStorage]
+						done := capacity.Cmp(requested) >= 0
+						if !done {
+							log.Info(fmt.Sprintf("PVC %s capacity %s < requested %s, retrying", pvcName, capacity.String(), requested.String()))
+						}
+						return done, nil
+					},
+				); err != nil {
+					return fmt.Errorf("PVC %s did not reach requested capacity after restarting %s: %w", pvcName, ssName, err)
+				}
 			}
 
 			// Wait for this node to rejoin the cluster before cycling the next one.
