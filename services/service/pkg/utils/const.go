@@ -27,7 +27,6 @@ const TriesCount = "triesCount"
 const RetryTimeoutSec = "retryTimeout"
 
 const BackupPvcName = "backup-data-%v"
-const BackupAllPVCsContext = "backupAllPVCNames"
 const Backup = "backup"
 
 const BackupDaemon = "cassandra-backup-daemon"
