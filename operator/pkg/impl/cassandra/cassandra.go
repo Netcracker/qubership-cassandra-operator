@@ -358,9 +358,10 @@ func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.Cass
 
 			// Wait for this node to rejoin the cluster before cycling the next one.
 			log.Info(fmt.Sprintf("Waiting for Cassandra to become healthy after %s restart", ssName))
+			execCtx := ctx
 			if err := wait.PollUntilContextTimeout(context.Background(), 10*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second, true,
-				func(ctx context.Context) (bool, error) {
-					if !cassandraHelperImpl.CheckLogin(ctx, username, password) {
+				func(_ context.Context) (bool, error) {
+					if !cassandraHelperImpl.CheckLogin(execCtx, username, password) {
 						log.Info("Cassandra not yet accepting connections, retrying")
 						return false, nil
 					}
