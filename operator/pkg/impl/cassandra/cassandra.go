@@ -274,12 +274,12 @@ func waitForPvcResizeState(k8sClient client.Client, pvcName, namespace string, w
 func scaleUpStatefulSetWithRetry(helperImpl core.KubernetesHelper, ssName, namespace string, waitSeconds int, log *zap.Logger) error {
 	const maxAttempts = 5
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		delay := time.Duration(10*(1<<uint(attempt-1))) * time.Second
+		delay := time.Duration(60*(1<<uint(attempt-1))) * time.Second
 		log.Info(fmt.Sprintf("Attempt %d/%d: waiting %s before scaling up %s", attempt, maxAttempts, delay, ssName))
 		time.Sleep(delay)
 
 		log.Info(fmt.Sprintf("Scaling up %s (attempt %d/%d)", ssName, attempt, maxAttempts))
-		if err := helperImpl.ScaleStatefulSetByName(ssName, namespace, 1, 120); err == nil {
+		if err := helperImpl.ScaleStatefulSetByName(ssName, namespace, 1, waitSeconds); err == nil {
 			log.Info(fmt.Sprintf("StatefulSet %s started successfully on attempt %d", ssName, attempt))
 			return nil
 		} else if attempt == maxAttempts {
@@ -294,10 +294,6 @@ func scaleUpStatefulSetWithRetry(helperImpl core.KubernetesHelper, ssName, names
 	return nil
 }
 
-// restartCassandraStatefulSets cycles each StatefulSet one at a time for PVC filesystem
-// resize. For each replica: wait for the PVC to signal it needs a node-side resize
-// (FileSystemResizePending), scale down to detach the volume, then scale back up so
-// kubelet can run NodeExpandVolume on mount.
 func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.CassandraDeployment) error {
 	helperImpl := ctx.Get(utils.KubernetesHelperImpl).(core.KubernetesHelper)
 	cassandraHelperImpl := ctx.Get(utils.CassandraHelperImpl).(utils.CassandraUtils)

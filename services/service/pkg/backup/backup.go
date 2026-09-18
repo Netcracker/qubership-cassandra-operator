@@ -99,21 +99,16 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 				); err != nil {
 					return fmt.Errorf("scaling down %s: %w", utils.BackupDaemon, err)
 				}
-
-				// Scale back up with exponential-backoff retry. Cinder may not have
-				// finished the block-level resize by the time the pod first attaches;
-				// if it does not become ready within 2 minutes we scale back down and
-				// try again with a longer wait.
 				const maxAttempts = 5
 				for attempt := 1; attempt <= maxAttempts; attempt++ {
-					delay := time.Duration(10*(1<<uint(attempt-1))) * time.Second
+					delay := time.Duration(60*(1<<uint(attempt-1))) * time.Second
 					log.Info(fmt.Sprintf("Attempt %d/%d: waiting %s before scaling up %s", attempt, maxAttempts, delay, utils.BackupDaemon))
 					time.Sleep(delay)
 
 					log.Info(fmt.Sprintf("Scaling deployment %s up (attempt %d/%d)", utils.BackupDaemon, attempt, maxAttempts))
 					if err := helperImpl.ScaleDeploymentByLabels(
 						map[string]string{utils.Name: utils.BackupDaemon},
-						request.Namespace, 1, 120,
+						request.Namespace, 1, backupWaitSeconds,
 					); err == nil {
 						log.Info(fmt.Sprintf("Deployment %s started successfully on attempt %d", utils.BackupDaemon, attempt))
 						return nil
