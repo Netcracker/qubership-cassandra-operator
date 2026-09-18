@@ -1,6 +1,7 @@
 package backup
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -11,6 +12,8 @@ import (
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/steps"
 	"go.uber.org/zap"
 	v12 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -83,6 +86,7 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 			Storage:           storage,
 			ContextVarToStore: nodesContext,
 		})
+		backup.AddStep(&checkPVCFilesystemResizePendingStep{pvcName: fmt.Sprintf(utils.BackupPvcName, 0)})
 		backupWaitSeconds := spec.Spec.WaitTimeout
 		backup.AddStep(&steps.WaitForPVCExpansionStep{
 			WaitTimeout: backupWaitSeconds,
@@ -133,11 +137,40 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 		backup.AddStep(&BackupSSHKeyStep{})
 	}
 
-	backup.AddStep(&BackupPVCFilesystemResizeStep{WaitSeconds: spec.Spec.WaitTimeout})
-
 	backup.AddStep(&LegacyBackupDeployment{})
 
 	return &backup
+}
+
+// checkPVCFilesystemResizePendingStep sets PVCResizeNeeded=true in the context
+// when the PVC still has FileSystemResizePending=True. This ensures
+// WaitForPVCExpansionStep is not skipped in reconciles where the PVC spec was
+// already updated (PVCResizeNeeded was not set by CreatePVCStep).
+type checkPVCFilesystemResizePendingStep struct {
+	core.DefaultExecutable
+	pvcName string
+}
+
+func (r *checkPVCFilesystemResizePendingStep) Execute(ctx core.ExecutionContext) error {
+	request := ctx.Get(constants.ContextRequest).(reconcile.Request)
+	k8sClient := ctx.Get(constants.ContextClient).(client.Client)
+
+	pvc := &v12.PersistentVolumeClaim{}
+	if err := k8sClient.Get(context.TODO(), types.NamespacedName{Name: r.pvcName, Namespace: request.Namespace}, pvc); err != nil {
+		return fmt.Errorf("getting PVC %s: %w", r.pvcName, err)
+	}
+	for _, cond := range pvc.Status.Conditions {
+		if cond.Type == v12.PersistentVolumeClaimFileSystemResizePending &&
+			cond.Status == v12.ConditionTrue {
+			ctx.Set(constants.PVCResizeNeeded, true)
+			break
+		}
+	}
+	return nil
+}
+
+func (r *checkPVCFilesystemResizePendingStep) Condition(ctx core.ExecutionContext) (bool, error) {
+	return true, nil
 }
 
 func (r *CassandraBackup) Condition(ctx core.ExecutionContext) (bool, error) {
