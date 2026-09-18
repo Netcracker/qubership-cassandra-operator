@@ -133,6 +133,8 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 		backup.AddStep(&BackupSSHKeyStep{})
 	}
 
+	backup.AddStep(&BackupPVCFilesystemResizeStep{WaitSeconds: spec.Spec.WaitTimeout})
+
 	backup.AddStep(&LegacyBackupDeployment{})
 
 	return &backup
