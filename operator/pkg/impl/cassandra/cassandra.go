@@ -269,7 +269,7 @@ func waitForPvcResizeState(k8sClient client.Client, pvcName, namespace string, w
 
 // scaleUpStatefulSetWithRetry scales a StatefulSet to 1 replica with exponential-backoff
 // retries. Cinder may not have finished the block-level resize by the time the pod
-// first attaches; if the pod does not become ready within 2 minutes we scale back down
+// first attaches; if the pod does not become ready within configured timeout we scale back down
 // and retry with a longer wait before the next attempt.
 func scaleUpStatefulSetWithRetry(helperImpl core.KubernetesHelper, ssName, namespace string, waitSeconds int, log *zap.Logger) error {
 	const maxAttempts = 5
