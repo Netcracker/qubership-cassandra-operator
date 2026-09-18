@@ -258,7 +258,7 @@ func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.Cass
 				return err
 			}
 
-			// Collect PVC names for this replica to verify capacity after scale-up.
+			// Collect PVC names for this replica.
 			pvcContextFormat := fmt.Sprintf(utils.CassandraDCPvcNameFormat, dcIndex)
 			var replicaPVCs []string
 			for storageIndex := range dc.Storage {
@@ -273,18 +273,16 @@ func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.Cass
 				replicaPVCs = append(replicaPVCs, fmt.Sprintf(utils.CassandraDCCommitlogArchivesPvcNameFormat+"-%v", dcIndex, replicaIndex))
 			}
 
-			log.Info(fmt.Sprintf("Scaling up %s", ssName))
-			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 1, spec.Spec.WaitTimeout); err != nil {
-				return err
-			}
-
-			// Wait until kubelet completes NodeExpandVolume for each PVC, confirmed by
-			// Status.Capacity reaching the requested size. FileSystemResizePending=true only
-			// means the Cinder control-plane accepted the request — the block device on the
-			// node is not resized until the pod mounts the volume.
+			// Wait for ControllerExpandVolume to finish before mounting the volume.
+			// NodeExpandVolume (which runs when the pod mounts the volume) fails with
+			// "current volume size is less than expected" when the storage backend has
+			// not yet resized the block device. Status.Capacity is updated by
+			// external-resizer immediately after the Cinder API call returns, which
+			// can precede the actual block-level resize; waiting for it here ensures
+			// the backend has committed the new size before the pod attaches.
 			k8sClient := ctx.Get(constants.ContextClient).(client.Client)
 			for _, pvcName := range replicaPVCs {
-				log.Info(fmt.Sprintf("Waiting for PVC %s capacity to reflect new size after %s restart", pvcName, ssName))
+				log.Info(fmt.Sprintf("Waiting for PVC %s expansion to complete before scaling up %s", pvcName, ssName))
 				if err := wait.PollImmediate(5*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second,
 					func() (bool, error) {
 						pvc := &v13.PersistentVolumeClaim{}
@@ -293,15 +291,20 @@ func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.Cass
 						}
 						requested := pvc.Spec.Resources.Requests[v13.ResourceStorage]
 						capacity := pvc.Status.Capacity[v13.ResourceStorage]
-						done := capacity.Cmp(requested) >= 0
-						if !done {
-							log.Info(fmt.Sprintf("PVC %s capacity %s < requested %s, retrying", pvcName, capacity.String(), requested.String()))
+						if capacity.Cmp(requested) >= 0 {
+							return true, nil
 						}
-						return done, nil
+						log.Info(fmt.Sprintf("PVC %s capacity %s < requested %s, waiting for ControllerExpand", pvcName, capacity.String(), requested.String()))
+						return false, nil
 					},
 				); err != nil {
-					return fmt.Errorf("PVC %s did not reach requested capacity after restarting %s: %w", pvcName, ssName, err)
+					return fmt.Errorf("PVC %s did not reach requested capacity before scaling up %s: %w", pvcName, ssName, err)
 				}
+			}
+
+			log.Info(fmt.Sprintf("Scaling up %s", ssName))
+			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 1, spec.Spec.WaitTimeout); err != nil {
+				return err
 			}
 
 			// Wait for this node to rejoin the cluster before cycling the next one.

@@ -1,6 +1,7 @@
 package backup
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/steps"
 	"go.uber.org/zap"
 	v12 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -90,9 +94,9 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 			OnNeedsRestart: func(ctx core.ExecutionContext) error {
 				request := ctx.Get(constants.ContextRequest).(reconcile.Request)
 				helperImpl := ctx.Get(utils.KubernetesHelperImpl).(core.KubernetesHelper)
+				k8sClient := ctx.Get(constants.ContextClient).(client.Client)
 				log := ctx.Get(constants.ContextLogger).(*zap.Logger)
 
-				// Scale down to 0.
 				log.Info(fmt.Sprintf("Scaling deployment %s down for volume resize", utils.BackupDaemon))
 				if err := helperImpl.ScaleDeploymentByLabels(
 					map[string]string{utils.Name: utils.BackupDaemon},
@@ -101,29 +105,37 @@ func (r *BackupBuilder) Build(ctx core.ExecutionContext) core.Executable {
 					return fmt.Errorf("scaling down %s: %w", utils.BackupDaemon, err)
 				}
 
-				// Scale back up with retry.
-				const maxAttempts = 5
-				for attempt := 1; attempt <= maxAttempts; attempt++ {
-					delay := time.Duration(10*(1<<uint(attempt-1))) * time.Second
-					log.Info(fmt.Sprintf("Attempt %d/%d: waiting %s before starting %s", attempt, maxAttempts, delay, utils.BackupDaemon))
-					time.Sleep(delay)
+				// Wait for ControllerExpandVolume to finish before mounting the volume.
+				// NodeExpandVolume (which runs when the pod mounts the volume) fails with
+				// "current volume size is less than expected" when the storage backend has
+				// not yet resized the block device. Waiting here ensures the backend has
+				// committed the new size before the pod attaches.
+				pvcName := fmt.Sprintf(utils.BackupPvcName, 0)
+				log.Info(fmt.Sprintf("Waiting for PVC %s expansion to complete before scaling up %s", pvcName, utils.BackupDaemon))
+				if err := wait.PollImmediate(5*time.Second, time.Duration(backupWaitSeconds)*time.Second,
+					func() (bool, error) {
+						pvc := &v12.PersistentVolumeClaim{}
+						if err := k8sClient.Get(context.TODO(), types.NamespacedName{Name: pvcName, Namespace: request.Namespace}, pvc); err != nil {
+							return false, err
+						}
+						requested := pvc.Spec.Resources.Requests[v12.ResourceStorage]
+						capacity := pvc.Status.Capacity[v12.ResourceStorage]
+						if capacity.Cmp(requested) >= 0 {
+							return true, nil
+						}
+						log.Info(fmt.Sprintf("PVC %s capacity %s < requested %s, waiting for ControllerExpand", pvcName, capacity.String(), requested.String()))
+						return false, nil
+					},
+				); err != nil {
+					return fmt.Errorf("PVC %s did not reach requested capacity before scaling up %s: %w", pvcName, utils.BackupDaemon, err)
+				}
 
-					if err := helperImpl.ScaleDeploymentByLabels(
-						map[string]string{utils.Name: utils.BackupDaemon},
-						request.Namespace, 1, backupWaitSeconds,
-					); err == nil {
-						log.Info(fmt.Sprintf("Deployment %s started successfully on attempt %d", utils.BackupDaemon, attempt))
-						return nil
-					} else if attempt == maxAttempts {
-						return fmt.Errorf("deployment %s failed to start after %d attempts: %w", utils.BackupDaemon, maxAttempts, err)
-					}
-					log.Warn(fmt.Sprintf("Deployment %s not healthy on attempt %d, retrying", utils.BackupDaemon, attempt))
-
-					// Scale back down before next attempt.
-					_ = helperImpl.ScaleDeploymentByLabels(
-						map[string]string{utils.Name: utils.BackupDaemon},
-						request.Namespace, 0, backupWaitSeconds,
-					)
+				log.Info(fmt.Sprintf("Scaling deployment %s up after PVC expansion", utils.BackupDaemon))
+				if err := helperImpl.ScaleDeploymentByLabels(
+					map[string]string{utils.Name: utils.BackupDaemon},
+					request.Namespace, 1, backupWaitSeconds,
+				); err != nil {
+					return fmt.Errorf("scaling up %s: %w", utils.BackupDaemon, err)
 				}
 				return nil
 			},
