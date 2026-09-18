@@ -234,13 +234,74 @@ func (r *Cassandra) Condition(ctx core.ExecutionContext) (bool, error) {
 	}
 }
 
-// restartCassandraStatefulSets cycles each StatefulSet one at a time to keep the cluster
-// available during PVC expansion. For each pod: scale down, wait 60s for Cinder to detach
-// and complete the block resize, scale back up, then wait for CQL login before moving to
-// the next pod.
+// waitForPvcResizeState waits until the PVC is in a terminal resize state:
+// - capacity >= requested: already expanded, no pod restart needed
+// - FileSystemResizePending=True: ControllerExpand done, NodeExpand needs a pod restart
+// Returns needsRestart=true in the second case.
+func waitForPvcResizeState(k8sClient client.Client, pvcName, namespace string, waitSeconds int) (bool, error) {
+	var needsRestart bool
+	err := wait.PollUntilContextTimeout(context.Background(), 2*time.Second, time.Duration(waitSeconds)*time.Second, true,
+		func(ctx context.Context) (bool, error) {
+			pvc := &v13.PersistentVolumeClaim{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: pvcName, Namespace: namespace}, pvc); err != nil {
+				return false, err
+			}
+			if pvc.Status.Phase != v13.ClaimBound {
+				return false, nil
+			}
+			requested := pvc.Spec.Resources.Requests[v13.ResourceStorage]
+			capacity := pvc.Status.Capacity[v13.ResourceStorage]
+			if capacity.Cmp(requested) >= 0 {
+				return true, nil
+			}
+			for _, cond := range pvc.Status.Conditions {
+				if cond.Type == v13.PersistentVolumeClaimFileSystemResizePending &&
+					cond.Status == v13.ConditionTrue {
+					needsRestart = true
+					return true, nil
+				}
+			}
+			return false, nil
+		},
+	)
+	return needsRestart, err
+}
+
+// scaleUpStatefulSetWithRetry scales a StatefulSet to 1 replica with exponential-backoff
+// retries. Cinder may not have finished the block-level resize by the time the pod
+// first attaches; if the pod does not become ready within 2 minutes we scale back down
+// and retry with a longer wait before the next attempt.
+func scaleUpStatefulSetWithRetry(helperImpl core.KubernetesHelper, ssName, namespace string, waitSeconds int, log *zap.Logger) error {
+	const maxAttempts = 5
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		delay := time.Duration(10*(1<<uint(attempt-1))) * time.Second
+		log.Info(fmt.Sprintf("Attempt %d/%d: waiting %s before scaling up %s", attempt, maxAttempts, delay, ssName))
+		time.Sleep(delay)
+
+		log.Info(fmt.Sprintf("Scaling up %s (attempt %d/%d)", ssName, attempt, maxAttempts))
+		if err := helperImpl.ScaleStatefulSetByName(ssName, namespace, 1, 120); err == nil {
+			log.Info(fmt.Sprintf("StatefulSet %s started successfully on attempt %d", ssName, attempt))
+			return nil
+		} else if attempt == maxAttempts {
+			return fmt.Errorf("statefulset %s failed to start after %d attempts: %w", ssName, maxAttempts, err)
+		}
+
+		log.Info(fmt.Sprintf("StatefulSet %s not healthy on attempt %d, scaling back down for retry", ssName, attempt))
+		if err := helperImpl.ScaleStatefulSetByName(ssName, namespace, 0, waitSeconds); err != nil {
+			return fmt.Errorf("failed to scale down %s for retry: %w", ssName, err)
+		}
+	}
+	return nil
+}
+
+// restartCassandraStatefulSets cycles each StatefulSet one at a time for PVC filesystem
+// resize. For each replica: wait for the PVC to signal it needs a node-side resize
+// (FileSystemResizePending), scale down to detach the volume, then scale back up so
+// kubelet can run NodeExpandVolume on mount.
 func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.CassandraDeployment) error {
 	helperImpl := ctx.Get(utils.KubernetesHelperImpl).(core.KubernetesHelper)
 	cassandraHelperImpl := ctx.Get(utils.CassandraHelperImpl).(utils.CassandraUtils)
+	k8sClient := ctx.Get(constants.ContextClient).(client.Client)
 	request := ctx.Get(constants.ContextRequest).(reconcile.Request)
 	log := ctx.Get(constants.ContextLogger).(*zap.Logger)
 
@@ -252,11 +313,6 @@ func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.Cass
 	for dcIndex, dc := range dcReplicas {
 		for _, replicaIndex := range dc.GetActiveReplicas() {
 			ssName := fmt.Sprintf(utils.CassandraReplicaNameFormat, utils.CalcReplicaIndex(dcReplicas, dcIndex, replicaIndex))
-
-			log.Info(fmt.Sprintf("Scaling down %s for PVC filesystem resize", ssName))
-			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 0, spec.Spec.WaitTimeout); err != nil {
-				return err
-			}
 
 			// Collect PVC names for this replica.
 			pvcContextFormat := fmt.Sprintf(utils.CassandraDCPvcNameFormat, dcIndex)
@@ -273,44 +329,37 @@ func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.Cass
 				replicaPVCs = append(replicaPVCs, fmt.Sprintf(utils.CassandraDCCommitlogArchivesPvcNameFormat+"-%v", dcIndex, replicaIndex))
 			}
 
-			// Wait for ControllerExpandVolume to finish before mounting the volume.
-			// NodeExpandVolume (which runs when the pod mounts the volume) fails with
-			// "current volume size is less than expected" when the storage backend has
-			// not yet resized the block device. Status.Capacity is updated by
-			// external-resizer immediately after the Cinder API call returns, which
-			// can precede the actual block-level resize; waiting for it here ensures
-			// the backend has committed the new size before the pod attaches.
-			k8sClient := ctx.Get(constants.ContextClient).(client.Client)
+			// Wait until each PVC is in a terminal resize state (already expanded, or
+			// FileSystemResizePending meaning a pod restart is required).
+			needsRestart := false
 			for _, pvcName := range replicaPVCs {
-				log.Info(fmt.Sprintf("Waiting for PVC %s expansion to complete before scaling up %s", pvcName, ssName))
-				if err := wait.PollImmediate(5*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second,
-					func() (bool, error) {
-						pvc := &v13.PersistentVolumeClaim{}
-						if err := k8sClient.Get(context.TODO(), types.NamespacedName{Name: pvcName, Namespace: request.Namespace}, pvc); err != nil {
-							return false, err
-						}
-						requested := pvc.Spec.Resources.Requests[v13.ResourceStorage]
-						capacity := pvc.Status.Capacity[v13.ResourceStorage]
-						if capacity.Cmp(requested) >= 0 {
-							return true, nil
-						}
-						log.Info(fmt.Sprintf("PVC %s capacity %s < requested %s, waiting for ControllerExpand", pvcName, capacity.String(), requested.String()))
-						return false, nil
-					},
-				); err != nil {
-					return fmt.Errorf("PVC %s did not reach requested capacity before scaling up %s: %w", pvcName, ssName, err)
+				log.Info(fmt.Sprintf("Waiting for PVC %s resize state before cycling %s", pvcName, ssName))
+				pvcNeedsRestart, err := waitForPvcResizeState(k8sClient, pvcName, request.Namespace, spec.Spec.WaitTimeout)
+				if err != nil {
+					return fmt.Errorf("waiting for PVC %s resize state: %w", pvcName, err)
+				}
+				if pvcNeedsRestart {
+					needsRestart = true
 				}
 			}
 
-			log.Info(fmt.Sprintf("Scaling up %s", ssName))
-			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 1, spec.Spec.WaitTimeout); err != nil {
+			if !needsRestart {
+				continue
+			}
+
+			log.Info(fmt.Sprintf("Scaling down %s for PVC filesystem resize", ssName))
+			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 0, spec.Spec.WaitTimeout); err != nil {
+				return err
+			}
+
+			if err := scaleUpStatefulSetWithRetry(helperImpl, ssName, request.Namespace, spec.Spec.WaitTimeout, log); err != nil {
 				return err
 			}
 
 			// Wait for this node to rejoin the cluster before cycling the next one.
 			log.Info(fmt.Sprintf("Waiting for Cassandra to become healthy after %s restart", ssName))
-			if err := wait.PollImmediate(10*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second,
-				func() (bool, error) {
+			if err := wait.PollUntilContextTimeout(context.Background(), 10*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second, true,
+				func(ctx context.Context) (bool, error) {
 					if !cassandraHelperImpl.CheckLogin(ctx, username, password) {
 						log.Info("Cassandra not yet accepting connections, retrying")
 						return false, nil
