@@ -1,8 +1,10 @@
 package cassandra
 
 import (
+	"context"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/Netcracker/qubership-cassandra-operator/api/v1alpha1"
 	"github.com/Netcracker/qubership-cassandra-operator/pkg/impl/utils"
@@ -11,6 +13,9 @@ import (
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/steps"
 	"go.uber.org/zap"
 	v13 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -179,6 +184,15 @@ func (r *CassandraBuilder) Build(ctx core.ExecutionContext) core.Executable {
 	cassandra.AddStep(&CassandraServicesStep{})
 	cassandra.AddStep(&CassandraLoadbalancerService{})
 
+	cassandra.AddStep(&CollectCassandraPVCsStep{})
+	cassandra.AddStep(&steps.WaitForPVCExpansionStep{
+		WaitTimeout: spec.Spec.WaitTimeout,
+		PVCNamesVar: utils.CassandraAllPVCsContext,
+		OnNeedsRestart: func(ctx core.ExecutionContext) error {
+			return restartCassandraStatefulSets(ctx, spec)
+		},
+	})
+
 	cassandra.AddStep(&CassandraStatefulSetStep{})
 
 	cassandra.AddStep(&CreateSuperUser{
@@ -218,4 +232,141 @@ func (r *Cassandra) Condition(ctx core.ExecutionContext) (bool, error) {
 	} else {
 		return microServiceCheck || commonCheck, nil
 	}
+}
+
+// waitForPvcResizeState waits until the PVC is in a terminal resize state:
+// - capacity >= requested: already expanded, no pod restart needed
+// - FileSystemResizePending=True: ControllerExpand done, NodeExpand needs a pod restart
+// Returns needsRestart=true in the second case.
+func waitForPvcResizeState(k8sClient client.Client, pvcName, namespace string, waitSeconds int) (bool, error) {
+	var needsRestart bool
+	err := wait.PollUntilContextTimeout(context.Background(), 2*time.Second, time.Duration(waitSeconds)*time.Second, true,
+		func(ctx context.Context) (bool, error) {
+			pvc := &v13.PersistentVolumeClaim{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: pvcName, Namespace: namespace}, pvc); err != nil {
+				return false, err
+			}
+			if pvc.Status.Phase != v13.ClaimBound {
+				return false, nil
+			}
+			requested := pvc.Spec.Resources.Requests[v13.ResourceStorage]
+			capacity := pvc.Status.Capacity[v13.ResourceStorage]
+			if capacity.Cmp(requested) >= 0 {
+				return true, nil
+			}
+			for _, cond := range pvc.Status.Conditions {
+				if cond.Type == v13.PersistentVolumeClaimFileSystemResizePending &&
+					cond.Status == v13.ConditionTrue {
+					needsRestart = true
+					return true, nil
+				}
+			}
+			return false, nil
+		},
+	)
+	return needsRestart, err
+}
+
+// scaleUpStatefulSetWithRetry scales a StatefulSet to 1 replica with exponential-backoff
+// retries. Cinder may not have finished the block-level resize by the time the pod
+// first attaches; if the pod does not become ready within configured timeout we scale back down
+// and retry with a longer wait before the next attempt.
+func scaleUpStatefulSetWithRetry(helperImpl core.KubernetesHelper, ssName, namespace string, waitSeconds int, log *zap.Logger) error {
+	const maxAttempts = 5
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		delay := time.Duration(60*(1<<uint(attempt-1))) * time.Second
+		log.Info(fmt.Sprintf("Attempt %d/%d: waiting %s before scaling up %s", attempt, maxAttempts, delay, ssName))
+		time.Sleep(delay)
+
+		log.Info(fmt.Sprintf("Scaling up %s (attempt %d/%d)", ssName, attempt, maxAttempts))
+		if err := helperImpl.ScaleStatefulSetByName(ssName, namespace, 1, waitSeconds); err == nil {
+			log.Info(fmt.Sprintf("StatefulSet %s started successfully on attempt %d", ssName, attempt))
+			return nil
+		} else if attempt == maxAttempts {
+			return fmt.Errorf("statefulset %s failed to start after %d attempts: %w", ssName, maxAttempts, err)
+		}
+
+		log.Info(fmt.Sprintf("StatefulSet %s not healthy on attempt %d, scaling back down for retry", ssName, attempt))
+		if err := helperImpl.ScaleStatefulSetByName(ssName, namespace, 0, waitSeconds); err != nil {
+			return fmt.Errorf("failed to scale down %s for retry: %w", ssName, err)
+		}
+	}
+	return nil
+}
+
+func restartCassandraStatefulSets(ctx core.ExecutionContext, spec *v1alpha1.CassandraDeployment) error {
+	helperImpl := ctx.Get(utils.KubernetesHelperImpl).(core.KubernetesHelper)
+	cassandraHelperImpl := ctx.Get(utils.CassandraHelperImpl).(utils.CassandraUtils)
+	k8sClient := ctx.Get(constants.ContextClient).(client.Client)
+	request := ctx.Get(constants.ContextRequest).(reconcile.Request)
+	log := ctx.Get(constants.ContextLogger).(*zap.Logger)
+
+	username := spec.Spec.User
+	password := ctx.Get(utils.ContextPasswordKey).(string)
+
+	dcReplicas := utils.FilterDC(spec.Spec.Cassandra.DeploymentSchema.DataCenters, func(dc *v1alpha1.DataCenter) bool { return dc.Deploy })
+
+	for dcIndex, dc := range dcReplicas {
+		for _, replicaIndex := range dc.GetActiveReplicas() {
+			ssName := fmt.Sprintf(utils.CassandraReplicaNameFormat, utils.CalcReplicaIndex(dcReplicas, dcIndex, replicaIndex))
+
+			// Collect PVC names for this replica.
+			pvcContextFormat := fmt.Sprintf(utils.CassandraDCPvcNameFormat, dcIndex)
+			var replicaPVCs []string
+			for storageIndex := range dc.Storage {
+				if storageIndex == 0 {
+					replicaPVCs = append(replicaPVCs, fmt.Sprintf("%s-%v", pvcContextFormat, replicaIndex))
+				} else {
+					replicaPVCs = append(replicaPVCs, fmt.Sprintf("%s-%v-%v", pvcContextFormat, replicaIndex, storageIndex))
+				}
+			}
+			commitlogArchiving := spec.Spec.Cassandra.CommitlogArchiving
+			if commitlogArchiving.Enabled && commitlogArchiving.Storage != nil {
+				replicaPVCs = append(replicaPVCs, fmt.Sprintf(utils.CassandraDCCommitlogArchivesPvcNameFormat+"-%v", dcIndex, replicaIndex))
+			}
+
+			// Wait until each PVC is in a terminal resize state (already expanded, or
+			// FileSystemResizePending meaning a pod restart is required).
+			needsRestart := false
+			for _, pvcName := range replicaPVCs {
+				log.Info(fmt.Sprintf("Waiting for PVC %s resize state before cycling %s", pvcName, ssName))
+				pvcNeedsRestart, err := waitForPvcResizeState(k8sClient, pvcName, request.Namespace, spec.Spec.WaitTimeout)
+				if err != nil {
+					return fmt.Errorf("waiting for PVC %s resize state: %w", pvcName, err)
+				}
+				if pvcNeedsRestart {
+					needsRestart = true
+				}
+			}
+
+			if !needsRestart {
+				continue
+			}
+
+			log.Info(fmt.Sprintf("Scaling down %s for PVC filesystem resize", ssName))
+			if err := helperImpl.ScaleStatefulSetByName(ssName, request.Namespace, 0, spec.Spec.WaitTimeout); err != nil {
+				return err
+			}
+
+			if err := scaleUpStatefulSetWithRetry(helperImpl, ssName, request.Namespace, spec.Spec.WaitTimeout, log); err != nil {
+				return err
+			}
+
+			// Wait for this node to rejoin the cluster before cycling the next one.
+			log.Info(fmt.Sprintf("Waiting for Cassandra to become healthy after %s restart", ssName))
+			execCtx := ctx
+			if err := wait.PollUntilContextTimeout(context.Background(), 10*time.Second, time.Duration(spec.Spec.WaitTimeout)*time.Second, true,
+				func(_ context.Context) (bool, error) {
+					if !cassandraHelperImpl.CheckLogin(execCtx, username, password) {
+						log.Info("Cassandra not yet accepting connections, retrying")
+						return false, nil
+					}
+					return true, nil
+				},
+			); err != nil {
+				return fmt.Errorf("cassandra not healthy after restarting %s: %w", ssName, err)
+			}
+		}
+	}
+	return nil
 }
