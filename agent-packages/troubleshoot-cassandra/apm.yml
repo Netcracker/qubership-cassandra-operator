@@ -1,0 +1,11 @@
+name: troubleshoot-cassandra
+version: 1.0.0
+description: Troubleshooting guidance for operator-managed CASSANDRA clusters.
+targets:
+- claude
+- copilot
+- cursor
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
