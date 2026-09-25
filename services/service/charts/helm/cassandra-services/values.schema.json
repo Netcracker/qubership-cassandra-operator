@@ -7,6 +7,7 @@
     "global": { "$ref": "#/$defs/global" },
     "operator": { "$ref": "#/$defs/operator" },
     "recycler": { "$ref": "#/$defs/recycler" },
+    "reaper": { "$ref": "#/$defs/reaper" },
     "cassandra": { "$ref": "#/$defs/cassandra" },
     "crProcessingDelaySeconds": { "type": "integer", "default": 5 },
     "waitTimeout": { "type": "integer", "default": 3600 },
@@ -74,6 +75,27 @@
         "resources": { "$ref": "#/$defs/resourceRequirements" }
       }
     },
+    "reaper": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "install": { "type": "boolean" },
+        "dockerImage": { "type": "string" },
+        "ingressHost": { "type": "string" },
+        "port": { "type": "integer" },
+        "type": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "secretName": { "type": "string" },
+        "envs": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "resources": { "$ref": "#/$defs/resourceRequirements" },
+        "truststoreSecretName": { "type": "string" },
+        "truststorePassword": { "type": "string" }
+      }
+    },
     "podSecurityContext": {
       "type": "object",
       "additionalProperties": false,
@@ -117,6 +139,7 @@
         "smoketestKeyspace": { "type": "string" },
         "commitlogArchiving": { "$ref": "#/$defs/commitlogArchiving" },
         "affinity": { "$ref": "#/$defs/affinity" },
+        "terminationGracePeriodSeconds": { "type": "integer", "default": 10 },
         "adapter": { "$ref": "#/$defs/cassandraAdapterCredentials" },
         "aggregator": { "$ref": "#/$defs/cassandraAggregatorCredentials" }
       }
@@ -144,7 +167,10 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean", "default": false },
-        "storage": { "$ref": "#/$defs/storageRequirements" }
+        "storage": { "$ref": "#/$defs/storageRequirements" },
+        "archive_command": { "type": "string" },
+        "restore_command": { "type": "string" },
+        "restore_directories": { "type": "string" }
       }
     },
     "deploymentSchema": {
