@@ -30,7 +30,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/Netcracker/qubership-cassandra-supplementary/api/v1alpha1"
@@ -95,7 +97,7 @@ func WaitForCassandraOperatorReady(k8sClient client.Client, name, namespace stri
 			}
 
 			t, _ := condMap["type"].(string)
-			s, ok := condMap["status"].(bool) // read as bool instead of string
+			s, ok := condMap["status"].(bool)
 
 			if !ok {
 				continue
@@ -113,6 +115,7 @@ func WaitForCassandraOperatorReady(k8sClient client.Client, name, namespace stri
 					return true, fmt.Errorf("Cassabdra CR failed")
 				}
 			}
+
 			setupLog.Info("Waiting for Cassabdra CR to be ready", "type", t, "status", s)
 		}
 
@@ -120,11 +123,23 @@ func WaitForCassandraOperatorReady(k8sClient client.Client, name, namespace stri
 	})
 }
 
+// ignoreStatusUpdatePredicate ignores updates where only the CR status changes.
+// Status updates do not change metadata.generation.
+func ignoreStatusUpdatePredicate() predicate.Predicate {
+	return predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			return e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration()
+		},
+	}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CassandraSupplServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	r.Reconciler = newCassandraServiceReconciler(mgr)
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.CassandraSupplService{}).
+		WithEventFilter(ignoreStatusUpdatePredicate()).
 		Complete(r)
 }
 
@@ -165,6 +180,7 @@ func (s *CassandraServiceInstanceReconciler) GetConsulServiceRegistrations() map
 
 func (s *CassandraServiceInstanceReconciler) SetServiceInstance(client client.Client, request reconcile.Request) {
 	cassandraServiceList := &v1alpha1.CassandraSupplServiceList{}
+
 	err := core.ListRuntimeObjectsByNamespace(cassandraServiceList, client, request.Namespace)
 	if err != nil {
 		msCount := len(cassandraServiceList.Items)
@@ -200,7 +216,6 @@ func (s *CassandraServiceInstanceReconciler) GetDeploymentVersion() string {
 }
 
 func (s *CassandraServiceInstanceReconciler) UpdateDRStatus(status types.DisasterRecoveryStatus) {
-
 }
 
 func (s *CassandraServiceInstanceReconciler) UpdatePassword() core.Executable {
