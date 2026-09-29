@@ -20,6 +20,7 @@ import (
 )
 
 var (
+	DbKind                   = "database"
 	dbNameRegexpExpression   = "^[_A-z0-9]*$"
 	dbNameRegexp, _          = regexp.Compile(dbNameRegexpExpression)
 	prefixRegexpExpression   = "^[_A-z0-9]*$"
@@ -578,6 +579,11 @@ func (c *CassandraDbAdministration) CreateUser(ctx context.Context, userName str
 				panic(err)
 			}
 		}
+
+		resources = append(resources, dao.DbResource{
+			Kind: DbKind,
+			Name: requestOnCreateUser.DbName,
+		})
 
 		return &dao.CreatedUser{
 			ConnectionProperties: c.getKeySpaceConnectionProperties(

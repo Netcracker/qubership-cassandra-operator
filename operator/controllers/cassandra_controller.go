@@ -23,7 +23,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/Netcracker/qubership-cassandra-operator/api/v1alpha1"
@@ -44,7 +46,7 @@ type CassandraReconciler struct {
 //+kubebuilder:rbac:groups=netcracker.com,resources=cassandras/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=netcracker.com,resources=cassandras/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// Reconcile is part of the main Kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *CassandraReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
@@ -52,11 +54,24 @@ func (r *CassandraReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return r.Reconciler.Reconcile(ctx, req)
 }
 
+// ignoreStatusUpdatePredicate ignores CR updates where only the status has changed.
+// A status update does not change metadata.Generation, so it will not trigger
+// another reconciliation.
+func ignoreStatusUpdatePredicate() predicate.Predicate {
+	return predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			return e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration()
+		},
+	}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CassandraReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	r.Reconciler = newCassandraReconciler(mgr)
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.CassandraDeployment{}).
+		WithEventFilter(ignoreStatusUpdatePredicate()).
 		Complete(r)
 }
 
@@ -97,16 +112,26 @@ func (s *CassandraInstanceReconciler) GetConfigMapName() string {
 
 func (s *CassandraInstanceReconciler) SetServiceInstance(client client.Client, request reconcile.Request) {
 	cassandraServiceList := &v1alpha1.CassandraDeploymentList{}
-	err := core.ListRuntimeObjectsByNamespace(cassandraServiceList, client, request.Namespace)
+
+	err := core.ListRuntimeObjectsByNamespace(
+		cassandraServiceList,
+		client,
+		request.Namespace,
+	)
+
 	if err != nil {
 		if errors.IsNotFound(err) {
-
+			// No Cassandra deployment found.
 		}
 	}
+
 	msCount := len(cassandraServiceList.Items)
 	if msCount != 1 {
-		//r.reqLogger.Error("There are " + fmt.Sprintf("%v", msCount) + " instances of Cassandraservice. Please leave only one.")
+		// There should be exactly one Cassandra deployment.
+		// r.reqLogger.Error("There are " + fmt.Sprintf("%v", msCount) +
+		//     " instances of Cassandra service. Please leave only one.")
 	}
+
 	s.Instance = &cassandraServiceList.Items[0]
 }
 
@@ -118,6 +143,7 @@ func (s *CassandraInstanceReconciler) GetStatus() *types.ServiceStatusCondition 
 	if len(s.Instance.Status.Conditions) > 0 {
 		return &s.Instance.Status.Conditions[0]
 	}
+
 	return nil
 }
 
@@ -134,11 +160,9 @@ func (s *CassandraInstanceReconciler) GetDeploymentVersion() string {
 }
 
 func (s *CassandraInstanceReconciler) UpdateDRStatus(status types.DisasterRecoveryStatus) {
-
 }
 
 func (s *CassandraInstanceReconciler) UpdatePassword() core.Executable {
-
 	return &cassandra.UpdateCassandraCredentials{}
 }
 
