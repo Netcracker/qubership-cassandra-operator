@@ -61,6 +61,7 @@
         "smoketestKeyspace": { "type": "string", "default": "smoke_test" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
         "affinity": { "$ref": "#/$defs/affinity" },
+        "terminationGracePeriodSeconds": { "type": "integer", "default": 10 },
         "adapter": { "$ref": "#/$defs/cassandraAdapterCredentials" },
         "aggregator": { "$ref": "#/$defs/cassandraAggregatorCredentials" }
       }
@@ -88,6 +89,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean", "default": false },
+        "storage": { "$ref": "#/$defs/storageRequirements" },
         "archive_command": { "type": "string" },
         "restore_command": { "type": "string" },
         "restore_directories": { "type": "string" }
