@@ -61,7 +61,6 @@
         "smoketestKeyspace": { "type": "string", "default": "smoke_test" },
         "resources": { "$ref": "#/$defs/resourceRequirements" },
         "affinity": { "$ref": "#/$defs/affinity" },
-        "terminationGracePeriodSeconds": { "type": "integer", "default": 10 },
         "adapter": { "$ref": "#/$defs/cassandraAdapterCredentials" },
         "aggregator": { "$ref": "#/$defs/cassandraAggregatorCredentials" }
       }
