@@ -88,6 +88,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean", "default": false },
+        "storage": { "$ref": "#/$defs/storageRequirements" },
         "archive_command": { "type": "string" },
         "restore_command": { "type": "string" },
         "restore_directories": { "type": "string" }

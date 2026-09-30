@@ -179,7 +179,27 @@
         "port": { "type": "integer" },
         "tls": { "type": "boolean" },
         "replicas": { "type": "integer" },
-        "storage": { "type": "object", "additionalProperties": true }
+        "storage": { "type": "object", "additionalProperties": true },
+        "adapter": { "$ref": "#/$defs/cassandraAdapterCredentials" },
+        "aggregator": { "$ref": "#/$defs/cassandraAggregatorCredentials" }
+      }
+    },
+    "cassandraAdapterCredentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "cassandraAggregatorCredentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": { "type": "string" },
+        "physicalDatabaseIdentifier": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
       }
     },
     "commitlogArchiving": {
