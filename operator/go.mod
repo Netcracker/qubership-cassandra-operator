@@ -10,7 +10,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.15
 	github.com/hashicorp/consul/api v1.32.1
 	github.com/stretchr/testify v1.11.1
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.52.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.34.0
