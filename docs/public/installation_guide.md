@@ -6,6 +6,15 @@ The following topics are described in this guide:
 
 The prerequisites for the installation process are specified in this section.
 
+## Helm Chart Preparation when deploying using Helm:
+
+The service-operator embeds compressed grafana dashboard json:
+
+```bash
+cd services/service
+make gzip-charts   # Compresses Grafana dashboards
+```
+
 ## Common 
 
 It is highly recommended to deploy Cassandra along with platform logging and monitoring infrastructure components, as they are necessary to troubleshoot in case of any performance or technical issues.

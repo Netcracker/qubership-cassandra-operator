@@ -17,6 +17,7 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o ./build/_output/
     -gcflags all=-trimpath=${GOPATH} -asmflags all=-trimpath=${GOPATH} ./main.go
 
 RUN mkdir -p deployments/charts/cassandra-services && \
+    gzip -f -c ./charts/helm/cassandra-services/monitoring/grafana-dashboard.json > ./charts/helm/cassandra-services/monitoring/grafana-dashboard.json.gz && \
     cp -R ./charts/helm/cassandra-services/* deployments/charts/cassandra-services/ && \
     cp ./charts/helm/cassandra-services/deployment-configuration.json deployments/deployment-configuration.json
 
