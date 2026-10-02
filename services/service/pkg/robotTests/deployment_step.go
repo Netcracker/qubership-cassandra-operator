@@ -14,6 +14,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+const (
+	robotTestsAtpStorageSecretName = "cassandra-robot-tests-atp-storage-secret"
+	robotTestsPodSecretsMountPath  = "/etc/secrets/robot-tests-pod-secrets"
+)
+
 type RobotDeployment struct {
 	core.DefaultExecutable
 }
@@ -114,6 +119,10 @@ func (r *RobotDeployment) Execute(ctx core.ExecutionContext) error {
 		)
 	}
 
+	if robot.AtpReport.Enabled {
+		volumes, volumeMounts, envs = appendAtpReportPodConfig(robot, volumes, volumeMounts, envs)
+	}
+
 	// Environment variable End
 
 	dc := RobotTemplate(
@@ -127,8 +136,12 @@ func (r *RobotDeployment) Execute(ctx core.ExecutionContext) error {
 		volumes,
 	)
 
+	secretNames := []string{spec.Spec.Cassandra.SecretName}
+	if robot.AtpReport.Enabled {
+		secretNames = append(secretNames, robotTestsAtpStorageSecretName)
+	}
 	err := credsManager.AddCredHashToPodTemplate(
-		[]string{spec.Spec.Cassandra.SecretName},
+		secretNames,
 		&dc.Spec.Template,
 	)
 	if err != nil {
@@ -184,4 +197,54 @@ func (r *RobotDeployment) Execute(ctx core.ExecutionContext) error {
 	core.PanicError(err, log.Error, "RobotTests failed")
 
 	return nil
+}
+
+func appendAtpReportPodConfig(
+	robot v1.RobotTests,
+	volumes []v12.Volume,
+	volumeMounts []v12.VolumeMount,
+	envs []v12.EnvVar,
+) ([]v12.Volume, []v12.VolumeMount, []v12.EnvVar) {
+	atpSecretMode := int32(420)
+	volumes = append(volumes, v12.Volume{
+		Name: "robot-tests-pod-secrets",
+		VolumeSource: v12.VolumeSource{
+			Projected: &v12.ProjectedVolumeSource{
+				DefaultMode: &atpSecretMode,
+				Sources: []v12.VolumeProjection{
+					{
+						Secret: &v12.SecretProjection{
+							LocalObjectReference: v12.LocalObjectReference{
+								Name: robotTestsAtpStorageSecretName,
+							},
+							Items: []v12.KeyToPath{
+								{Key: "atp-storage-username", Path: "ATP_STORAGE_USERNAME"},
+								{Key: "atp-storage-password", Path: "ATP_STORAGE_PASSWORD"},
+							},
+						},
+					},
+				},
+			},
+		},
+	})
+	volumeMounts = append(volumeMounts, v12.VolumeMount{
+		Name:      "robot-tests-pod-secrets",
+		MountPath: robotTestsPodSecretsMountPath,
+		ReadOnly:  true,
+	})
+
+	envs = append(envs,
+		coreUtils.GetPlainTextEnvVar("INTEGRATION_TESTS_SECRETS_DIR", robotTestsPodSecretsMountPath),
+		coreUtils.GetPlainTextEnvVar("ATP_REPORT_ENABLED", "true"),
+		coreUtils.GetPlainTextEnvVar("ATP_STORAGE_PROVIDER", robot.AtpReport.AtpStorage.Provider),
+		coreUtils.GetPlainTextEnvVar("ATP_STORAGE_SERVER_URL", robot.AtpReport.AtpStorage.ServerUrl),
+		coreUtils.GetPlainTextEnvVar("ATP_STORAGE_SERVER_UI_URL", robot.AtpReport.AtpStorage.ServerUiUrl),
+		coreUtils.GetPlainTextEnvVar("ATP_STORAGE_BUCKET", robot.AtpReport.AtpStorage.Bucket),
+		coreUtils.GetPlainTextEnvVar("ATP_STORAGE_REGION", robot.AtpReport.AtpStorage.Region),
+		coreUtils.GetPlainTextEnvVar("ATP_REPORT_VIEW_UI_URL", robot.AtpReportViewUiUrl),
+		coreUtils.GetPlainTextEnvVar("ENVIRONMENT_NAME", robot.EnvironmentName),
+		coreUtils.GetPlainTextEnvVar("ENABLE_JIRA_INTEGRATION", strconv.FormatBool(robot.EnableJiraIntegration)),
+	)
+
+	return volumes, volumeMounts, envs
 }

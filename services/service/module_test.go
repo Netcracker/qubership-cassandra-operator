@@ -521,3 +521,22 @@ func TestExecutionCheck(t *testing.T) {
 		})
 	}
 }
+
+func TestRobotTestsAtpReportDeepCopy(t *testing.T) {
+	in := &v1.RobotTests{
+		AtpReport: v1.AtpReport{
+			Enabled: true,
+			AtpStorage: v1.AtpStorage{
+				Provider: "aws",
+				Bucket:   "test-bucket",
+				Region:   "us-east-1",
+			},
+		},
+		EnvironmentName:    "cassandra",
+		AtpReportViewUiUrl: "https://reports.example.com",
+	}
+	out := in.DeepCopy()
+	assert.Equal(t, in.AtpReport.Enabled, out.AtpReport.Enabled)
+	assert.Equal(t, in.AtpReport.AtpStorage.Bucket, out.AtpReport.AtpStorage.Bucket)
+	assert.Equal(t, in.EnvironmentName, out.EnvironmentName)
+}
