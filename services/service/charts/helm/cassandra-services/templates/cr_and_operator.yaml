@@ -47,6 +47,18 @@ spec:
     consistency: {{ .Values.cassandra.consistency }}
     {{- end }}
     tls: {{ .Values.cassandra.tls }}
+    {{- if .Values.cassandra.adapter }}
+    adapter:
+      username: {{ .Values.cassandra.adapter.username | quote }}
+      password: {{ .Values.cassandra.adapter.password | quote }}
+    {{- end }}
+    {{- if .Values.cassandra.aggregator }}
+    aggregator:
+      address: {{ .Values.cassandra.aggregator.address | quote }}
+      physicalDatabaseIdentifier: {{ .Values.cassandra.aggregator.physicalDatabaseIdentifier | quote }}
+      username: {{ .Values.cassandra.aggregator.username | quote }}
+      password: {{ .Values.cassandra.aggregator.password | quote }}
+    {{- end }}
 
     deploymentSchema:
       dataCenters:
