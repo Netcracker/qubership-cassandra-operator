@@ -274,6 +274,24 @@ spec:
                 type: object
               cassandra:
                 properties:
+                  adapter:
+                    properties:
+                      password:
+                        type: string
+                      username:
+                        type: string
+                    type: object
+                  aggregator:
+                    properties:
+                      address:
+                        type: string
+                      password:
+                        type: string
+                      physicalDatabaseIdentifier:
+                        type: string
+                      username:
+                        type: string
+                    type: object
                   consistency:
                     type: string
                   defaultKeyspace:
