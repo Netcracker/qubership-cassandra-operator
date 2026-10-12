@@ -1,6 +1,8 @@
 name: "CI: Dev Build"
 run-name: "Dev image for ${{ github.event.repository.name }}: ${{ github.run_number }} - ${{ github.actor }}"
 on:
+  release:
+    types: [created]
   push:
     branches:
       - "**"
