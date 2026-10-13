@@ -12,6 +12,7 @@ import (
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/steps"
 	"go.uber.org/zap"
 	v12 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -157,6 +158,9 @@ func (r *checkPVCFilesystemResizePendingStep) Execute(ctx core.ExecutionContext)
 
 	pvc := &v12.PersistentVolumeClaim{}
 	if err := k8sClient.Get(context.TODO(), types.NamespacedName{Name: r.pvcName, Namespace: request.Namespace}, pvc); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
 		return fmt.Errorf("getting PVC %s: %w", r.pvcName, err)
 	}
 	for _, cond := range pvc.Status.Conditions {

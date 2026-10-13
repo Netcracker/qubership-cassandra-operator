@@ -42,6 +42,24 @@ spec:
                 type: string
               cassandra:
                 properties:
+                  adapter:
+                    properties:
+                      password:
+                        type: string
+                      username:
+                        type: string
+                    type: object
+                  aggregator:
+                    properties:
+                      address:
+                        type: string
+                      password:
+                        type: string
+                      physicalDatabaseIdentifier:
+                        type: string
+                      username:
+                        type: string
+                    type: object
                   affinity:
                     description: Affinity is a group of affinity scheduling rules.
                     properties:
