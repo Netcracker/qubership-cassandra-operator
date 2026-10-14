@@ -45,17 +45,21 @@ Previous deploy was done without mandatory parameter DEPLOY_W_HELM: true.
 
 ### Stack trace(s)
 
+**Case 1: a ConfigMap (or another non-Deployment object) already exists.**
+
 ```text
 Error: rendered manifests contain a resource that already exists. Unable to continue with install: ConfigMap "cassandra-major-version" in namespace "diag-cassandra-22" exists and cannot be imported into the current release: invalid ownership metadata; label validation error: missing key "app.kubernetes.io/managed-by": must be set to "Helm"; annotation validation error: missing key "meta.helm.sh/release-name": must be set to "cassandra"; annotation validation error: missing key "meta.helm.sh/release-namespace": must be set to "diag-cassandra-22"
 ```
 
 ### How to solve
 
-1. **delete the following objects:**
+1. **delete the following objects** (this removes **all** objects of these kinds in the namespace; first list them with `kubectl get <kinds> --namespace=<namespace_name>` and make sure the namespace is dedicated to this deployment):
     - Use the following command to delete: ```kubectl delete configmaps,ingresses,serviceaccounts,roles,rolebindings,grafanadashboard,prometheusrule,servicemonitor --all --namespace=<namespace_name>``` 
     - re-run the job.
 
 ### Stack trace(s)
+
+**Case 2: the `cassandra-operator` Deployment already exists.**
 
 ```text
 Error: rendered manifests contain a resource that already exists. Unable to continue with install: Deployment "cassandra-operator" in namespace "ocs-cicd-dev-2-qcm-cassandra" exists and cannot be imported into the current release: invalid ownership metadata; annotation validation error: key "meta.helm.sh/release-name" must equal "cassandra-services": current value is "cassandra-operator" 
@@ -109,10 +113,10 @@ org.apache.cassandra.db.commitlog.CommitLogReadHandler$CommitLogReadException: C
 1. **delete the log file:** 
     - Delete the file the stacktrace is complaining about (in this example /var/lib/cassandra/data/commitlog/CommitLog.log).
     - Restart the pod.
-2. **clear the log directory:** 
-    - Clear the whole directory **/var/lib/cassandra/data/commitlog/**, but in some cases that can lead to partial data loss.
-3. **add option in Config map:** 
+2. **add option in Config map** (try this before clearing the directory): 
     - Add `JVM_OPTS="$JVM_OPTS -Dcassandra.commitlog.ignorereplayerrors=true"` line to Config Map `cassandra-env` before the last line and restart the pod. After that revert changes in Config Map.
+3. **clear the log directory (last resort):** 
+    - Clear the whole directory **/var/lib/cassandra/data/commitlog/**, but in some cases that can lead to partial data loss.
 
 ### Recommendations
 
@@ -124,7 +128,7 @@ This section provides information about the Cassandra Pod Fails to Start because
 
 ### Description
 
-Commit log got corrupted.
+The starting node cannot reach any seed/peer node (`cassandra0-0` is not running or unreachable, or there are DNS/network problems in Kubernetes), so it fails the gossip shadow round and exits.
 
 ### Alerts
 
@@ -159,7 +163,7 @@ java.lang.RuntimeException: Unable to gossip with any peers
 
 1. **The pod cassandra0-0 is not running or unreachable:**
    - check cassandra0-0 pod state and make it running if it's not.
-   - check connectivity to cassandra0-0 pod via `nslookup cassandra0-0.cassandra.<namespace>.svc.cluster.local or via ping and resolve the problem.
+   - check connectivity to cassandra0-0 pod via `nslookup cassandra0-0.cassandra.<namespace>.svc.cluster.local` or via ping and resolve the problem.
 
 2. **An issues with DNS in the kubernetes:**
    - restart all DNS and Calico pods.
@@ -369,15 +373,16 @@ Failed node unable to gossip with any peers.
 ### Stack trace(s)
 
 ```text
-java. lang-RuntimeException: Unable to gossip with any peers
-    at org-apache.cassandra.gms.Gossiper.doShadowRound(Gossiper.java:1443)
-    at org-apache. cassandra-service.StorageService. CheckForEndpointCollision(StorageService.java:547)
-    at org-apache.cassandra.service.StorageService-prepareToJoin(StorageService-java:804)
-    at org-apache. cassandra. service.StorageService-initServer(StorageService.java:664) at org-apache.cassandra.service.StorageService.initServer(StorageService.java:613)
-    at org-apache.cassandra.service.CassandraDaemon.setup(CassandraDaemon.java:379)
-    at org-apache. cassandra.service.CassandraDaemon.activate(CassandraDaemon.java:602)
-    at org-apache.cassandra.service.CassandraDaemon.main(CassandraDaemon-java:691)
-[2020-07-1608:26:32,429] [ERROR] [method=exitOrFail]Exception encountered during startup
+[2020-07-16T08:26:32,429][ERROR][method=exitOrFail]Exception encountered during startup
+java.lang.RuntimeException: Unable to gossip with any peers
+    at org.apache.cassandra.gms.Gossiper.doShadowRound(Gossiper.java:1443)
+    at org.apache.cassandra.service.StorageService.checkForEndpointCollision(StorageService.java:547)
+    at org.apache.cassandra.service.StorageService.prepareToJoin(StorageService.java:804)
+    at org.apache.cassandra.service.StorageService.initServer(StorageService.java:664)
+    at org.apache.cassandra.service.StorageService.initServer(StorageService.java:613)
+    at org.apache.cassandra.service.CassandraDaemon.setup(CassandraDaemon.java:379)
+    at org.apache.cassandra.service.CassandraDaemon.activate(CassandraDaemon.java:602)
+    at org.apache.cassandra.service.CassandraDaemon.main(CassandraDaemon.java:691)
 ```
 
 ### How to solve
@@ -463,7 +468,7 @@ Unavailable exceptions count over 5 minutes. Cassandra node does not behave as e
 ### How to solve
 
 1. **one of Cassandra node is down**
-   - see [Cassandra Node Down](#cassandra-node-down) section.
+   - see [Cassandra Pod is Not Running](#prometheus-alerts-troubleshooting-cassandra-pod-is-not-running) section and check the logs of the failed pod.
 2. **all pods are working** you need to find out which node is down:
   - Navigate to any Cassandra pod terminal.
   - Type `nodetool status`.
