@@ -3,7 +3,7 @@ module github.com/Netcracker/qubership-cassandra-dbaas-adapter/go
 go 1.26.5
 
 require (
-	github.com/Netcracker/qubership-dbaas-adapter-core v0.11.1
+	github.com/Netcracker/qubership-dbaas-adapter-core v0.13.0
 	github.com/gocql/gocql v1.7.0
 	github.com/gofiber/fiber/v2 v2.52.15
 	github.com/google/uuid v1.6.0

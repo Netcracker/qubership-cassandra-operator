@@ -23,6 +23,19 @@
     "reaper": { "$ref": "#/$defs/reaper" },
     "tls": { "$ref": "#/$defs/tls" },
     "cassandra": { "$ref": "#/$defs/cassandra" },
+    "dbaas": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "declarativeRegistration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operatorNamespace": { "type": "string" }
+          }
+        }
+      }
+    },
     "pvc": { "$ref": "#/$defs/pvc" },
     "policies": { "$ref": "#/$defs/policies" },
     "awsKeyspaces": { "$ref": "#/$defs/awsKeyspaces" },

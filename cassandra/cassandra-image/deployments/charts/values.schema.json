@@ -270,6 +270,13 @@
         "apiVersion": { "type": "string" },
         "multiUsers": { "type": "boolean" },
         "topologyStrategy": { "type": "string" },
+        "declarativeRegistration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operatorNamespace": { "type": "string" }
+          }
+        },
         "tls": { "$ref": "#/$defs/dbaasAdapterTLS" }
       }
     },

@@ -92,6 +92,7 @@ func (r *DbaasDeployment) Execute(ctx core.ExecutionContext) error {
 		coreUtils.GetPlainTextEnvVar("CLOUD_PUBLIC_HOST", os.Getenv("CLOUD_PUBLIC_HOST")),
 		coreUtils.GetPlainTextEnvVar("API_VERSION", dbaas.ApiVersion),
 		coreUtils.GetPlainTextEnvVar("MULTI_USERS_ENABLED", strconv.FormatBool(dbaas.MultiUsers)),
+		coreUtils.GetPlainTextEnvVar("DBAAS_DECLARATIVE_REGISTRATION_ENABLED", strconv.FormatBool(dbaas.DeclarativeRegistration.OperatorNamespace != "")),
 		coreUtils.GetPlainTextEnvVar("CASSANDRA_DEFAULT_TOPOLOGY", dbaas.TopologyStrategy),
 	)
 

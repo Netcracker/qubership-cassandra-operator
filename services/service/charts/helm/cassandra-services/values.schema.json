@@ -319,6 +319,13 @@
         "dbaasStreamingRoleName": { "type": "string" },
         "dbaasStreamingRoles": { "type": "array", "items": { "type": "string" } },
         "labels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "declarativeRegistration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operatorNamespace": { "type": "string" }
+          }
+        },
         "tls": { "$ref": "#/$defs/dbaasAdapterTLS" }
       }
     },

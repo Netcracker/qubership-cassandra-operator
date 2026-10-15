@@ -371,6 +371,11 @@ spec:
                     type: string
                   dockerImage:
                     type: string
+                  declarativeRegistration:
+                    properties:
+                      operatorNamespace:
+                        type: string
+                    type: object
                   install:
                     type: boolean
                   multiUsers:

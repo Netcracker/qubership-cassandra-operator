@@ -136,6 +136,11 @@ dbaas:
     - ALL
   labels:
     clusterName: "cassandra"
+  # Declarative physical database registration. It is selected automatically when the shared
+  # PhysicalDatabase CRD (dbaas.netcracker.com/v1) exists in the cluster at Helm render time.
+  declarativeRegistration:
+    # Namespace (CLOUD_NAMESPACE) of the DBaaS Operator. Used when the CRD is available.
+    operatorNamespace: dbaas
   # Dbaas resources
   resources:
     requests:
