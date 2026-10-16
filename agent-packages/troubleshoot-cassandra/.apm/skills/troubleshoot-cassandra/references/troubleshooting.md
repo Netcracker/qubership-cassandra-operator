@@ -389,7 +389,7 @@ java.lang.RuntimeException: Unable to gossip with any peers
 
 1. **Cassandra headless service has been changed manually.**
    - It is required to check cluster IP of `cassandra` service. It should be `None`.
-   - ![Cluster IP of Cassandra service](/docs/public/images/cassandra-headless-check.png)
+   - ![Cluster IP of Cassandra service](images/cassandra-headless-check.png)
    - Otherwise, it is required to re-create `cassandra` service with `spec.clusterIP` value `None`.
 2. **Network issues between Kubernetes nodes.**
    - To make sure there are no network issues, try to ping pods/services presented on the Cassandra's failed node from another nodes.
