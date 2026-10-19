@@ -103,10 +103,10 @@ func main() {
 	var dbaasClient *dbaas.Client
 	if declarativeRegistration {
 		ctxLogger.Info("Declarative registration is enabled, adapter self-registration is disabled")
-		// The Aggregator version cannot be probed without a client; use the configured API version.
-		if apiVersion != "v1" {
-			apiVersion = "v2"
-		}
+		// The Aggregator version cannot be probed without a client. Declarative registration
+		// is only supported by Aggregators with the v3 API, which maps to the adapter v2 API,
+		// regardless of the configured (default "v1") API version.
+		apiVersion = "v2"
 	} else {
 		basicRegistrationAuth := dao.BasicAuth{
 			Username: aggregatorRegistrationUser,
