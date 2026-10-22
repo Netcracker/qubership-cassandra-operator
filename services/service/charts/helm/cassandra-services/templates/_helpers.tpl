@@ -408,3 +408,26 @@ app.kubernetes.io/managed-by: {{ default "services" .Values.MANAGED_BY }}
 app.kubernetes.io/managed-by-operator: "cassandra-services-operator"
 app.kubernetes.io/technology: "go"
 {{- end -}}
+
+{{/*
+DBaaS declarative registration mode. True only when the DBaaS adapter is installed and the shared
+PhysicalDatabase CRD is available at render time. The same condition drives the PhysicalDatabase CR,
+the Secret RBAC and the adapter self-registration switch.
+*/}}
+{{- define "cassandra.dbaas.declarativeRegistration" -}}
+  {{- if and (eq (include "fromValuesThenEnvElseDefault" (dict "dotVar" .Values.dbaas.install "envVar" .Values.DBAAS_ENABLED "default" true)) "true") (.Capabilities.APIVersions.Has "dbaas.netcracker.com/v1/PhysicalDatabase") -}}
+true
+  {{- else -}}
+false
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Address of the DBaaS adapter service reachable by the DBaaS Operator. Mirrors the operator logic:
+HTTPS/8443 only when TLS is enabled and the Aggregator registration address uses https.
+*/}}
+{{- define "cassandra.dbaas.adapterAddress" -}}
+  {{- $aggregator := include "fromEnv" (dict "envName" .Values.API_DBAAS_ADDRESS "default" .Values.dbaas.aggregator.dbaasAggregatorRegistrationAddress) -}}
+  {{- $tls := and .Values.tls.enabled (contains "https" $aggregator) -}}
+  {{- printf "%s://dbaas-cassandra-adapter.%s:%d" (ternary "https" "http" $tls) .Release.Namespace (ternary 8443 8080 $tls | int) -}}
+{{- end -}}
