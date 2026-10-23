@@ -283,7 +283,7 @@ monitoringAgent:
 
 robotTests:
   install: false
-  dockerImage: ghcr.io/netcracker/qubership-cassandra-tests:main
+  dockerImage: ghcr.io/netcracker/cassandra-docker-tests:main
   tags: smokeORdbaas_backupORmarker
   args:
     - run-robot
