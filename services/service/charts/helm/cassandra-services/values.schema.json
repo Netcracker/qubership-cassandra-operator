@@ -19,6 +19,17 @@
     "securityContext": { "$ref": "#/$defs/podSecurityContext" },
     "imagePullPolicy": { "type": "string", "enum": ["Always", "Never", "IfNotPresent"] },
     "createIngress": { "type": "boolean", "default": false },
+    "GATEWAY_SYSTEM_TYPE": { "type": "string" },
+    "gatewayApi": {
+      "type": "object",
+      "properties": {
+        "ignoreAnnotation": {
+          "type": "object",
+          "properties": { "key": { "type": "string" }, "value": { "type": "string" } }
+        },
+        "parentRefs": { "type": "array", "items": { "type": "object" } }
+      }
+    },
     "publicCloud": { "type": "string" },
     "tls": { "$ref": "#/$defs/tls" },
     "awsKeyspaces": { "$ref": "#/$defs/awsKeyspaces" },

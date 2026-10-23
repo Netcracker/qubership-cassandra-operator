@@ -431,3 +431,26 @@ HTTPS/8443 only when TLS is enabled and the Aggregator registration address uses
   {{- $tls := and .Values.tls.enabled (contains "https" $aggregator) -}}
   {{- printf "%s://dbaas-cassandra-adapter.%s:%d" (ternary "https" "http" $tls) .Release.Namespace (ternary 8443 8080 $tls | int) -}}
 {{- end -}}
+
+{{/*
+Gateway system types parsed from GATEWAY_SYSTEM_TYPE (comma and/or space separated, case-insensitive).
+Empty value falls back to "legacy-ingress" to keep existing deployments working.
+Returns a JSON list.
+*/}}
+{{- define "cassandra.gateway.types" -}}
+  {{- $raw := .Values.GATEWAY_SYSTEM_TYPE | default "" | toString | lower | replace "," " " -}}
+  {{- $types := list -}}
+  {{- range (splitList " " $raw) -}}
+    {{- if . -}}{{- $types = append $types . -}}{{- end -}}
+  {{- end -}}
+  {{- if not $types -}}{{- $types = list "legacy-ingress" -}}{{- end -}}
+  {{- toJson $types -}}
+{{- end -}}
+
+{{- define "cassandra.gateway.legacyIngress" -}}
+  {{- if has "legacy-ingress" (include "cassandra.gateway.types" . | fromJsonArray) -}}true{{- else -}}false{{- end -}}
+{{- end -}}
+
+{{- define "cassandra.gateway.apiDefault" -}}
+  {{- if has "gateway-api-default" (include "cassandra.gateway.types" . | fromJsonArray) -}}true{{- else -}}false{{- end -}}
+{{- end -}}
