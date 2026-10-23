@@ -67,6 +67,18 @@ imagePullPolicy: IfNotPresent
 
 createIngress: false
 
+# Comma-separated list of gateway types: legacy-ingress, gateway-api-default.
+# Empty means legacy-ingress (backward compatible). Can also be set via the GATEWAY_SYSTEM_TYPE env/deploy parameter.
+GATEWAY_SYSTEM_TYPE: ""
+gatewayApi:
+  # Annotation added to Ingress resources when gateway-api-default is enabled,
+  # so the Gateway API converter ignores them.
+  ignoreAnnotation:
+    key: gateway-api-converter.netcracker.com/ignore
+    value: "true"
+  # parentRefs for HTTPRoute, e.g. [{name: public-gateway, namespace: gateway}]
+  parentRefs: []
+
 # publicCloud:
 
 # tolerations Example

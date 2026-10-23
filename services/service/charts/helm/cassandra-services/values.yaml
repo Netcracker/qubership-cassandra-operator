@@ -80,7 +80,7 @@ gatewayApi:
   # Annotation added to Ingress resources when gateway-api-default is enabled,
   # so the Gateway API controller ignores them.
   ignoreAnnotation:
-    key: gateway.netcracker.com/ignore
+    key: gateway-api-converter.netcracker.com/ignore
     value: "true"
   # parentRefs for HTTPRoute, e.g. [{name: public-gateway, namespace: gateway}]
   parentRefs: []
