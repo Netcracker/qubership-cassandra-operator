@@ -605,3 +605,44 @@ Cassandra backups fail with exit code 2 during execution of the backup playbook.
    - GC pause duration
    - Cassandra schema growth
 3. **Perform periodic cleanup of unused tables and obsolete schema objects to minimize JVM metadata overhead.**
+
+## Ingress or HTTPRoute Returns 404 or Is Not Reachable
+
+### Description
+
+Reaper or the DBaaS adapter swagger is exposed through a Kubernetes Ingress and/or a Gateway API `HTTPRoute`. The `GATEWAY_SYSTEM_TYPE` deploy parameter (comma-separated; empty means `legacy-ingress`) selects which resources are created:
+
+| `GATEWAY_SYSTEM_TYPE` | Ingress | HTTPRoute |
+|---|---|---|
+| empty or `legacy-ingress` | created | not created |
+| `gateway-api-default` | not created | created |
+| `legacy-ingress,gateway-api-default` | created, with the ignore annotation | created |
+
+The affected resources are `cassandra-reaper` (needs `reaper.ingressHost`) and `cassandra-swagger` (needs `createIngress` and `CLOUD_PUBLIC_HOST`).
+
+### Alerts
+
+Not applicable.
+
+### Stack trace(s)
+
+```text
+{"code":404,"message":"HTTP 404 Not Found"}
+```
+
+This Dropwizard-style body comes from Reaper, so the request reached the application through the Ingress. It is not a routing failure.
+
+### How to solve
+
+1. If the body is `{"code":404,...}`, open the Reaper UI at `<reaper.ingressHost>/webui/index.html`. Reaper has no page at `/`.
+2. Check which resources exist: `kubectl get ingress,httproute -n <namespace>`.
+3. If only `gateway-api-default` is set, no Ingress exists by design. An `HTTPRoute` receives traffic only if `gatewayApi.parentRefs` points to an existing Gateway (the default is an empty list).
+4. Compare a direct call with the routed one: `kubectl port-forward svc/cassandra 8080:8080 -n <namespace>` and `curl localhost:8080/webui/index.html`. If the direct call works and the routed one does not, the problem is routing; if both fail, the path does not exist.
+5. With TLS enabled, the Reaper backend port is 8443 and the Ingress needs `nginx.ingress.kubernetes.io/backend-protocol: HTTPS`. The swagger route is fixed to port 8080.
+6. When passing `GATEWAY_SYSTEM_TYPE` with a comma through Helm `--set`, escape it: `--set-string 'GATEWAY_SYSTEM_TYPE=legacy-ingress\,gateway-api-default'`.
+
+### Recommendations
+
+1. During a migration, deploy `legacy-ingress,gateway-api-default`, verify access through the Gateway, then switch to `gateway-api-default`.
+2. The operator deletes a leftover `cassandra-reaper` Ingress when `ingressHost` is not passed (Gateway-only mode).
+3. The nginx-specific Reaper annotations (cookie affinity, backend HTTPS verification) have no `HTTPRoute` equivalent. Configure them in the gateway controller.
