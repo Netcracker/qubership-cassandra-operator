@@ -1043,6 +1043,41 @@ backupDaemon:
     endpointUrl: http://minio-tenant-4.paas-miniha-kubernetes.openshift.sdntest.netcracker.com
 ```
 
+### Gateway API Migration
+
+The `GATEWAY_SYSTEM_TYPE` parameter controls whether Cassandra endpoints are exposed through Kubernetes `Ingress`, Gateway API `HTTPRoute`, or both. It is supported by the `cassandra-operator` and `cassandra-services` charts.
+
+The value is a comma- or space-separated, case-insensitive list. An empty value is treated as `legacy-ingress`, so existing deployments are not changed.
+
+| `GATEWAY_SYSTEM_TYPE` | Ingress | HTTPRoute |
+|---|---|---|
+| Empty or `legacy-ingress` | Created | Not created |
+| `gateway-api-default` | Not created | Created |
+| `legacy-ingress,gateway-api-default` | Created, with the ignore annotation | Created |
+
+When `gateway-api-default` is enabled, every created `Ingress` gets the annotation from `gatewayApi.ignoreAnnotation` (`gateway-api-converter.netcracker.com/ignore: "true"` by default). It prevents Gateway API Converter from creating a duplicate route from the Ingress and avoids ArgoCD health-check issues.
+
+The following resources are affected:
+
+| Resource | Chart | Created when |
+|---|---|---|
+| `cassandra-swagger` Ingress / `HTTPRoute` | `cassandra-services` | `createIngress` is true, DBaaS adapter is installed and `CLOUD_PUBLIC_HOST` is set. Host is `<namespace>-dbaas-adapter-swagger.<CLOUD_PUBLIC_HOST>`, backend is `dbaas-cassandra-adapter:8080`. |
+| `cassandra-reaper` Ingress / `HTTPRoute` | `cassandra-operator` | `reaper.install` is true and `reaper.ingressHost` is set. See [Reaper Access Through Gateway API](#reaper-access-through-gateway-api). |
+
+**Note**: An `HTTPRoute` receives traffic only if `gatewayApi.parentRefs` points to an existing Gateway, for example `[{name: public-gateway, namespace: gateway}]`. The default is an empty list.
+
+Example for a migration period, when both the Ingress and the `HTTPRoute` are served:
+
+```yaml
+GATEWAY_SYSTEM_TYPE: "legacy-ingress,gateway-api-default"
+gatewayApi:
+  parentRefs:
+    - name: public-gateway
+      namespace: gateway
+```
+
+After verifying access through the Gateway, set `GATEWAY_SYSTEM_TYPE: "gateway-api-default"` to remove the Ingress resources.
+
 ### Cassandra Reaper Installation 
 
 This section describes how to install the Cassandra Reaper repair tool in a Cassandra cluster.
