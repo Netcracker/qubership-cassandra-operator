@@ -1405,6 +1405,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  ingressAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
                   ingressHost:
                     type: string
                   install:

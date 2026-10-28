@@ -1,13 +1,20 @@
-{{- if and .Values.createIngress (include "fromValuesThenEnvElseDefault" (dict "dotVar" .Values.dbaas.install "envVar" .Values.DBAAS_ENABLED "default" true )) .Values.CLOUD_PUBLIC_HOST }}
+{{- $dbaasEnabled := include "fromValuesThenEnvElseDefault" (dict "dotVar" .Values.dbaas.install "envVar" .Values.DBAAS_ENABLED "default" true ) }}
+{{- $swaggerHost := printf "%s-dbaas-adapter-swagger.%s" .Release.Namespace .Values.CLOUD_PUBLIC_HOST }}
+{{- if and .Values.createIngress $dbaasEnabled .Values.CLOUD_PUBLIC_HOST }}
+{{- if eq (include "cassandra.gateway.legacyIngress" .) "true" }}
 apiVersion: {{ if .Capabilities.APIVersions.Has "networking.k8s.io/v1" }}"networking.k8s.io/v1"{{ else }}"networking.k8s.io/v1beta1"{{ end }}
 kind: Ingress
 metadata:
   labels:
     {{- include "cassandra.defaultLabels" . | nindent 4 }}
   name: cassandra-swagger
+  {{- if eq (include "cassandra.gateway.apiDefault" .) "true" }}
+  annotations:
+    {{ .Values.gatewayApi.ignoreAnnotation.key | quote }}: {{ .Values.gatewayApi.ignoreAnnotation.value | quote }}
+  {{- end }}
 spec:
   rules:
-    - host: {{ printf "%s-dbaas-adapter-swagger.%s" .Release.Namespace  .Values.CLOUD_PUBLIC_HOST }}
+    - host: {{ $swaggerHost }}
       http:
         paths:
           - path: /
@@ -17,4 +24,31 @@ spec:
                 name: dbaas-cassandra-adapter
                 port:
                   number: 8080
-{{ end }}
+{{- end }}
+{{- if eq (include "cassandra.gateway.apiDefault" .) "true" }}
+{{- if eq (include "cassandra.gateway.legacyIngress" .) "true" }}
+---
+{{- end }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  labels:
+    {{- include "cassandra.defaultLabels" . | nindent 4 }}
+  name: cassandra-swagger
+spec:
+  {{- with .Values.gatewayApi.parentRefs }}
+  parentRefs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  hostnames:
+    - {{ $swaggerHost }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: dbaas-cassandra-adapter
+          port: 8080
+{{- end }}
+{{- end }}

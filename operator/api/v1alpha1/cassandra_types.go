@@ -157,6 +157,7 @@ type Reaper struct {
 	Install              bool                     `json:"install,omitempty"`
 	DockerImage          string                   `json:"dockerImage,omitempty"`
 	IngressHost          string                   `json:"ingressHost,omitempty"`
+	IngressAnnotations   map[string]string        `json:"ingressAnnotations,omitempty"`
 	Port                 int                      `json:"port,omitempty"`
 	Type                 string                   `json:"type,omitempty"`
 	Username             string                   `json:"username,omitempty"`

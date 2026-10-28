@@ -61,3 +61,14 @@ rules:
   - networking.k8s.io
   resources:
   - ingresses
+- apiGroups:
+  - gateway.networking.k8s.io
+  resources:
+  - httproutes
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - delete
+  - watch
