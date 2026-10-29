@@ -419,10 +419,58 @@ The list of DBaaS Cassandra Adapter parameters is as follows:
 | `dbaas.nodeLabels`                                      | false       | map[string]string   |                                                     | The additional node labels for a DBaaS adapter replica.                                                                                                                                                                                                                    |
 | `dbaas.adapter.username`                                | false       | string              | dbaas-aggregator                                    | The username for the database adapter.                                                                                                                                                                                                                                   |
 | `dbaas.adapter.password`                                | false       | string              | dbaas-aggregator                                    | The password for the database adapter. Optional parameters for DBaaS installation if multiple physical databases for DBaaS are used.                                                                                                                                    |
+| `dbaas.adapter.secretName`                              | false       | string              | dbaas-adapter-credentials                           | The name of the Secret with the DBaaS adapter Basic Auth credentials (`username`, `password`). In declarative registration mode the DBaaS Operator reads it to call the adapter descriptor endpoint. |
+| `dbaas.declarativeRegistration.operatorNamespace`       | false       | string              | dbaas                                               | The namespace of the DBaaS Operator (its `CLOUD_NAMESPACE`). It is used only when the `PhysicalDatabase` CRD is available in the cluster. See [DBaaS Declarative Registration](#dbaas-declarative-registration). |
 | `dbaas.aggregator.physicalDatabaseIdentifier`           | false       | string              |                                                     | The database identifier in the DBaaS aggregator. The default is set to the Kubernetes namespace name.                                                                                                                                                                    |
-| `dbaas.aggregator.dbaasAggregatorRegistrationAddress`   | false       | string              | http://dbaas-aggregator.dbaas:8080                  | The address of the aggregator where the adapter registers its physical database cluster. The default is set to ```http://dbaas-aggregator.dbaas:8080/```.                                                                                                                |
+| `dbaas.aggregator.dbaasAggregatorRegistrationAddress`   | false       | string              | http://dbaas-aggregator.dbaas:8080                  | The address of the aggregator where the adapter registers its physical database cluster. The default is set to ```http://dbaas-aggregator.dbaas:8080/```. It is also used to decide whether the adapter address uses HTTPS in declarative mode. Self-registration with this address is performed only in legacy mode.                                                                                                                |
 | `dbaas.aggregator.username`                             | false       | string              | cluster-dba                                         | The username for database registration.                                                                                                                                                                                                                                  |
 | `dbaas.aggregator.password`                             | false       | string              | Bnmq5567_PO                                         | The password for database registration.                                                                                                                                                                                                                                  |
+
+## DBaaS Declarative Registration
+
+The DBaaS Cassandra Adapter supports two registration modes with the DBaaS Aggregator. The mode is selected automatically at Helm render time, so there is no manual switch.
+
+| Mode        | Selected when                                                                                                          | Who registers the physical database                                                      |
+|-------------|------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
+| Declarative | `dbaas.install` is `true` and the `dbaas.netcracker.com/v1/PhysicalDatabase` API (CRD) exists in the cluster         | The DBaaS Operator, based on the `PhysicalDatabase` custom resource created by the chart |
+| Legacy      | `dbaas.install` is `true` and the `PhysicalDatabase` CRD is not available                                             | The adapter itself, using the `dbaas.aggregator.*` parameters                            |
+
+In declarative mode the chart does the following:
+
+* Creates the `PhysicalDatabase` custom resource `<release-name>-cassandra-physical-db` in the release namespace. It references the DBaaS Operator namespace (`dbaas.declarativeRegistration.operatorNamespace`), the adapter address and the adapter credentials Secret (`dbaas.adapter.secretName`).
+* Creates the `dbaas-operator-credentials-reader` Role and RoleBinding in the release namespace. They allow the `dbaas-operator` ServiceAccount from the DBaaS Operator namespace to `get` only the adapter credentials Secret.
+* Starts the adapter with `DBAAS_DECLARATIVE_REGISTRATION_ENABLED=true`. The adapter no longer registers itself in the Aggregator and exposes the descriptor endpoint instead.
+
+The adapter address in the custom resource is `http://dbaas-cassandra-adapter.<namespace>:8080`. It is `https://dbaas-cassandra-adapter.<namespace>:8443` only when `tls.enabled` is `true` and `dbaas.aggregator.dbaasAggregatorRegistrationAddress` (or `API_DBAAS_ADDRESS`) uses `https`.
+
+The descriptor endpoint is `GET /api/v2/adapter/physical_database` and it requires Basic Auth with the adapter credentials. It returns `401` without valid credentials and `503` if the physical database identifier is not set. The endpoint never calls the Aggregator.
+
+The physical database identifier is still taken from `dbaas.aggregator.physicalDatabaseIdentifier` (the namespace name by default). Keep it unchanged when you switch modes, otherwise the DBaaS Operator registers a duplicate physical database.
+
+**Prerequisites for declarative mode:**
+
+* The DBaaS team has installed the `PhysicalDatabase` CRD. Do not install it with the Cassandra chart.
+* The DBaaS Operator is running and ready. The CRD alone does not mean the operator is ready, so check this before you install or upgrade.
+* `dbaas.declarativeRegistration.operatorNamespace` matches the namespace where the DBaaS Operator is deployed.
+* The DBaaS Operator ServiceAccount is named `dbaas-operator`.
+
+**Notes:**
+
+* The mode is evaluated on every Helm install or upgrade. If the CRD appears after the first installation, run an upgrade to switch to declarative mode. If API discovery is unavailable during a later upgrade, the declarative resources are not rendered and the adapter falls back to legacy registration.
+* Deleting the `PhysicalDatabase` custom resource stops declarative reconciliation. It does not delete the databases, and the Aggregator registration may remain until it is removed on the DBaaS side.
+* Do not run both modes against the same Aggregator for the same physical database identifier.
+
+To check the result after the installation:
+
+```bash
+kubectl get crd physicaldatabases.dbaas.netcracker.com
+kubectl get physicaldatabases -n <cassandra-namespace>
+kubectl auth can-i get secrets/dbaas-adapter-credentials -n <cassandra-namespace> \
+  --as=system:serviceaccount:<dbaas-operator-namespace>:dbaas-operator
+kubectl logs -n <cassandra-namespace> deploy/dbaas-cassandra-adapter | grep -i "declarative registration"
+```
+
+The adapter log contains `Declarative registration is enabled, adapter self-registration is disabled` in declarative mode.
 
 ## Cassandra Backup Daemon
 
@@ -1144,6 +1192,18 @@ The upgrade of CRD happens automatically through pre-deploy scripts.
 To disable this feature, add the `DISABLE_CRD: true` parameter(The DISABLE_CRD option is supported from release 2.16.0 onward).
 
 **Note**: `DISABLE_CRD=true` is intended only for restricted environments where cluster-wide permissions (`apiextensions.k8s.io`) are unavailable. **This flag is deprecated for all other deployment scenarios.** When CRDs are delivered as a dedicated CRD application, use that application instead of disabling CRD installation. In restricted environments without cluster-wide permissions, the dedicated CRD application must not be installed — use `DISABLE_CRD=true` for the main microservice application instead.
+
+#### Migration to Declarative DBaaS Registration
+
+When you upgrade to a release with declarative registration in a cluster where the `PhysicalDatabase` CRD is already installed, the chart switches to declarative mode automatically and the adapter stops self-registering.
+
+Before the upgrade:
+
+1. Make sure the DBaaS Operator is deployed and ready in the namespace set in `dbaas.declarativeRegistration.operatorNamespace`.
+2. Keep `dbaas.aggregator.physicalDatabaseIdentifier` unchanged, so the existing registration is reused.
+3. Make sure the deploy user can create `PhysicalDatabase` resources, `Roles` and `RoleBindings` in the Cassandra namespace.
+
+If the CRD is not installed, the upgrade keeps the legacy registration.
 
 ### Upgrade Using App Deployer
 
