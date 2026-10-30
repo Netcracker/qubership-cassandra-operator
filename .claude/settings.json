@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "ask": ["Edit", "Write", "NotebookEdit"]
+  }
+}

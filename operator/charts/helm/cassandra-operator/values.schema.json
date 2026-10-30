@@ -19,10 +19,34 @@
     "securityContext": { "$ref": "#/$defs/podSecurityContext" },
     "imagePullPolicy": { "type": "string", "enum": ["Always", "Never", "IfNotPresent"] },
     "createIngress": { "type": "boolean", "default": false },
+    "GATEWAY_SYSTEM_TYPE": { "type": "string" },
+    "gatewayApi": {
+      "type": "object",
+      "properties": {
+        "ignoreAnnotation": {
+          "type": "object",
+          "properties": { "key": { "type": "string" }, "value": { "type": "string" } }
+        },
+        "parentRefs": { "type": "array", "items": { "type": "object" } }
+      }
+    },
     "publicCloud": { "type": "string" },
     "reaper": { "$ref": "#/$defs/reaper" },
     "tls": { "$ref": "#/$defs/tls" },
     "cassandra": { "$ref": "#/$defs/cassandra" },
+    "dbaas": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "declarativeRegistration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operatorNamespace": { "type": "string" }
+          }
+        }
+      }
+    },
     "pvc": { "$ref": "#/$defs/pvc" },
     "policies": { "$ref": "#/$defs/policies" },
     "awsKeyspaces": { "$ref": "#/$defs/awsKeyspaces" },
@@ -91,6 +115,7 @@
         "install": { "type": "boolean" },
         "dockerImage": { "type": "string" },
         "ingressHost": { "type": "string" },
+        "ingressAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "port": { "type": "integer" },
         "type": { "type": "string" },
         "username": { "type": "string" },

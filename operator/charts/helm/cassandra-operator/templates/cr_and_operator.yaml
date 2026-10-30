@@ -64,8 +64,12 @@ spec:
   reaper:
     install: {{ .Values.reaper.install }}
     dockerImage: {{template "find_image" (dict "deployName" "dockerReaper" "SERVICE_NAME" "cassandra-reaper" "vals" .Values "default" .Values.reaper.dockerImage) }}
-    {{- if .Values.reaper.ingressHost }}
+    {{- if and .Values.reaper.ingressHost (eq (include "cassandra.gateway.legacyIngress" .) "true") }}
     ingressHost: {{ .Values.reaper.ingressHost }}
+    {{- if eq (include "cassandra.gateway.apiDefault" .) "true" }}
+    ingressAnnotations:
+      {{ .Values.gatewayApi.ignoreAnnotation.key | quote }}: {{ .Values.gatewayApi.ignoreAnnotation.value | quote }}
+    {{- end }}
     {{- end }}
     port: {{ if .Values.tls.enabled }}8443{{ else }}8080{{ end }}
     type: {{ if .Values.tls.enabled }}https{{ else }}http{{ end }}

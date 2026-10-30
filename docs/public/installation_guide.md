@@ -297,6 +297,10 @@ The list of Operator parameters is as follows:
 | `deletePVConUninstall`                                           | false      | bool     | false       	    | If PVCs needs to be deleted when `helm uninstall` executed.                                                                              |
 | `pvc.metadata.annotations`                                       | false      | map[string]string |        | The annotations to add to all PVC metadata.                                                                                              |
 | `imagePullPolicy`                                                | false      | string   | IfNotPresent       | If the image should be pulled prior to starting the container. Values: Always - always pull the image; IfNotPre  |
+| `GATEWAY_SYSTEM_TYPE` | false | string | legacy-ingress | Comma-separated list of gateway types: `legacy-ingress`, `gateway-api-default`. If it contains `legacy-ingress` or is empty, Kubernetes Ingress resources are deployed. If it contains `gateway-api-default`, Gateway API resources (`HTTPRoute`) are deployed and the Ingress resources get the ignore annotation. Both values can be combined, for example `legacy-ingress,gateway-api-default`, then both Ingress and `HTTPRoute` are deployed. |
+| `gatewayApi.parentRefs` | false | list | [] | The `parentRefs` of the created `HTTPRoute`, for example `[{name: public-gateway, namespace: gateway}]`. |
+| `gatewayApi.ignoreAnnotation.key` | false | string | gateway-api-converter.netcracker.com/ignore | The annotation added to Ingress resources when `gateway-api-default` is enabled, to prevent automatic conversion by Gateway API Converter and ArgoCD health-check issues. |
+| `gatewayApi.ignoreAnnotation.value` | false | string | "true" | The value of the ignore annotation. |
 | `operator.name`                                                  | false      | string   | operator-service   | The name of the operator.                                                                                            |
 | `operator.resources.requests.cpu`                                | false      | Quantity | 50m        		| The minimum number of CPUs the operator should use.                                                                  |
 | `operator.resources.requests.memory`                             | false      | Quantity | 64Mi        		| The minimum amount of memory the operator should use.                                                                |
@@ -393,6 +397,10 @@ The list of DBaaS Cassandra Adapter parameters is as follows:
 |-------------------------------------------------------  |-------------|---------------------|-----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `dbaas.pdb`                                             | false       | bool                | false                                               | IF PDB needs to be used. |
 | `dbaas.install`                                         | false       | bool                | true                                                | If DBaaS adapter needs to be installed.                                                                                                                                                                                                                                  |
+| `GATEWAY_SYSTEM_TYPE` | false | string | legacy-ingress | (cassandra-services chart) Comma-separated list of gateway types: `legacy-ingress`, `gateway-api-default`. If it contains `legacy-ingress` or is empty, Kubernetes Ingress resources are deployed. If it contains `gateway-api-default`, Gateway API resources (`HTTPRoute`) are deployed and the Ingress resources get the ignore annotation. Both values can be combined, for example `legacy-ingress,gateway-api-default`, then both Ingress and `HTTPRoute` are deployed. |
+| `gatewayApi.parentRefs` | false | list | [] | The `parentRefs` of the created `HTTPRoute`, for example `[{name: public-gateway, namespace: gateway}]`. |
+| `gatewayApi.ignoreAnnotation.key` | false | string | gateway-api-converter.netcracker.com/ignore | The annotation added to Ingress resources when `gateway-api-default` is enabled, to prevent automatic conversion by Gateway API Converter and ArgoCD health-check issues. |
+| `gatewayApi.ignoreAnnotation.value` | false | string | "true" | The value of the ignore annotation. |
 | `dbaas.apiVersion`                                      | false       | string              | v1                                                  | The DBaaS adapter REST API version.                                                                                                                                                                                                                                          |
 | `dbaas.multiUsers`                                      | false       | bool                | false                                               | If DBaaS adapter needs to create multiple users on a Create DB request.                                                                                                                                                                                                    |
 | `dbaas.allDCTopologyStrategy`                           | false       | bool                | false                                               | If keyspaces created through DBaaS should have full NetworkTopologyStrategy. The default values is "false".                                                                                                                                                                  |
@@ -1035,6 +1043,41 @@ backupDaemon:
     endpointUrl: http://minio-tenant-4.paas-miniha-kubernetes.openshift.sdntest.netcracker.com
 ```
 
+### Gateway API Migration
+
+The `GATEWAY_SYSTEM_TYPE` parameter controls whether Cassandra endpoints are exposed through Kubernetes `Ingress`, Gateway API `HTTPRoute`, or both. It is supported by the `cassandra-operator` and `cassandra-services` charts.
+
+The value is a comma- or space-separated, case-insensitive list. An empty value is treated as `legacy-ingress`, so existing deployments are not changed.
+
+| `GATEWAY_SYSTEM_TYPE` | Ingress | HTTPRoute |
+|---|---|---|
+| Empty or `legacy-ingress` | Created | Not created |
+| `gateway-api-default` | Not created | Created |
+| `legacy-ingress,gateway-api-default` | Created, with the ignore annotation | Created |
+
+When `gateway-api-default` is enabled, every created `Ingress` gets the annotation from `gatewayApi.ignoreAnnotation` (`gateway-api-converter.netcracker.com/ignore: "true"` by default). It prevents Gateway API Converter from creating a duplicate route from the Ingress and avoids ArgoCD health-check issues.
+
+The following resources are affected:
+
+| Resource | Chart | Created when |
+|---|---|---|
+| `cassandra-swagger` Ingress / `HTTPRoute` | `cassandra-services` | `createIngress` is true, DBaaS adapter is installed and `CLOUD_PUBLIC_HOST` is set. Host is `<namespace>-dbaas-adapter-swagger.<CLOUD_PUBLIC_HOST>`, backend is `dbaas-cassandra-adapter:8080`. |
+| `cassandra-reaper` Ingress / `HTTPRoute` | `cassandra-operator` | `reaper.install` is true and `reaper.ingressHost` is set. See [Reaper Access Through Gateway API](#reaper-access-through-gateway-api). |
+
+**Note**: An `HTTPRoute` receives traffic only if `gatewayApi.parentRefs` points to an existing Gateway, for example `[{name: public-gateway, namespace: gateway}]`. The default is an empty list.
+
+Example for a migration period, when both the Ingress and the `HTTPRoute` are served:
+
+```yaml
+GATEWAY_SYSTEM_TYPE: "legacy-ingress,gateway-api-default"
+gatewayApi:
+  parentRefs:
+    - name: public-gateway
+      namespace: gateway
+```
+
+After verifying access through the Gateway, set `GATEWAY_SYSTEM_TYPE: "gateway-api-default"` to remove the Ingress resources.
+
 ### Cassandra Reaper Installation 
 
 This section describes how to install the Cassandra Reaper repair tool in a Cassandra cluster.
@@ -1046,6 +1089,18 @@ Cassandra Reaper is installed in a Sidecar mode. Therefore, every Cassandra pod 
 To enable Cassandra Reaper, you need to specify the parameters from the [Cassandra Reaper Parameters](#cassandra-reaper-parameters) section in the microservice_deployer-helm or the App Deployer job:
 
 After all the services are deployed, you can access the Cassandra Reaper Web UI using the address specified in the `reaper.ingressHost` parameter plus /webui/index.html. The credentials for the Web UI are specified in the `reaper.username` and `reaper.password` parameters.
+
+#### Reaper Access Through Gateway API
+
+The way Cassandra Reaper is exposed depends on the `GATEWAY_SYSTEM_TYPE` parameter and requires `reaper.ingressHost`:
+
+* Empty or contains `legacy-ingress` - the operator creates the `cassandra-reaper` Ingress (default behavior).
+* Contains `gateway-api-default` - the Helm chart creates the `cassandra-reaper` `HTTPRoute` (host `reaper.ingressHost`, service `cassandra`, port 8080 or 8443 with TLS) attached to `gatewayApi.parentRefs`. The Ingress, if created, gets the `gateway-api-converter.netcracker.com/ignore: "true"` annotation.
+* Contains only `gateway-api-default` - no Ingress is created, and the `cassandra-reaper` Ingress left from a previous deployment is deleted by the operator.
+* Contains both values - both the Ingress and the `HTTPRoute` are deployed.
+
+**Note**: The nginx-specific annotations of the Reaper Ingress (cookie session affinity, backend HTTPS verification) have no `HTTPRoute` equivalent. Configure them in the gateway controller if needed.
+
 
 #### Re-encrypt Route In Openshift Without NGINX Ingress Controller
 

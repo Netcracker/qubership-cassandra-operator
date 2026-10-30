@@ -1,0 +1,23 @@
+{{- if and .Values.reaper.install .Values.reaper.ingressHost (eq (include "cassandra.gateway.apiDefault" .) "true") }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  labels:
+    {{- include "cassandra.defaultLabels" . | nindent 4 }}
+  name: cassandra-reaper
+spec:
+  {{- with .Values.gatewayApi.parentRefs }}
+  parentRefs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  hostnames:
+    - {{ .Values.reaper.ingressHost | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: cassandra
+          port: {{ if .Values.tls.enabled }}8443{{ else }}8080{{ end }}
+{{- end }}
