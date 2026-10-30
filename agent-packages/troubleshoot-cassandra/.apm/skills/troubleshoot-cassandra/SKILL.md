@@ -1,9 +1,51 @@
 ---
 name: troubleshoot-cassandra
 
-description: Diagnose and resolve failures in operator-managed Cassandra clusters using the documented troubleshooting reference. Use whenever the user reports a Cassandra pod startup failure, CrashLoopBackOff, gossip/connectivity issue, commit-log corruption, direct-buffer-memory problem, logs stuck during startup, invalid GrafanaDashboard, Prometheus alert, high CPU/memory/JVM heap/disk/inode usage, nodes DOWN or not running, fewer pods than expected, Unavailable exceptions, backup-daemon disk/inode pressure, failed backups (GC/heap pressure, excessive schema metadata), an operator not reacting to a restart, or an App Job/Helm deploy error. Match the reported symptom to the documented Cassandra troubleshooting section first. If no documented section is a plausible match, fall back to a general Cassandra/operator checklist covering pod state, operator logs, Cassandra logs, events, networking/DNS, storage, resources, configuration, nodetool status, and backup-daemon logs.
+description: Diagnose and resolve failures in operator-managed Cassandra clusters using the documented troubleshooting reference. Use for pod startup failures, CrashLoopBackOff, gossip/connectivity issues, commit-log corruption, direct-buffer-memory problems, stuck startup logs, Grafana dashboard or Prometheus alerts (CPU, memory, JVM heap, disk, inodes), nodes DOWN, fewer pods than expected, Unavailable exceptions, backup-daemon disk/inode pressure, failed backups, operator not reacting to a restart, App Job/Helm deploy errors, and Reaper/swagger Ingress or HTTPRoute problems (404, `GATEWAY_SYSTEM_TYPE`). Match the symptom to the documented section first; otherwise fall back to a general checklist (pod state, operator and Cassandra logs, events, networking, storage, resources, config, nodetool status, backup-daemon logs).
 
 ---
+
+# Cassandra Operator Troubleshooting Skill
+
+Use this skill when investigating issues related to:
+
+- **cassandra-operator** reconciliation (`CassandraDeployment` CR, operator restart, App Job/Helm ownership errors)
+- **Cassandra pod startup** failures (commit log, gossip, direct buffer memory, stuck logs, cluster-name mismatch)
+- **Cluster health** (nodes `DN`, fewer pods than expected, Unavailable exceptions)
+- **Prometheus alerts** (CPU, memory, JVM heap, disk, inodes) and the Grafana dashboard
+- **Backups** (backup daemon disk/inodes, failed backups, exit code 2)
+- **Reaper / swagger exposure** through Ingress or Gateway API `HTTPRoute` (`GATEWAY_SYSTEM_TYPE`)
+
+## Component overview
+
+- **cassandra-operator**: Go operator (`operator/`) that reconciles the `CassandraDeployment` CR; deployed by the `cassandra-operator` Helm chart (`operator/charts/helm/cassandra-operator`).
+- **Cassandra pods**: StatefulSet-style pods (`cassandra0-0`, ...) behind the headless `cassandra` service; Reaper runs as a sidecar when `reaper.install` is true.
+- **cassandra-services**: Helm chart (`services/service/charts/helm/cassandra-services`) with the DBaaS adapter, backup daemon, monitoring, and the swagger Ingress/HTTPRoute.
+- **DBaaS adapter** (`services/dbaas-adapter`): Go service exposing the DBaaS API (`/api/v2/adapter/physical_database`, `/api/version`).
+- **Backup daemon** (`services/backup-daemon`): backups under `/backup-storage/{backup_id}`.
+- **Exposure**: Ingress and/or Gateway API `HTTPRoute`, selected by `GATEWAY_SYSTEM_TYPE`.
+
+Operator logs and the CR (`kubectl get cassandradeployment -n <namespace> -o yaml`) are the first stop for deploy and reconcile problems.
+
+### Critical configuration paths
+
+- `operator/charts/helm/cassandra-operator/`: operator chart (`values.yaml`, `templates/cr_and_operator.yaml` builds the `CassandraDeployment` CR, `templates/reaper-httproute.yaml`).
+- `services/service/charts/helm/cassandra-services/`: services chart (DBaaS adapter, backup daemon, `service_monitor.yaml`, `prometheus_alerts.yaml`, `grafana_dashboard.yaml`, `dbaas-ingress-deployment.yaml`).
+- `operator/pkg/impl/cassandra/reaper.go`: creates or deletes the `cassandra-reaper` Ingress.
+- Key values: `reaper.install`, `reaper.ingressHost`, `createIngress`, `CLOUD_PUBLIC_HOST`, `GATEWAY_SYSTEM_TYPE`, `gatewayApi.parentRefs`, `tls.enabled`, `DEPLOY_W_HELM`. See "Configuration conventions" for what each does.
+- Parameter reference: `docs/public/installation_guide.md`.
+
+### Forbidden actions
+
+Never run these without explicit user confirmation, and show the exact command and its impact first:
+
+- Deleting files in `/var/lib/cassandra/data/commitlog/` beyond the single file named in the stack trace (partial data loss).
+- `kubectl delete pvc` or deleting a Cassandra pod's PV (data loss).
+- The namespace-wide cleanup `kubectl delete configmaps,ingresses,serviceaccounts,roles,rolebindings,grafanadashboard,prometheusrule,servicemonitor --all` (deletes objects not owned by Cassandra).
+- Deleting the `CassandraDeployment` CR, or recreating the headless `cassandra` service, on a live cluster.
+- Removing backups from `/backup-storage` or dropping tables/keyspaces to relieve pressure.
+- Scaling down Cassandra pods, or restarting DNS/Calico pods.
+- Supplementary (not in the reference): `nodetool removenode`, `nodetool assassinate`, `nodetool decommission`, and `nodetool repair` on a cluster with `DN` nodes, because they change ring membership or load.
 
 ## Workflow
 
@@ -15,6 +57,7 @@ Follow these steps in order. Do not skip step 1 or step 5.
    - *Prometheus alert*: user quotes an alert name or threshold.
    - *Deployment/operator*: App Job, Helm, or operator reconciliation error.
    - *Backup*: backup-daemon alert, backup ID, or backup playbook failure.
+   - *Exposure*: Ingress/HTTPRoute for Reaper or swagger returns an error or is unreachable.
 3. **Select the section** with the lookup below and the jump table.
 4. **Read only that section** and follow its "How to solve" steps. Verify each documented cause against the evidence before proposing it (see "Confirm before fixing").
 5. **Report** using the output format at the end. State which section was used, which evidence supports it, and what has not been verified.
@@ -58,6 +101,7 @@ All paths are relative to this skill directory. The file uses CRLF line endings,
 | Backup daemon inode usage above threshold | Prometheus Alerts Troubleshooting. Backup Daemon Uses More Than N Percent of Available Inodes |
 | Last backup failed (alert with a backup `id`) | Prometheus Alerts Troubleshooting. Last Backup Failed |
 | Backup fails with exit code 2, all nodes `UN`, long GC pauses or heap pressure | Cassandra Backup Failure (Exit Code 2) |
+| Reaper/swagger URL returns `{"code":404,"message":"HTTP 404 Not Found"}`, no Ingress or HTTPRoute created, `GATEWAY_SYSTEM_TYPE` questions | Ingress or HTTPRoute Returns 404 or Is Not Reachable |
 
 ### Disambiguation rules
 
@@ -66,6 +110,7 @@ All paths are relative to this skill directory. The file uses CRLF line endings,
 - **High heap vs. backup exit code 2 vs. Unavailable exceptions** can be the same underlying GC/heap problem. Start with the section that matches the reported alert, and mention the others if logs show long GC pauses or a `DOWN` node.
 - **Disk alerts**: Cassandra disk (data PV) and Backup Daemon disk/inodes are different volumes and different sections.
 - **Pod startup stuck with no error**: use *Logs stuck* only if the last log line is `Initializing system.IndexInfo`; otherwise fall back to the checklist.
+- **`{"code":404,...}`** is Reaper's (Dropwizard) body, not the adapter's: the adapter is Go Fiber and answers `Cannot GET /`. It means the route works and the path is wrong.
 - Match on the exact string, not a loose keyword (for example, "Commit log got corrupted" is also the stated description under the gossip startup section, but the evidence decides, not the description).
 
 ## Confirm before fixing
@@ -84,6 +129,7 @@ Each documented fix assumes a specific cause. Verify it first with a read-only c
 | Resource alerts | Current usage vs. limits (`kubectl top pod -n <namespace>`, `kubectl describe pod`) and whether the usage is sustained rather than a spike |
 | Last backup failed | The backup `id` from the alert; read `/backup-storage/{backup_id}/.console` |
 | Backup exit code 2 | `nodetool status` shows all `UN` **and** Cassandra logs show long GC pauses; otherwise it is the generic "Last Backup Failed" investigation |
+| Ingress/HTTPRoute 404 | `kubectl get ingress,httproute -n <namespace>`; the value of `GATEWAY_SYSTEM_TYPE` in the CR/deploy parameters; `curl` through a `port-forward` to compare with the routed call |
 
 If the confirmation does not match, say so and move to the next candidate section or the fallback checklist rather than applying the fix anyway.
 
@@ -112,6 +158,10 @@ The Cassandra operator is operator-managed. Prefer the documented configuration/
   cassandra.configuration: "cluster_name: <saved cluster name>"
   ```
   (or the equivalent multi-line `cassandra: configuration: |- cluster_name: <saved cluster name>`).
+- `GATEWAY_SYSTEM_TYPE` (default `legacy-ingress`): comma-separated `legacy-ingress`, `gateway-api-default`. Empty is treated as `legacy-ingress`. With `gateway-api-default`, Ingresses get `gateway-api-converter.netcracker.com/ignore: "true"` (`gatewayApi.ignoreAnnotation`).
+- `gatewayApi.parentRefs`: list of Gateways the `HTTPRoute` attaches to, for example `[{name: public-gateway, namespace: gateway}]`. Empty by default, so a route attaches to nothing.
+- `reaper.install` / `reaper.ingressHost`: required for the Reaper Ingress/HTTPRoute. `createIngress` + `CLOUD_PUBLIC_HOST`: required for the swagger one.
+- Helm `--set` splits on commas; pass multiple gateway types with `--set-string 'GATEWAY_SYSTEM_TYPE=legacy-ingress\,gateway-api-default'` or a values file.
 - Do not replace the documented configuration path with a live `nodetool` or JVM command unless the reference explicitly calls for it.
 
 ## Cluster and diagnostic conventions
@@ -126,6 +176,27 @@ The Cassandra operator is operator-managed. Prefer the documented configuration/
 - For a failed backup, use the backup ID from the alert: `cat /backup-storage/{backup_id}/.console` in the Backup Daemon pod.
 - For Cassandra backup exit code 2, check Cassandra logs for long GC pauses and heap pressure, then review schema/keyspace structure and the number of tables per keyspace.
 - Read-only commands are safe to run directly; anything that changes state follows the Guardrails.
+
+## Log analysis tips
+
+```bash
+# Operator: reconcile errors
+kubectl logs deployment/cassandra-operator -n <namespace> | grep -iE "error|failed|panic"
+
+# Cassandra: startup, gossip, GC, commit log
+kubectl logs <cassandra-pod> -n <namespace> | grep -iE "gossip|CommitLog|OutOfMemory|GCInspector"
+kubectl logs <cassandra-pod> -n <namespace> --previous
+
+# Backup daemon
+kubectl logs <backup-daemon-pod> -n <namespace> | grep -iE "error|failed"
+```
+
+## Integration points
+
+- **Monitoring**: `service_monitor.yaml` scrapes the `metrics` port; alerts come from `prometheus_alerts.yaml` and the dashboard from `grafana_dashboard.yaml`. Check them with `kubectl get servicemonitor,prometheusrule,grafanadashboard -n <namespace>`. Dashboard details: `docs/public/grafana_dashboard.md`.
+- **DBaaS adapter**: reachable in-cluster as `dbaas-cassandra-adapter` on 8080 (8443 with TLS). Quick checks: `kubectl port-forward svc/dbaas-cassandra-adapter 8080:8080 -n <namespace>`, then `curl localhost:8080/api/version`. The descriptor endpoint `/api/v2/adapter/physical_database` needs basic auth with the adapter credentials.
+- **Reaper**: sidecar in each Cassandra pod, UI at `<reaper.ingressHost>/webui/index.html`, credentials in `reaper.username` / `reaper.password`.
+- **Backup daemon**: logs in the backup-daemon pod; each backup keeps a `.console` file under `/backup-storage/{backup_id}`. Details: `docs/public/backup-daemon.md`.
 
 ## Fallback checklist
 
@@ -157,3 +228,34 @@ Keep the answer short and structured:
 4. **Steps**: the documented fix, in order, with real namespace/pod names. Flag every destructive step and its risk.
 5. **Verification**: how to confirm recovery (pod Ready, `nodetool status` all `UN`, alert cleared, job succeeds, backup re-run succeeds).
 6. **Follow-ups**: revert temporary changes (for example `ignorereplayerrors`), and any recommendations from the section.
+
+## Prevention best practices
+
+1. Monitor JVM heap, GC pause time and schema growth; clean up unused tables to keep metadata overhead low.
+2. Keep disk and inode headroom on both the Cassandra data volume and the backup volume.
+3. Set realistic CPU and memory requests and limits, and review them when alerts start firing regularly.
+4. Always deploy with `DEPLOY_W_HELM: "true"` consistently, so later App Job runs do not hit ownership conflicts.
+5. Keep the Cassandra headless service (`clusterIP: None`) and DNS healthy; they are what gossip relies on.
+6. Check `nodetool status` after every upgrade or scaling change before moving on.
+7. Verify backups restore in a non-production environment, not just that they complete.
+8. During a gateway migration, run `legacy-ingress,gateway-api-default` first and verify the Gateway path before dropping the Ingress.
+
+## Related documentation
+
+- `docs/public/installation_guide.md`: parameters, installation, gateway migration, Reaper access.
+- `docs/public/troubleshooting.md`: the public troubleshooting guide (compare it with this skill's reference before relying on either).
+- `docs/public/operations_guide.md`: day-two operations.
+- `docs/public/backup-daemon.md`: backup and restore.
+- `docs/public/grafana_dashboard.md`: dashboard and metrics.
+- `docs/public/architecture.md` and `docs/public/configuration.md`: components and tunables.
+
+## When to escalate
+
+Escalate to the component maintainers or cluster administrators when:
+
+- The operator crashes with a Go panic (attach the stack trace).
+- Data corruption is suspected, or a commit-log fix did not recover the node.
+- Several nodes stay `DN` or gossip fails and DNS/network checks do not explain it.
+- A backup or restore fails repeatedly with the documented checks exhausted.
+
+Include the operator logs, logs of the affected pods, `nodetool status`, the `CassandraDeployment` YAML, and recent namespace events.
