@@ -159,6 +159,11 @@ type DbaasAggregatorCredentials struct {
 	SecretName                         string `json:"secretName,omitempty"`
 }
 
+type DbaasDeclarativeRegistration struct {
+	// Namespace of the DBaaS Operator.
+	OperatorNamespace string `json:"operatorNamespace,omitempty"`
+}
+
 type Dbaas struct {
 	Install           bool                        `json:"install,omitempty"`
 	DockerImage       string                      `json:"dockerImage,omitempty"`
@@ -169,6 +174,8 @@ type Dbaas struct {
 	PriorityClassName string                      `json:"priorityClassName,omitempty"`
 	ApiVersion        string                      `json:"apiVersion,omitempty"`
 	MultiUsers        bool                        `json:"multiUsers,omitempty"`
+	// DeclarativeRegistration enables registration by the DBaaS Operator from the PhysicalDatabase CR; the adapter then does not self-register. It is enabled when `operatorNamespace` is set.
+	DeclarativeRegistration DbaasDeclarativeRegistration `json:"declarativeRegistration,omitempty"`
 	//default topology strategy for keyspaces created via Dbaas. The default values is `"{'class':'SimpleStrategy','replication_factor': 1 }"`. This parameter is ignored if `dbaas.allDCTopologyStrategy` is `true`. The value can be overridden in a request body to Dbaas.
 	TopologyStrategy string          `json:"topologyStrategy,omitempty"`
 	TLS              DbaasAdapterTLS `json:"tls,omitempty"`

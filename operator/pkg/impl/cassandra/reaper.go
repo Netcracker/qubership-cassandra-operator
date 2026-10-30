@@ -1,6 +1,7 @@
 package cassandra
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Netcracker/qubership-cassandra-operator/api/v1alpha1"
@@ -11,7 +12,9 @@ import (
 	"github.com/gocql/gocql"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/networking/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -48,6 +51,10 @@ func (r *CassandraReaper) Execute(ctx core.ExecutionContext) error {
 		annotations["nginx.ingress.kubernetes.io/proxy-ssl-verify"] = "on"
 		annotations["nginx.ingress.kubernetes.io/proxy-ssl-name"] = "cassandra." + request.Namespace
 		annotations["nginx.ingress.kubernetes.io/proxy-ssl-secret"] = request.Namespace + "/" + spec.Spec.TLS.RootCASecretName
+	}
+
+	for k, v := range spec.Spec.Reaper.IngressAnnotations {
+		annotations[k] = v
 	}
 
 	if spec.Spec.Reaper.IngressHost != "" {
@@ -89,6 +96,13 @@ func (r *CassandraReaper) Execute(ctx core.ExecutionContext) error {
 		core.PanicError(err, log.Error, "Ingress "+ingress.Name+" creation failed")
 
 		log.Debug("Cassandra reaper Ingress have been created")
+	} else {
+		// ingressHost is not set (e.g. migrated to gateway-api-default only): remove a previously created Ingress
+		k8sClient := ctx.Get(constants.ContextClient).(client.Client)
+		stale := &v1.Ingress{ObjectMeta: metav1.ObjectMeta{Name: "cassandra-reaper", Namespace: request.Namespace}}
+		if err := k8sClient.Delete(context.TODO(), stale); err != nil && !apierrors.IsNotFound(err) {
+			core.PanicError(err, log.Error, "Ingress "+stale.Name+" deletion failed")
+		}
 	}
 
 	return nil

@@ -36,6 +36,7 @@ func main() {
 	apiVersion := utils.GetEnv("API_VERSION", "v1")
 	multiUserEnabled := utils.GetEnvAsBool("MULTI_USERS_ENABLED", false)
 	aggregatorAdapterAddress := utils.GetEnv("DBAAS_ADAPTER_ADDRESS", fmt.Sprintf("http://dbaas-%s-adapter.%s:8080", appName, namespace))
+	declarativeRegistration := utils.GetEnvAsBool("DBAAS_DECLARATIVE_REGISTRATION_ENABLED", false)
 	aggregatorRegistrationAddress := utils.GetEnv("DBAAS_AGGREGATOR_REGISTRATION_ADDRESS", "http://dbaas-aggregator.dbaas:8080")
 	aggregatorRegistrationIdentifier := utils.GetEnv("DBAAS_AGGREGATOR_PHYSICAL_DATABASE_IDENTIFIER", appName)
 	aggregatorRegistrationUser := mUtils.GetSecret("/var/run/secrets/dbaas-aggregator/username", "cluster-dba")
@@ -97,27 +98,38 @@ func main() {
 		},
 	}
 
-	basicRegistrationAuth := dao.BasicAuth{
-		Username: aggregatorRegistrationUser,
-		Password: aggregatorRegistrationPass,
-	}
-
-	dbaasClient, err := dbaas.NewDbaasClient(aggregatorRegistrationAddress, &basicRegistrationAuth, nil)
-	if dbaasClient == nil {
-		panic(fmt.Errorf("Failed to establish connection to DBaaS aggregator, err: %v", err))
-	}
-
-	if err != nil {
-		ctxLogger.Error(fmt.Sprintf("Failed to get DBaaS aggregator version, err %v. Setting default API version", err))
-	}
-
-	version, _ := dbaasClient.GetVersion() // if err != nil it will fail in the condition above
-	if version == "v3" {
+	// In declarative mode the DBaaS Operator registers the physical database from the CR,
+	// so the adapter must not create an Aggregator client or self-register.
+	var dbaasClient *dbaas.Client
+	if declarativeRegistration {
+		ctxLogger.Info("Declarative registration is enabled, adapter self-registration is disabled")
+		// The Aggregator version cannot be probed without a client. Declarative registration
+		// is only supported by Aggregators with the v3 API, which maps to the adapter v2 API,
+		// regardless of the configured (default "v1") API version.
 		apiVersion = "v2"
 	} else {
-		apiVersion = "v1"
-	}
+		basicRegistrationAuth := dao.BasicAuth{
+			Username: aggregatorRegistrationUser,
+			Password: aggregatorRegistrationPass,
+		}
 
+		var err error
+		dbaasClient, err = dbaas.NewDbaasClient(aggregatorRegistrationAddress, &basicRegistrationAuth, nil)
+		if dbaasClient == nil {
+			panic(fmt.Errorf("Failed to establish connection to DBaaS aggregator, err: %v", err))
+		}
+
+		if err != nil {
+			ctxLogger.Error(fmt.Sprintf("Failed to get DBaaS aggregator version, err %v. Setting default API version", err))
+		}
+
+		version, _ := dbaasClient.GetVersion() // if err != nil it will fail in the condition above
+		if version == "v3" {
+			apiVersion = "v2"
+		} else {
+			apiVersion = "v1"
+		}
+	}
 	ctxLogger.Info(fmt.Sprintf("API version is %s", apiVersion))
 
 	var dbAdminImpl service.DbAdministration = impl.GetCassandraDbAdministration(
@@ -145,13 +157,10 @@ func main() {
 	)
 
 	log.Fatal(fiber2.RunFiberServer(port, func(app *fiber.App, ctx context.Context) error {
-		fiber2.BuildFiberDBaaSAdapterHandlers(
-			app,
-			apiUser,
-			apiPass,
-			appPath,
-			admService,
-			service.NewPhysicalRegistrationService(
+		// nil disables the legacy registration routes and the periodic registration worker.
+		var physicalService *service.PhysicalDatabaseRegistrationService
+		if !declarativeRegistration {
+			physicalService = service.NewPhysicalRegistrationService(
 				appName,
 				ctxLogger,
 				aggregatorRegistrationIdentifier,
@@ -167,11 +176,23 @@ func main() {
 				aggregatorRegistrationRetryDelay,
 				admService,
 				ctx,
-			),
+			)
+		}
+
+		fiber2.BuildFiberDBaaSAdapterHandlers(
+			app,
+			apiUser,
+			apiPass,
+			appPath,
+			admService,
+			physicalService,
 			backupAdminServiceImpl,
 			supports.ToMap(),
 			ctxLogger,
 			profiler, "")
+
+		RegisterDescriptorHandler(app, apiUser, apiPass,
+			BuildDescriptor(aggregatorRegistrationIdentifier, appName, mUtils.ReadLabelsFile(), admService))
 
 		prefix := fmt.Sprintf("/api/%s/dbaas/adapter/cassandra/databases/", apiVersion)
 		app.Put(prefix+":dbName/settings", dbAdminImpl.(*impl.CassandraDbAdministration).UpdateCassandraSettingsHandler)

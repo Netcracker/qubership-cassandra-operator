@@ -209,21 +209,9 @@ func appendAtpReportPodConfig(
 	volumes = append(volumes, v12.Volume{
 		Name: "robot-tests-pod-secrets",
 		VolumeSource: v12.VolumeSource{
-			Projected: &v12.ProjectedVolumeSource{
+			Secret: &v12.SecretVolumeSource{
+				SecretName:  robotTestsAtpStorageSecretName,
 				DefaultMode: &atpSecretMode,
-				Sources: []v12.VolumeProjection{
-					{
-						Secret: &v12.SecretProjection{
-							LocalObjectReference: v12.LocalObjectReference{
-								Name: robotTestsAtpStorageSecretName,
-							},
-							Items: []v12.KeyToPath{
-								{Key: "atp-storage-username", Path: "ATP_STORAGE_USERNAME"},
-								{Key: "atp-storage-password", Path: "ATP_STORAGE_PASSWORD"},
-							},
-						},
-					},
-				},
 			},
 		},
 	})
