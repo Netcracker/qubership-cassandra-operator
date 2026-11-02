@@ -202,7 +202,7 @@ metadata:
   name: {{ .Release.Name }}-physical-db
   namespace: {{ .Release.Namespace }}
 spec:
-  operatorNamespace: {{ required "DBaaS Operator namespace is required" .Values.dbaas.declarativeRegistration.operatorNamespace | quote }}
+  operatorNamespace: {{ include "cassandra.dbaas.operatorNamespace" . | quote }}
   adapterAddress: {{ required "Adapter address is required" .Values.dbaas.declarativeRegistration.adapterAddress | quote }}
   credentialsSecretRef:
     name: {{ required "Adapter credentials Secret name is required" .Values.dbaas.declarativeRegistration.credentialsSecretName | quote }}

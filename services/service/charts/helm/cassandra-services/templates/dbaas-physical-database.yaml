@@ -7,7 +7,7 @@ metadata:
   labels:
     {{- include "cassandra.defaultLabels" . | nindent 4 }}
 spec:
-  operatorNamespace: {{ required "dbaas.declarativeRegistration.operatorNamespace is required when the PhysicalDatabase CRD is available" .Values.dbaas.declarativeRegistration.operatorNamespace | quote }}
+  operatorNamespace: {{ include "cassandra.dbaas.operatorNamespace" . | quote }}
   adapterAddress: {{ include "cassandra.dbaas.adapterAddress" . | quote }}
   credentialsSecretRef:
     name: {{ .Values.dbaas.adapter.secretName | quote }}
@@ -36,5 +36,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: dbaas-operator
-    namespace: {{ required "dbaas.declarativeRegistration.operatorNamespace is required when the PhysicalDatabase CRD is available" .Values.dbaas.declarativeRegistration.operatorNamespace | quote }}
+    namespace: {{ include "cassandra.dbaas.operatorNamespace" . | quote }}
 {{- end }}

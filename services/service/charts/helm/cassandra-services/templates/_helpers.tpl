@@ -410,6 +410,30 @@ app.kubernetes.io/technology: "go"
 {{- end -}}
 
 {{/*
+DBaaS Operator namespace for declarative registration.
+Uses explicitly configured dbaas.declarativeRegistration.operatorNamespace if set,
+otherwise extracts the namespace from API_DBAAS_ADDRESS.
+*/}}
+{{- define "cassandra.dbaas.operatorNamespace" -}}
+  {{- $explicit := .Values.dbaas.declarativeRegistration.operatorNamespace -}}
+  {{- if and (ne ($explicit | toString) "<nil>") (ne ($explicit | toString) "") -}}
+    {{- $explicit -}}
+  {{- else -}}
+    {{- $address := toString (default "" .Values.API_DBAAS_ADDRESS) -}}
+    {{- $host := first (splitList ":" (last (splitList "://" $address))) -}}
+    {{- $parts := splitList "." $host -}}
+    {{- $namespace := "" -}}
+    {{- if ge (len $parts) 2 -}}
+      {{- $namespace = index $parts 1 -}}
+    {{- end -}}
+    {{- if or (eq $namespace "") (regexMatch "^[0-9]+$" $namespace) -}}
+      {{- fail (printf "API_DBAAS_ADDRESS %q names no namespace. Set it to http://<aggregator>.<namespace>:<port> or set dbaas.declarativeRegistration.operatorNamespace." $address) -}}
+    {{- end -}}
+    {{- $namespace -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
 DBaaS declarative registration mode. True only when the DBaaS adapter is installed and the shared
 PhysicalDatabase CRD is available at render time. The same condition drives the PhysicalDatabase CR,
 the Secret RBAC and the adapter self-registration switch.
