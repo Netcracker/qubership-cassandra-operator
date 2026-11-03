@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	github.com/Netcracker/qubership-cql-driver v0.0.2
 	github.com/Netcracker/qubership-credential-manager v0.0.18
-	github.com/Netcracker/qubership-nosqldb-operator-core v1.0.14
+	github.com/Netcracker/qubership-nosqldb-operator-core v1.0.15
 	github.com/gocql/gocql v1.6.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.1
