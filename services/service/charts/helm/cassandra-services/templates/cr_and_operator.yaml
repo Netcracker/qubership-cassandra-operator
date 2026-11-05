@@ -138,7 +138,7 @@ spec:
     install: {{ .Values.dbaas.install }}
     {{- if eq (include "cassandra.dbaas.declarativeRegistration" .) "true" }}
     declarativeRegistration:
-      operatorNamespace: {{ required "dbaas.declarativeRegistration.operatorNamespace is required when the PhysicalDatabase CRD is available" .Values.dbaas.declarativeRegistration.operatorNamespace | quote }}
+      operatorNamespace: {{ include "cassandra.dbaas.operatorNamespace" . | quote }}
     {{- end }}
     {{- if .Values.dbaas.allDCTopologyStrategy }}
     {{- $replication := list }}

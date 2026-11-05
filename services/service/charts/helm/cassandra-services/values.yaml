@@ -152,7 +152,8 @@ dbaas:
   # PhysicalDatabase CRD (dbaas.netcracker.com/v1) exists in the cluster at Helm render time.
   declarativeRegistration:
     # Namespace (CLOUD_NAMESPACE) of the DBaaS Operator. Used when the CRD is available.
-    operatorNamespace: dbaas
+    # Defaults to the namespace extracted from API_DBAAS_ADDRESS.
+    operatorNamespace: ""
   # Dbaas resources
   resources:
     requests:
