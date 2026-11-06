@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   partOf: {{ .Values.PART_OF }}
-  artifactDescriptorVersion: {{ .Values.ARTIFACT_DESCRIPTOR_VERSION | trunc 63 | trimAll "-_." }}
+  artifactDescriptorVersion: {{ default "n/a" .Values.ARTIFACT_DESCRIPTOR_VERSION | trunc 63 | trimAll "-_." }}
   managedBy: {{ .Values.MANAGED_BY }}
   instance: {{ cat (coalesce .Values.DEPLOYMENT_RESOURCE_NAME .Values.SERVICE_NAME) "-" .Values.NAMESPACE | nospace | trunc 63 | trimSuffix "-" }}
   deploymentVersion: {{ $deploymentVersion | quote }}
@@ -294,7 +294,7 @@ metadata:
     name: {{ .Values.SERVICE_NAME }}
     app.kubernetes.io/name: {{ .Values.SERVICE_NAME }}
     app.kubernetes.io/instance: {{ cat (coalesce .Values.DEPLOYMENT_RESOURCE_NAME .Values.SERVICE_NAME) "-" .Values.NAMESPACE | nospace | trunc 63 | trimSuffix "-" }}
-    app.kubernetes.io/version: {{ .Values.ARTIFACT_DESCRIPTOR_VERSION | trunc 63 | trimAll "-_." }}
+    app.kubernetes.io/version: {{ default "n/a" .Values.ARTIFACT_DESCRIPTOR_VERSION | trunc 63 | trimAll "-_." }}
     app.kubernetes.io/component: 'backend'
     app.kubernetes.io/part-of: {{ .Values.PART_OF }}
     app.kubernetes.io/managed-by: {{ .Values.MANAGED_BY }}
@@ -310,7 +310,7 @@ spec:
         name: {{ .Values.operator.podName }}
         app.kubernetes.io/name: {{ .Values.SERVICE_NAME }}
         app.kubernetes.io/instance: {{ cat (coalesce .Values.DEPLOYMENT_RESOURCE_NAME .Values.SERVICE_NAME) "-" .Values.NAMESPACE | nospace | trunc 63 | trimSuffix "-" }}
-        app.kubernetes.io/version: {{ .Values.ARTIFACT_DESCRIPTOR_VERSION | trunc 63 | trimAll "-_." }}
+        app.kubernetes.io/version: {{ default "n/a" .Values.ARTIFACT_DESCRIPTOR_VERSION | trunc 63 | trimAll "-_." }}
         app.kubernetes.io/component: 'backend'
         app.kubernetes.io/part-of: {{ .Values.PART_OF }}
         app.kubernetes.io/managed-by: {{ .Values.MANAGED_BY }}
