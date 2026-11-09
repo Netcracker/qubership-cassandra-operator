@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:11-jre@sha256:5dd0f12260b837ce636299e4fc0a10c7c70ed879d1f162470da6badd6f8f733d
 
 ARG version
 ENV CASSANDRA_VERSION $version
