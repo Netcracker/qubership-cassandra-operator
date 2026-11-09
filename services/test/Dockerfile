@@ -1,4 +1,4 @@
-FROM ghcr.io/netcracker/qubership-docker-integration-tests-debian:0.6.1
+FROM ghcr.io/netcracker/qubership-docker-integration-tests-debian:0.6.4@sha256:cbc05e8b4b796760170b266342e5b0855941b5ecf59457b003f2ad51c59861c9
 
 ENV ROBOT_OUTPUT=${ROBOT_HOME}/output \
     DISTR_DIR=/tmp/deps
