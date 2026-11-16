@@ -45,6 +45,8 @@ crProcessingDelaySeconds: 5
 waitTimeout: 3600
 gocqlConnectTimeout: 20
 gocqlTimeout: 20
+# Max seconds the DBaaS adapter waits for all nodes to agree on the schema version after a DDL statement
+gocqlMaxWaitSchemaAgreement: 60
 
 # Optional annotations to apply to PVCs created for Cassandra storage.
 # Use this to protect PVCs from ArgoCD pruning or add custom metadata.

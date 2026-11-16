@@ -76,13 +76,14 @@ func GetCassandraDbAdministration(
 		DefaultKeyspace:    defaultKeyspace,
 		DefaultConsistency: defaultConsistency,
 		Configuration: &cassandra.CassandraConfigurationImpl{
-			Hostname:       hostname,
-			Port:           port,
-			User:           user,
-			Pass:           pass,
-			ConnectTimeout: connectTimeout,
-			Timeout:        timeout,
-			Topology:       defaultTopology,
+			Hostname:               hostname,
+			Port:                   port,
+			User:                   user,
+			Pass:                   pass,
+			ConnectTimeout:         connectTimeout,
+			Timeout:                timeout,
+			Topology:               defaultTopology,
+			MaxWaitSchemaAgreement: time.Duration(utils.GetEnvAsInt("GOCQL_MAX_WAIT_SCHEMA_AGREEMENT", 0)) * time.Second,
 		},
 	}
 	return &CassandraDbAdministration{
