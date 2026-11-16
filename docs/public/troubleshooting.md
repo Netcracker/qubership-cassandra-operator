@@ -279,6 +279,49 @@ Cassandra Pod goes CrashLoopBack with Error **Saved cluster name <namespace-name
 
 "Not applicable"
 
+## Cassandra Pod Stays Not Ready or Node Drain Is Blocked
+
+This section provides information about a Cassandra pod that does not become ready, or a node drain that waits on a Cassandra pod.
+
+### Description
+
+A Cassandra pod is reported as ready only when the local node has gossip and the native transport running, is in the `UN` (Up/Normal) state in the ring, and has no large backlog of pending writes.
+While this is not true, the pod stays not ready. The Pod Disruption Budget then does not allow the next Cassandra pod to be evicted, so a node drain or Kubernetes upgrade waits.
+Kubernetes does not restart a pod that fails the readiness check.
+
+### Alerts
+
+"Not applicable"
+
+### Stack trace(s)
+
+"Not applicable"
+
+### How to solve
+1. Check the pod and the Pod Disruption Budget:
+   ```bash
+   kubectl get pods -n <namespace> -l service=cassandra-cluster
+   kubectl get pdb cassandra-cluster -n <namespace>
+   kubectl describe pod <cassandra-pod> -n <namespace>
+   ```
+   `ALLOWED DISRUPTIONS` equal to `0` means a drain is waiting for a pod to become ready.
+2. Run the same checks as the readiness probe inside the not ready pod:
+   ```bash
+   kubectl exec <cassandra-pod> -n <namespace> -- nodetool info
+   kubectl exec <cassandra-pod> -n <namespace> -- nodetool status
+   kubectl exec <cassandra-pod> -n <namespace> -- nodetool tpstats
+   ```
+   * `Gossip active` and `Native Transport active` must be `true`.
+   * The local node, identified by its `ID` from `nodetool info`, must be `UN` in `nodetool status`. `UJ` means it is still joining, `UL` leaving, `UM` moving, `DN` down.
+   * `MutationStage` pending tasks in `nodetool tpstats` must be 1000 or less. A larger value means the node is still catching up or is overloaded.
+3. If the node is `DN` or cannot gossip, check the Cassandra pod logs and see "Cassandra Pod Fails to Start. Unable to gossip with any peers".
+4. If the node is `UJ` or the backlog is large, wait for it to finish. Do not restart the pod, it will not be ready any sooner.
+5. As a last resort, when the cluster is known to be healthy and the drain must continue, delete the PDB with `kubectl delete pdb cassandra-cluster -n <namespace>`. The next deployment recreates it.
+
+### Recommendations
+
+Do not drain the next node until the previous Cassandra pod is ready again. To disable the Pod Disruption Budget permanently, set `cassandra.pdb: false`.
+
 ## Prometheus Alerts Troubleshooting. CPU Usage.
 
 This section provides information about the Prometheus Alerts Troubleshooting with CPU Usage issue.

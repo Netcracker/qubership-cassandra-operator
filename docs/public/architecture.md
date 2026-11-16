@@ -65,6 +65,18 @@ Cassandra Operator also performs an upgrade scenario without Cassandra downtime 
 Cassandra is a custom docker image distribution with additional tools to enhance troubleshooting capabilities and provides configuration flexibility.
 The solution includes a Prometheus exporter that monitors and collects vital metrics, optimizing performance, and ensuring a robust Cassandra cluster.
 
+### Readiness Criteria
+
+A Cassandra pod is reported as ready only when the local node:
+
+* has gossip and the native transport (CQL) running;
+* is a member of the ring in the `UN` (Up/Normal) state, that is, not joining, leaving or moving;
+* has no large backlog of unapplied writes (`MutationStage` pending tasks are not more than 1000).
+
+Only the local node is evaluated, so another node being down does not make healthy pods not ready.
+A pod that does not meet these criteria stays not ready. Kubernetes does not restart it, because the liveness probe is still a TCP check of port 9042.
+Together with the Pod Disruption Budget (`cassandra.pdb`, enabled by default for clusters with at least 3 replicas), this makes a node-by-node Kubernetes upgrade wait until the previous Cassandra pod has rejoined the ring and caught up before the next node is drained.
+
 ## Cassandra Reaper
 
 Cassandra Reaper is an open source tool that aims to schedule and orchestrate repairs of Cassandra clusters. 

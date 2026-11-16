@@ -6,8 +6,9 @@
   {{- $totalReplicas = add $totalReplicas $dc.replicas }}
   {{- end }}
 {{- end }}
-{{- if gt $totalReplicas 0 }}
 {{- $minAvailable := add1 (div $totalReplicas 2) }}
+{{- /* Render only if at least one pod can be disrupted; otherwise the PDB would block every node drain. */ -}}
+{{- if lt (int $minAvailable) (int $totalReplicas) }}
 {{template "nosql.core.pdb" (dict "name" $nameAndSelector "labels" (dict "service" $nameAndSelector) "minAvailable" $minAvailable "values" $)}}
 {{- end }}
 ---

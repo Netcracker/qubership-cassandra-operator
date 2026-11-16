@@ -137,7 +137,8 @@ cassandra:
   install: true
   hostNetwork: false
   terminationGracePeriodSeconds: 10
-  pdb: false
+  # Created only when the cluster has at least 3 replicas, so node drains are never blocked.
+  pdb: true
   auditLogEnabled: false
   # Mandatory docker image link
   dockerImage: ghcr.io/netcracker/cassandra_5.0:main

@@ -6,6 +6,7 @@ import (
 
 	"github.com/Netcracker/qubership-cassandra-operator/api/v1alpha1"
 	"github.com/Netcracker/qubership-cassandra-operator/pkg/impl/utils"
+	"github.com/Netcracker/qubership-cassandra-operator/pkg/impl/readiness"
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/constants"
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/consul"
 	"github.com/Netcracker/qubership-nosqldb-operator-core/pkg/core"
@@ -139,18 +140,7 @@ func CassandraReplicaTemplate(
 			SuccessThreshold:    1,
 			FailureThreshold:    livnessProbeRetries,
 		},
-		ReadinessProbe: &v13.Probe{
-			ProbeHandler: v13.ProbeHandler{
-				TCPSocket: &v13.TCPSocketAction{
-					Port: intstr.IntOrString{Type: intstr.Int, IntVal: 9042},
-				},
-			},
-			InitialDelaySeconds: 100,
-			TimeoutSeconds:      10,
-			PeriodSeconds:       20,
-			SuccessThreshold:    1,
-			FailureThreshold:    3,
-		},
+		ReadinessProbe: readiness.Probe(),
 		VolumeMounts: append(volumeMounts,
 			v13.VolumeMount{
 				Name:      utils.Configuration,

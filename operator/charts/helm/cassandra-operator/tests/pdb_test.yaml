@@ -1,0 +1,48 @@
+suite: Test Cassandra PodDisruptionBudget
+templates:
+  - poddisruptionbudgets.yaml
+tests:
+  - it: should create the PDB by default without any override parameter
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: metadata.name
+          value: cassandra-cluster
+      - equal:
+          path: spec.minAvailable
+          value: 2
+
+  - it: should not create the PDB for a single replica, so node drains are not blocked
+    set:
+      cassandra.deploymentSchema.dataCenters:
+        - name: dc1
+          replicas: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not create the PDB for two replicas, so node drains are not blocked
+    set:
+      cassandra.deploymentSchema.dataCenters:
+        - name: dc1
+          replicas: 2
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should keep the PDB disabled when it is explicitly disabled
+    set:
+      cassandra.pdb: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not create the PDB when Cassandra is not installed
+    set:
+      cassandra.install: false
+    asserts:
+      - hasDocuments:
+          count: 0
