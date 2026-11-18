@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jre AS java
+FROM eclipse-temurin:11-jre@sha256:7db5776af2396377c8aae2aa124712da7b72a5b6b014c17d77ae37eb5276f37b AS java
 
 FROM ghcr.io/netcracker/qubership-backup-daemon-go-debian:0.1.22
 RUN apt-get update && apt-get install -y \
