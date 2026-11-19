@@ -1,6 +1,7 @@
 package cassandra
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -35,6 +36,7 @@ func (r *Cluster) NewSession() (Session, error) {
 type Session interface {
 	Query(string, ...interface{}) QueryInterface
 	SetConsistency(consistency gocql.Consistency)
+	AwaitSchemaAgreement(ctx context.Context) error
 	Close()
 }
 
@@ -59,6 +61,10 @@ func (s *SessionImpl) Query(stmt string, values ...interface{}) QueryInterface {
 
 func (s *SessionImpl) SetConsistency(consistency gocql.Consistency) {
 	s.session.SetConsistency(consistency)
+}
+
+func (s *SessionImpl) AwaitSchemaAgreement(ctx context.Context) error {
+	return s.session.AwaitSchemaAgreement(ctx)
 }
 
 func (s *SessionImpl) Close() {

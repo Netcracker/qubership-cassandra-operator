@@ -89,6 +89,7 @@ func (r *DbaasDeployment) Execute(ctx core.ExecutionContext) error {
 		coreUtils.GetPlainTextEnvVar("PORT", fmt.Sprint(utils.GetHTTPPort(tlsEnabled))),
 		coreUtils.GetPlainTextEnvVar("GOCQL_TIMEOUT", fmt.Sprint(spec.Spec.GocqlTimeout)),
 		coreUtils.GetPlainTextEnvVar("GOCQL_CONNECT_TIMEOUT", fmt.Sprint(spec.Spec.GocqlConnectTimeout)),
+		coreUtils.GetPlainTextEnvVar("GOCQL_MAX_WAIT_SCHEMA_AGREEMENT", fmt.Sprint(spec.Spec.GocqlMaxWaitSchemaAgreement)),
 		coreUtils.GetPlainTextEnvVar("CLOUD_PUBLIC_HOST", os.Getenv("CLOUD_PUBLIC_HOST")),
 		coreUtils.GetPlainTextEnvVar("API_VERSION", dbaas.ApiVersion),
 		coreUtils.GetPlainTextEnvVar("MULTI_USERS_ENABLED", strconv.FormatBool(dbaas.MultiUsers)),

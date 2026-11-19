@@ -12,6 +12,7 @@
     "reaper": { "$ref": "#/$defs/reaper" },
     "robotTests": { "$ref": "#/$defs/robotTests" },
     "waitTimeout": { "type": "integer", "default": 3600 },
+    "gocqlMaxWaitSchemaAgreement": { "type": "integer", "minimum": 0, "default": 60 },
     "ipV6": { "type": "boolean", "default": false }
   },
   "$defs": {

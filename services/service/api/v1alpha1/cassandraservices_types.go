@@ -50,31 +50,32 @@ type Policies struct {
 }
 
 type CassandraServiceSpec struct {
-	Cassandra                  Cassandra              `json:"cassandra" common:"true"`
-	DeploymentVersion          string                 `json:"deploymentVersion,omitempty"`
-	Recycler                   types.Recycler         `json:"recycler,omitempty"`
-	WaitTimeout                int                    `json:"waitTimeout,omitempty"`
-	PodSecurityContext         *v1.PodSecurityContext `json:"securityContext,omitempty"`
-	Policies                   *Policies              `json:"policies,omitempty" common:"true"`
-	TLS                        TLS                    `json:"tls,omitempty" common:"true"`
-	Backup                     `json:"backupDaemon"`
-	Dbaas                      `json:"dbaas"`
-	Monitoring                 `json:"monitoringAgent"`
-	RobotTests                 `json:"robotTests"`
-	ServiceAccountName         string                                     `json:"serviceAccountName"`
-	IpV6                       bool                                       `json:"ipV6,omitempty"`
-	StopOnFailedResourceUpdate bool                                       `json:"stopOnFailedResourceUpdate,omitempty"`
-	ConsulRegistration         types.ConsulRegistration                   `json:"consulRegistration,omitempty"`
-	ConsulDiscoverySettings    map[string]*types.AgentServiceRegistration `json:"consulDiscoverySettings,omitempty"`
-	GocqlConnectTimeout        int                                        `json:"gocqlConnectTimeout"`
-	GocqlTimeout               int                                        `json:"gocqlTimeout"`
-	ImagePullPolicy            v1.PullPolicy                              `json:"imagePullPolicy,omitempty" common:"true"`
-	AWSKeyspaces               AWSKeyspaces                               `json:"awsKeyspaces,omitempty" common:"true"`
-	ArtifactDescriptorVersion  string                                     `json:"artifactDescriptorVersion,omitempty"`
-	PartOf                     string                                     `json:"partOf,omitempty"`
-	ManagedBy                  string                                     `json:"managedBy,omitempty"`
-	Instance                   string                                     `json:"instance,omitempty"`
-	DeletePVConUninstall       bool                                       `json:"deletePVConUninstall,omitempty"`
+	Cassandra                   Cassandra              `json:"cassandra" common:"true"`
+	DeploymentVersion           string                 `json:"deploymentVersion,omitempty"`
+	Recycler                    types.Recycler         `json:"recycler,omitempty"`
+	WaitTimeout                 int                    `json:"waitTimeout,omitempty"`
+	PodSecurityContext          *v1.PodSecurityContext `json:"securityContext,omitempty"`
+	Policies                    *Policies              `json:"policies,omitempty" common:"true"`
+	TLS                         TLS                    `json:"tls,omitempty" common:"true"`
+	Backup                      `json:"backupDaemon"`
+	Dbaas                       `json:"dbaas"`
+	Monitoring                  `json:"monitoringAgent"`
+	RobotTests                  `json:"robotTests"`
+	ServiceAccountName          string                                     `json:"serviceAccountName"`
+	IpV6                        bool                                       `json:"ipV6,omitempty"`
+	StopOnFailedResourceUpdate  bool                                       `json:"stopOnFailedResourceUpdate,omitempty"`
+	ConsulRegistration          types.ConsulRegistration                   `json:"consulRegistration,omitempty"`
+	ConsulDiscoverySettings     map[string]*types.AgentServiceRegistration `json:"consulDiscoverySettings,omitempty"`
+	GocqlConnectTimeout         int                                        `json:"gocqlConnectTimeout"`
+	GocqlTimeout                int                                        `json:"gocqlTimeout"`
+	ImagePullPolicy             v1.PullPolicy                              `json:"imagePullPolicy,omitempty" common:"true"`
+	AWSKeyspaces                AWSKeyspaces                               `json:"awsKeyspaces,omitempty" common:"true"`
+	ArtifactDescriptorVersion   string                                     `json:"artifactDescriptorVersion,omitempty"`
+	PartOf                      string                                     `json:"partOf,omitempty"`
+	ManagedBy                   string                                     `json:"managedBy,omitempty"`
+	Instance                    string                                     `json:"instance,omitempty"`
+	DeletePVConUninstall        bool                                       `json:"deletePVConUninstall,omitempty"`
+	GocqlMaxWaitSchemaAgreement int                                        `json:"gocqlMaxWaitSchemaAgreement,omitempty"`
 }
 
 // CassandraServiceStatus defines the observed state of CassandraService

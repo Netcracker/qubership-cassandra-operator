@@ -19,13 +19,14 @@ type CassandraConfiguration interface {
 }
 
 type CassandraConfigurationImpl struct {
-	Hostname       string
-	Port           int
-	User           string
-	Pass           string
-	ConnectTimeout int
-	Timeout        int
-	Topology       string
+	Hostname               string
+	Port                   int
+	User                   string
+	Pass                   string
+	ConnectTimeout         int
+	Timeout                int
+	Topology               string
+	MaxWaitSchemaAgreement time.Duration
 }
 
 var _ CassandraConfiguration = &CassandraConfigurationImpl{}
@@ -58,6 +59,9 @@ func (r *CassandraConfigurationImpl) GetCluster(keyspace string, consistency goc
 	cluster.Consistency = consistency
 	cluster.Timeout = time.Duration(r.Timeout) * time.Second
 	cluster.ConnectTimeout = time.Duration(r.ConnectTimeout) * time.Second
+	if r.MaxWaitSchemaAgreement > 0 {
+		cluster.MaxWaitSchemaAgreement = r.MaxWaitSchemaAgreement
+	}
 
 	if utils.IsTLSEnabledForMainService() {
 		if cert := mUtils.GetCACert(); cert != "" {
