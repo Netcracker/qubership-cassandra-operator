@@ -6,11 +6,12 @@ permissions:
   actions: read
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [main]
-  push:
-    branches: [main]
+  push
+#  pull_request:
+#    types: [opened, synchronize, reopened]
+#    branches: [main]
+#  push:
+#    branches: [main]
 
 jobs:
 
@@ -47,11 +48,11 @@ jobs:
 
   Cassandra-Pipeline:
     needs: Wait-for-images
-    uses: Netcracker/qubership-test-pipelines/.github/workflows/cassandra.yaml@abc191433a739748f08da3689db071a5e4ac79a8 # v1.17.0
+    uses: Netcracker/qubership-test-pipelines/.github/workflows/cassandra.yaml@4ebc866a2ca5e308d2fad2e91de81a0aa6d42ba5 # v1.19.1
     with:
       repository_name: ${{ github.repository }}
       service_branch: '${{ github.head_ref || github.ref_name }}'
-      pipeline_branch: 'abc191433a739748f08da3689db071a5e4ac79a8' # v1.17.0 renovate: depName=Netcracker/qubership-test-pipelines
+      pipeline_branch: '4ebc866a2ca5e308d2fad2e91de81a0aa6d42ba5' # v1.19.1 renovate: depName=Netcracker/qubership-test-pipelines
       skip_tests: ${{ fromJSON(needs.Wait-for-images.outputs.skip_tests) }}
     secrets:
       AWS_S3_ACCESS_KEY_ID: ${{secrets.AWS_S3_ACCESS_KEY_ID}}
