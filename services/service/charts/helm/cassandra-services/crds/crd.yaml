@@ -470,6 +470,8 @@ spec:
                 type: integer
               gocqlTimeout:
                 type: integer
+              gocqlMaxWaitSchemaAgreement:
+                type: integer
               imagePullPolicy:
                 description: PullPolicy describes a policy for if/when to pull a container
                   image
