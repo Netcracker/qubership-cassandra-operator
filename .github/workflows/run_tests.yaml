@@ -47,11 +47,11 @@ jobs:
 
   Cassandra-Pipeline:
     needs: Wait-for-images
-    uses: Netcracker/qubership-test-pipelines/.github/workflows/cassandra.yaml@e1905f040398e9ae733b0cefa7e7793b6204ecfe # v1.16.0
+    uses: Netcracker/qubership-test-pipelines/.github/workflows/cassandra.yaml@4ebc866a2ca5e308d2fad2e91de81a0aa6d42ba5 # v1.19.1
     with:
       repository_name: ${{ github.repository }}
       service_branch: '${{ github.head_ref || github.ref_name }}'
-      pipeline_branch: 'e1905f040398e9ae733b0cefa7e7793b6204ecfe' # v1.16.0
+      pipeline_branch: '4ebc866a2ca5e308d2fad2e91de81a0aa6d42ba5' # v1.19.1
       skip_tests: ${{ fromJSON(needs.Wait-for-images.outputs.skip_tests) }}
       scope: nightly  # TODO: revert to pr after adapter-S3 verification
       allure: false

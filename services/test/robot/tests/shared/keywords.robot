@@ -5,6 +5,9 @@ ${TEST_KEYSPACES_REPLICATION_FACTOR}              %{TEST_KEYSPACES_REPLICATION_F
 ${DC_NAME}                                        %{DC_NAME}
 ${WAIT_TIMEOUT}                                   %{WAIT_TIMEOUT}
 ${TLS_ENABLED}                                    %{TLS_ENABLED=false}
+# Reads use consistency ONE, so a fresh write may not be visible on every replica immediately
+${DATA_CHECK_RETRY_TIME}                           30s
+${DATA_CHECK_RETRY_INTERVAL}                       2s
 
 *** Settings ***
 Library  String
@@ -69,16 +72,13 @@ Insert To ${table} And Check
     Set Suite Variable    ${col1}
     Set Suite Variable    ${col2}
     Insert To Table    ${col1}    ${col2}    ${table}
-    ${result}=    Select From Table    ${table}
-    Log    ${result}
-    Should Contain    ${result}    ${col1}
-    Should Contain    ${result}    ${col2}
+    Wait Until Keyword Succeeds    ${DATA_CHECK_RETRY_TIME}    ${DATA_CHECK_RETRY_INTERVAL}
+    ...    Check Data In Table    ${table}
 
 Delete From ${table} And Check
     Delete From Table    ${col1}    ${table}
-    ${result}=    Select From Table    ${table}
-    Log    ${result}
-    Should Not Contain    ${result}    ${col1}
+    Wait Until Keyword Succeeds    ${DATA_CHECK_RETRY_TIME}    ${DATA_CHECK_RETRY_INTERVAL}
+    ...    Check Data Not Exists In ${table}
 
 Check Data In Table
     [Arguments]    ${keyspace}    ${int_col}=${col1}    ${text_col}=${col2}
