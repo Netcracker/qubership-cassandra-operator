@@ -12,6 +12,7 @@
     "waitTimeout": { "type": "integer", "default": 3600 },
     "gocqlConnectTimeout": { "type": "integer", "default": 20 },
     "gocqlTimeout": { "type": "integer", "default": 20 },
+    "gocqlMaxWaitSchemaAgreement": { "type": "integer", "minimum": 0, "default": 60 },
     "ipV6": { "type": "boolean", "default": false },
     "stopOnFailedResourceUpdate": { "type": "boolean", "default": false },
     "debugLog": { "type": "boolean", "default": false },

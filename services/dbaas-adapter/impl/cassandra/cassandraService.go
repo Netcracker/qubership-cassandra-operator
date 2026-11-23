@@ -3,9 +3,15 @@ package cassandra
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Netcracker/qubership-dbaas-adapter-core/pkg/utils"
 	"go.uber.org/zap"
+)
+
+var (
+	dropAttempts   = 3
+	dropRetryDelay = 2 * time.Second
 )
 
 type CassandraService interface {
@@ -54,7 +60,34 @@ func (r *CassandraServiceImpl) UpsertMetadataSetting(ctx context.Context, sessio
 }
 
 func (r *CassandraServiceImpl) DropResource(ctx context.Context, session Session, resourceKind, name string) error {
-	return r.executeStatement(ctx, session, fmt.Sprintf("drop %s if exists %s", resourceKind, name))
+	logger := utils.AddLoggerContext(r.Logger, ctx)
+	stmt := fmt.Sprintf("drop %s if exists %s", resourceKind, name)
+
+	var err error
+	for attempt := 1; attempt <= dropAttempts; attempt++ {
+		if err = r.executeStatement(ctx, session, stmt); err == nil {
+			r.awaitSchemaAgreement(ctx, session, logger)
+			return nil
+		}
+		logger.Warn(fmt.Sprintf("Attempt %d/%d to drop %s %s failed: %v", attempt, dropAttempts, resourceKind, name, err))
+		if attempt == dropAttempts {
+			break
+		}
+		r.awaitSchemaAgreement(ctx, session, logger)
+		select {
+		case <-ctx.Done():
+			return err
+		case <-time.After(dropRetryDelay):
+		}
+	}
+	return err
+}
+
+// awaitSchemaAgreement waits for schema agreement. A timeout is only logged: the statement itself was accepted.
+func (r *CassandraServiceImpl) awaitSchemaAgreement(ctx context.Context, session Session, logger *zap.Logger) {
+	if err := session.AwaitSchemaAgreement(ctx); err != nil {
+		logger.Warn(fmt.Sprintf("Schema agreement was not reached: %v", err))
+	}
 }
 
 func (r *CassandraServiceImpl) CreateKeyspace(ctx context.Context, session Session, dbName, settings string) error {
