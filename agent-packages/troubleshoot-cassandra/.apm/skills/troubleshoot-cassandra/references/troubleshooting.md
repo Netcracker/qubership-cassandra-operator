@@ -45,21 +45,17 @@ Previous deploy was done without mandatory parameter DEPLOY_W_HELM: true.
 
 ### Stack trace(s)
 
-**Case 1: a ConfigMap (or another non-Deployment object) already exists.**
-
 ```text
 Error: rendered manifests contain a resource that already exists. Unable to continue with install: ConfigMap "cassandra-major-version" in namespace "diag-cassandra-22" exists and cannot be imported into the current release: invalid ownership metadata; label validation error: missing key "app.kubernetes.io/managed-by": must be set to "Helm"; annotation validation error: missing key "meta.helm.sh/release-name": must be set to "cassandra"; annotation validation error: missing key "meta.helm.sh/release-namespace": must be set to "diag-cassandra-22"
 ```
 
 ### How to solve
 
-1. **delete the following objects** (this removes **all** objects of these kinds in the namespace; first list them with `kubectl get <kinds> --namespace=<namespace_name>` and make sure the namespace is dedicated to this deployment):
+1. **delete the following objects:**
     - Use the following command to delete: ```kubectl delete configmaps,ingresses,serviceaccounts,roles,rolebindings,grafanadashboard,prometheusrule,servicemonitor --all --namespace=<namespace_name>``` 
     - re-run the job.
 
 ### Stack trace(s)
-
-**Case 2: the `cassandra-operator` Deployment already exists.**
 
 ```text
 Error: rendered manifests contain a resource that already exists. Unable to continue with install: Deployment "cassandra-operator" in namespace "ocs-cicd-dev-2-qcm-cassandra" exists and cannot be imported into the current release: invalid ownership metadata; annotation validation error: key "meta.helm.sh/release-name" must equal "cassandra-services": current value is "cassandra-operator" 
@@ -113,10 +109,10 @@ org.apache.cassandra.db.commitlog.CommitLogReadHandler$CommitLogReadException: C
 1. **delete the log file:** 
     - Delete the file the stacktrace is complaining about (in this example /var/lib/cassandra/data/commitlog/CommitLog.log).
     - Restart the pod.
-2. **add option in Config map** (try this before clearing the directory): 
-    - Add `JVM_OPTS="$JVM_OPTS -Dcassandra.commitlog.ignorereplayerrors=true"` line to Config Map `cassandra-env` before the last line and restart the pod. After that revert changes in Config Map.
-3. **clear the log directory (last resort):** 
+2. **clear the log directory:** 
     - Clear the whole directory **/var/lib/cassandra/data/commitlog/**, but in some cases that can lead to partial data loss.
+3. **add option in Config map:** 
+    - Add `JVM_OPTS="$JVM_OPTS -Dcassandra.commitlog.ignorereplayerrors=true"` line to Config Map `cassandra-env` before the last line and restart the pod. After that revert changes in Config Map.
 
 ### Recommendations
 
@@ -128,7 +124,7 @@ This section provides information about the Cassandra Pod Fails to Start because
 
 ### Description
 
-The starting node cannot reach any seed/peer node (`cassandra0-0` is not running or unreachable, or there are DNS/network problems in Kubernetes), so it fails the gossip shadow round and exits.
+Commit log got corrupted.
 
 ### Alerts
 
@@ -163,7 +159,7 @@ java.lang.RuntimeException: Unable to gossip with any peers
 
 1. **The pod cassandra0-0 is not running or unreachable:**
    - check cassandra0-0 pod state and make it running if it's not.
-   - check connectivity to cassandra0-0 pod via `nslookup cassandra0-0.cassandra.<namespace>.svc.cluster.local` or via ping and resolve the problem.
+   - check connectivity to cassandra0-0 pod via `nslookup cassandra0-0.cassandra.<namespace>.svc.cluster.local or via ping and resolve the problem.
 
 2. **An issues with DNS in the kubernetes:**
    - restart all DNS and Calico pods.
@@ -373,23 +369,22 @@ Failed node unable to gossip with any peers.
 ### Stack trace(s)
 
 ```text
-[2020-07-16T08:26:32,429][ERROR][method=exitOrFail]Exception encountered during startup
-java.lang.RuntimeException: Unable to gossip with any peers
-    at org.apache.cassandra.gms.Gossiper.doShadowRound(Gossiper.java:1443)
-    at org.apache.cassandra.service.StorageService.checkForEndpointCollision(StorageService.java:547)
-    at org.apache.cassandra.service.StorageService.prepareToJoin(StorageService.java:804)
-    at org.apache.cassandra.service.StorageService.initServer(StorageService.java:664)
-    at org.apache.cassandra.service.StorageService.initServer(StorageService.java:613)
-    at org.apache.cassandra.service.CassandraDaemon.setup(CassandraDaemon.java:379)
-    at org.apache.cassandra.service.CassandraDaemon.activate(CassandraDaemon.java:602)
-    at org.apache.cassandra.service.CassandraDaemon.main(CassandraDaemon.java:691)
+java. lang-RuntimeException: Unable to gossip with any peers
+    at org-apache.cassandra.gms.Gossiper.doShadowRound(Gossiper.java:1443)
+    at org-apache. cassandra-service.StorageService. CheckForEndpointCollision(StorageService.java:547)
+    at org-apache.cassandra.service.StorageService-prepareToJoin(StorageService-java:804)
+    at org-apache. cassandra. service.StorageService-initServer(StorageService.java:664) at org-apache.cassandra.service.StorageService.initServer(StorageService.java:613)
+    at org-apache.cassandra.service.CassandraDaemon.setup(CassandraDaemon.java:379)
+    at org-apache. cassandra.service.CassandraDaemon.activate(CassandraDaemon.java:602)
+    at org-apache.cassandra.service.CassandraDaemon.main(CassandraDaemon-java:691)
+[2020-07-1608:26:32,429] [ERROR] [method=exitOrFail]Exception encountered during startup
 ```
 
 ### How to solve
 
 1. **Cassandra headless service has been changed manually.**
    - It is required to check cluster IP of `cassandra` service. It should be `None`.
-   - ![Cluster IP of Cassandra service](images/cassandra-headless-check.png)
+   - ![Cluster IP of Cassandra service](/docs/public/images/cassandra-headless-check.png)
    - Otherwise, it is required to re-create `cassandra` service with `spec.clusterIP` value `None`.
 2. **Network issues between Kubernetes nodes.**
    - To make sure there are no network issues, try to ping pods/services presented on the Cassandra's failed node from another nodes.
@@ -468,7 +463,7 @@ Unavailable exceptions count over 5 minutes. Cassandra node does not behave as e
 ### How to solve
 
 1. **one of Cassandra node is down**
-   - see [Cassandra Pod is Not Running](#prometheus-alerts-troubleshooting-cassandra-pod-is-not-running) section and check the logs of the failed pod.
+   - see [Cassandra Node Down](#cassandra-node-down) section.
 2. **all pods are working** you need to find out which node is down:
   - Navigate to any Cassandra pod terminal.
   - Type `nodetool status`.
@@ -605,44 +600,3 @@ Cassandra backups fail with exit code 2 during execution of the backup playbook.
    - GC pause duration
    - Cassandra schema growth
 3. **Perform periodic cleanup of unused tables and obsolete schema objects to minimize JVM metadata overhead.**
-
-## Ingress or HTTPRoute Returns 404 or Is Not Reachable
-
-### Description
-
-Reaper or the DBaaS adapter swagger is exposed through a Kubernetes Ingress and/or a Gateway API `HTTPRoute`. The `GATEWAY_SYSTEM_TYPE` deploy parameter (comma-separated; empty means `legacy-ingress`) selects which resources are created:
-
-| `GATEWAY_SYSTEM_TYPE` | Ingress | HTTPRoute |
-|---|---|---|
-| empty or `legacy-ingress` | created | not created |
-| `gateway-api-default` | not created | created |
-| `legacy-ingress,gateway-api-default` | created, with the ignore annotation | created |
-
-The affected resources are `cassandra-reaper` (needs `reaper.ingressHost`) and `cassandra-swagger` (needs `createIngress` and `CLOUD_PUBLIC_HOST`).
-
-### Alerts
-
-Not applicable.
-
-### Stack trace(s)
-
-```text
-{"code":404,"message":"HTTP 404 Not Found"}
-```
-
-This Dropwizard-style body comes from Reaper, so the request reached the application through the Ingress. It is not a routing failure.
-
-### How to solve
-
-1. If the body is `{"code":404,...}`, open the Reaper UI at `<reaper.ingressHost>/webui/index.html`. Reaper has no page at `/`.
-2. Check which resources exist: `kubectl get ingress,httproute -n <namespace>`.
-3. If only `gateway-api-default` is set, no Ingress exists by design. An `HTTPRoute` receives traffic only if `gatewayApi.parentRefs` points to an existing Gateway (the default is an empty list).
-4. Compare a direct call with the routed one: `kubectl port-forward svc/cassandra 8080:8080 -n <namespace>` and `curl localhost:8080/webui/index.html`. If the direct call works and the routed one does not, the problem is routing; if both fail, the path does not exist.
-5. With TLS enabled, the Reaper backend port is 8443 and the Ingress needs `nginx.ingress.kubernetes.io/backend-protocol: HTTPS`. The swagger route is fixed to port 8080.
-6. When passing `GATEWAY_SYSTEM_TYPE` with a comma through Helm `--set`, escape it: `--set-string 'GATEWAY_SYSTEM_TYPE=legacy-ingress\,gateway-api-default'`.
-
-### Recommendations
-
-1. During a migration, deploy `legacy-ingress,gateway-api-default`, verify access through the Gateway, then switch to `gateway-api-default`.
-2. The operator deletes a leftover `cassandra-reaper` Ingress when `ingressHost` is not passed (Gateway-only mode).
-3. The nginx-specific Reaper annotations (cookie affinity, backend HTTPS verification) have no `HTTPRoute` equivalent. Configure them in the gateway controller.
