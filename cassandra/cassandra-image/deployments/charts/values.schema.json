@@ -259,7 +259,7 @@
     },
     "dbaas": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "install": { "type": "boolean" },
         "dockerImage": { "type": "string" },
@@ -270,6 +270,7 @@
         "priorityClassName": { "type": "string" },
         "apiVersion": { "type": "string" },
         "multiUsers": { "type": "boolean" },
+        "allDCTopologyStrategy": { "type": "boolean" },
         "topologyStrategy": { "type": "string" },
         "declarativeRegistration": {
           "type": "object",
@@ -283,7 +284,7 @@
     },
     "dbaasAdapterCredentials": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "username": { "type": "string" },
         "password": { "type": "string" },
@@ -292,7 +293,7 @@
     },
     "dbaasAggregatorCredentials": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "username": { "type": "string" },
         "password": { "type": "string" },
@@ -303,14 +304,14 @@
     },
     "dbaasAdapterTLS": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "dbaasAdapterCASecretName": { "type": "string" }
       }
     },
     "monitoringAgent": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "install": { "type": "boolean" },
         "dockerImage": { "type": "string" },
